@@ -11,4 +11,6 @@ sealed class RoutesScreens (val route: String,  val icon: Int){
     object Favourite : RoutesScreens("favourite", R.drawable.baseline_favorite_24)
     object Categories : RoutesScreens("categories", R.drawable.baseline_category_24)
     object Profile : RoutesScreens("profile", R.drawable.baseline_person_24)
+    object Login : RoutesScreens("login", 0)
+    object SignUp : RoutesScreens("signup", 0)
 }

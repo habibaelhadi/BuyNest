@@ -6,6 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.buynest.views.authentication.login.LoginScreen
+import com.example.buynest.views.authentication.signup.SignUpScreen
 import com.example.buynest.views.categories.CategoriesScreen
 import com.example.buynest.views.favourites.FavouriteScreen
 import com.example.buynest.views.home.HomeScreen
@@ -15,7 +17,7 @@ import com.example.buynest.views.profile.ProfileScreen
 @Composable
 fun SetupNavHost(mainNavController: NavHostController) {
     NavHost(
-        navController = mainNavController, startDestination = RoutesScreens.Home.route
+        navController = mainNavController, startDestination = RoutesScreens.Login.route
     ) {
         composable(RoutesScreens.Home.route) {
             HomeScreen()
@@ -28,6 +30,12 @@ fun SetupNavHost(mainNavController: NavHostController) {
         }
         composable(RoutesScreens.Profile.route) {
             ProfileScreen()
+        }
+        composable(RoutesScreens.Login.route) {
+            LoginScreen(mainNavController)
+        }
+        composable(RoutesScreens.SignUp.route) {
+            SignUpScreen()
         }
     }
 }

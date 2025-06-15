@@ -38,14 +38,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.buynest.R
+import com.example.buynest.navigation.RoutesScreens
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.views.authentication.CustomTextField
 
 @Composable
-fun LoginScreen() {
-    val username = remember { mutableStateOf("") }
+fun LoginScreen(mainNavController: NavHostController) {
+    val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val passwordVisible = remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
@@ -112,8 +114,8 @@ fun LoginScreen() {
             Spacer(modifier = Modifier.height(10.dp))
 
             CustomTextField(
-                value = username.value,
-                onValueChange = { username.value = it },
+                value = email.value,
+                onValueChange = { email.value = it },
                 placeholder = "Enter your email"
             )
 
@@ -184,7 +186,7 @@ fun LoginScreen() {
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "Create Account",
-                    modifier = Modifier.clickable {  },
+                    modifier = Modifier.clickable { mainNavController.navigate(RoutesScreens.SignUp.route) },
                     color = white,
                     fontSize = 14.sp,
                     fontFamily = FontFamily(Font(R.font.phenomena_bold)),
