@@ -51,6 +51,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.buynest.ui.theme.white
+import com.example.buynest.views.authentication.login.LoginScreen
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
@@ -71,6 +72,7 @@ class MainActivity : ComponentActivity() {
                     }
                 } else {
                     BuyNestStart()
+                    //LoginScreen()
                 }
             }
         }

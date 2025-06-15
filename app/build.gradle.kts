@@ -68,7 +68,7 @@ dependencies {
     implementation (libs.accompanist.pager)
     implementation (libs.accompanist.pager.indicators.v0340)
     //lottie
-    implementation ("com.airbnb.android:lottie-compose:6.1.0")
+    implementation (libs.lottie.compose)
     //NavigationBar
     implementation (libs.curved.bottom.navigation)
     //Serialization for NavArgs
@@ -80,4 +80,6 @@ dependencies {
     // Accompanist Pager
     implementation (libs.accompanist.pager)
     implementation (libs.accompanist.pager.indicators.v0340)
+    //compose
+    implementation(libs.androidx.material.icons.extended)
 }
