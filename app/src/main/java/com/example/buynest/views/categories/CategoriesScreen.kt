@@ -1,4 +1,4 @@
-package com.example.buynest.views.home
+package com.example.buynest.views.categories
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

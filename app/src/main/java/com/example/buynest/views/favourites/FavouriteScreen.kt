@@ -1,4 +1,4 @@
-package com.example.buynest.views.home
+package com.example.buynest.views.favourites
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -10,8 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
+
 @Composable
-fun ProfileScreen() {
+fun FavouriteScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -19,7 +20,7 @@ fun ProfileScreen() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Profile Screen",
+            text = "Favourite Screen",
             color = Color.Black,
             style = MaterialTheme.typography.headlineMedium
         )
