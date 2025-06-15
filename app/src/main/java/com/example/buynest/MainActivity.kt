@@ -89,11 +89,12 @@ class MainActivity : ComponentActivity() {
                     .fillMaxSize()
                     .padding(innerPadding)
 
-            ){
+            ) {
                 SetupNavHost(mainNavController = navController)
             }
         }
     }
+
     @Composable
     fun SplashScreen(
         onAnimationComplete: () -> Unit
@@ -116,7 +117,7 @@ class MainActivity : ComponentActivity() {
             onAnimationComplete()
         }
 
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MainColor),
@@ -140,38 +141,38 @@ class MainActivity : ComponentActivity() {
     }
 
 
+    @Composable
+    fun CurvedNavBar(navController: NavHostController) {
+        AndroidView(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp)
+                .background(White),
+            factory = { context ->
+                CurvedBottomNavigationView(context).apply {
 
-        @Composable
-        fun CurvedNavBar(navController: NavHostController) {
-            AndroidView(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp)
-                    .background(White),
-                factory = { context ->
-                    CurvedBottomNavigationView(context).apply {
+                    unSelectedColor = White.toArgb()
+                    selectedColor = MainColor.toArgb()
+                    navBackgroundColor = MainColor.toArgb()
 
-                        unSelectedColor = White.toArgb()
-                        selectedColor = MainColor.toArgb()
-                        navBackgroundColor = MainColor.toArgb()
-
-                        val cbnMenuItems = ScreenMenuItem.menuItems.map { screen ->
-                            CbnMenuItem(
-                                icon = screen.icon,
-                                avdIcon = screen.selectedIcon,
-                                destinationId = screen.id
-                            )
-                        }
-                        layoutDirection = View.LAYOUT_DIRECTION_LTR
-                        setMenuItems(cbnMenuItems.toTypedArray(), 0)
-                        setOnMenuItemClickListener { cbnMenuItem, i ->
-                            navController.popBackStack()
-                            navController.navigate(ScreenMenuItem.menuItems[i].screen.route)
-                        }
+                    val cbnMenuItems = ScreenMenuItem.menuItems.map { screen ->
+                        CbnMenuItem(
+                            icon = screen.icon,
+                            avdIcon = screen.selectedIcon,
+                            destinationId = screen.id
+                        )
+                    }
+                    layoutDirection = View.LAYOUT_DIRECTION_LTR
+                    setMenuItems(cbnMenuItems.toTypedArray(), 0)
+                    setOnMenuItemClickListener { cbnMenuItem, i ->
+                        navController.popBackStack()
+                        navController.navigate(ScreenMenuItem.menuItems[i].screen.route)
                     }
                 }
-            )
-        }
+            }
+        )
+    }
+
     fun hideSystemUI() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.insetsController?.let {
@@ -187,8 +188,8 @@ class MainActivity : ComponentActivity() {
                     )
         }
         window.navigationBarColor = White.toArgb()
-        }
     }
+}
 
 
 
