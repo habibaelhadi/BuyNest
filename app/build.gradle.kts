@@ -56,4 +56,16 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    //NavigationBar
+    implementation (libs.curved.bottom.navigation)
+    //Serialization for NavArgs
+    implementation(libs.kotlinx.serialization.json)
+    //NavController
+    implementation(libs.androidx.navigation.compose)
+    //pager for ads section
+    implementation (libs.accompanist.pager.indicators)
+    // Accompanist Pager
+    implementation (libs.accompanist.pager)
+    implementation (libs.accompanist.pager.indicators.v0340)
 }
