@@ -80,4 +80,7 @@ dependencies {
     // Accompanist Pager
     implementation (libs.accompanist.pager)
     implementation (libs.accompanist.pager.indicators.v0340)
+    // Material icons
+    implementation("androidx.compose.material:material-icons-extended")
+
 }
