@@ -116,7 +116,6 @@ fun HomeScreen() {
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
         Text("BuyNest", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MainColor)
         Spacer(modifier = Modifier.height(24.dp))
         SearchBar()
@@ -150,7 +149,10 @@ fun SearchBar() {
             )
         )
         Spacer(modifier = Modifier.width(20.dp))
-        Icon(Icons.Default.ShoppingCart, contentDescription = null, tint = MainColor)
+        Icon(Icons.Default.ShoppingCart,
+            contentDescription = null
+            , tint = MainColor,
+            modifier = Modifier.size(35.dp))
     }
 }
 
