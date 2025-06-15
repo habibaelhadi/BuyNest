@@ -6,10 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.buynest.views.home.CategoriesScreen
-import com.example.buynest.views.home.FavouriteScreen
+import com.example.buynest.views.categories.CategoriesScreen
+import com.example.buynest.views.favourites.FavouriteScreen
 import com.example.buynest.views.home.HomeScreen
-import com.example.buynest.views.home.ProfileScreen
+import com.example.buynest.views.profile.ProfileScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
