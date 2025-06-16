@@ -1,7 +1,14 @@
 package com.example.buynest.views.authentication.login
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
@@ -28,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -41,11 +49,17 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.buynest.R
 import com.example.buynest.navigation.RoutesScreens
+import com.example.buynest.repos.authenticationrepo.AuthenticationRepoImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
+import com.example.buynest.utils.strategies.GoogleAuthenticationStrategy
+import com.example.buynest.utils.strategies.LoginAuthenticationStrategy
+import com.example.buynest.viewmodels.authentication.AuthenticationViewModel
 import com.example.buynest.views.authentication.CustomTextField
 
 @Composable
@@ -55,6 +69,24 @@ fun LoginScreen(mainNavController: NavHostController) {
     val passwordVisible = remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     val activity = LocalActivity.current
+    val context = LocalContext.current
+    val viewModel: AuthenticationViewModel = viewModel(
+        factory = AuthenticationViewModel.AuthenticationViewModelFactory(AuthenticationRepoImpl())
+    )
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+            viewModel.handleGoogleSignInResult(123, data)
+        } else {
+            Log.e("GoogleSignIn", "Sign-in failed or canceled.")
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.setGoogleLauncher(googleSignInLauncher)
+    }
 
     Box(
         modifier = Modifier
@@ -158,7 +190,10 @@ fun LoginScreen(mainNavController: NavHostController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = {  },
+                onClick = {
+                    val strategy = LoginAuthenticationStrategy(email.value, password.value)
+                    viewModel.authenticate(strategy)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
@@ -207,7 +242,10 @@ fun LoginScreen(mainNavController: NavHostController) {
             ) {
                 Row {
                     IconButton(
-                        onClick = {  },
+                        onClick = {
+                            val strategy = GoogleAuthenticationStrategy(context = context, launcher = googleSignInLauncher)
+                            viewModel.authenticate(strategy)
+                        },
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)

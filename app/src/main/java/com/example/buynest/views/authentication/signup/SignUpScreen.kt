@@ -33,10 +33,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.buynest.R
+import com.example.buynest.repos.authenticationrepo.AuthenticationRepoImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
+import com.example.buynest.utils.strategies.SignUpAuthenticationStrategy
+import com.example.buynest.viewmodels.authentication.AuthenticationViewModel
 import com.example.buynest.views.authentication.CustomTextField
 
 @Composable
@@ -47,6 +51,9 @@ fun SignUpScreen(mainNavController: NavHostController) {
     val phone = remember { mutableStateOf("") }
     val passwordVisible = remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+    val viewModel: AuthenticationViewModel = viewModel(
+        factory = AuthenticationViewModel.AuthenticationViewModelFactory(AuthenticationRepoImpl())
+    )
 
     Box(
         modifier = Modifier
@@ -146,7 +153,10 @@ fun SignUpScreen(mainNavController: NavHostController) {
             Spacer(modifier = Modifier.height(50.dp))
 
             Button(
-                onClick = {  },
+                onClick = {
+                    val strategy = SignUpAuthenticationStrategy(name.value, phone.value,email.value, password.value)
+                    viewModel.authenticate(strategy)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)

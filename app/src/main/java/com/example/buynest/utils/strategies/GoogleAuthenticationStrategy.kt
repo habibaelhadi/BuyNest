@@ -1,7 +1,21 @@
 package com.example.buynest.utils.strategies
 
-class GoogleAuthenticationStrategy: AuthenticationStrategy {
-    override suspend fun login(): Result<Unit> {
+import android.content.Context
+import android.content.Intent
+import androidx.activity.result.ActivityResultLauncher
+import com.example.buynest.repos.authenticationrepo.AuthenticationRepo
+
+class GoogleAuthenticationStrategy(
+    private val context: Context,
+    private val launcher: ActivityResultLauncher<Intent>
+): AuthenticationStrategy {
+
+    override suspend fun authenticate(repo: AuthenticationRepo): Result<Unit> {
+        val result = repo.logInWithGoogle(context, launcher)
+        if (result.isFailure) {
+            return Result.failure(result.exceptionOrNull()!!)
+        }
         return Result.success(Unit)
     }
+
 }
