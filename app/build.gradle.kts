@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -49,6 +50,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -68,7 +71,7 @@ dependencies {
     implementation (libs.accompanist.pager)
     implementation (libs.accompanist.pager.indicators.v0340)
     //lottie
-    implementation ("com.airbnb.android:lottie-compose:6.1.0")
+    implementation (libs.lottie.compose)
     //NavigationBar
     implementation (libs.curved.bottom.navigation)
     //Serialization for NavArgs
@@ -80,6 +83,14 @@ dependencies {
     // Accompanist Pager
     implementation (libs.accompanist.pager)
     implementation (libs.accompanist.pager.indicators.v0340)
+    //compose
+    implementation(libs.androidx.material.icons.extended)
+    //firebase
+    implementation(libs.firebase.analytics)
+    implementation(platform(libs.firebase.bom))
+    implementation (libs.gms.play.services.auth)
+    //view model
+    implementation(libs.androidx.lifecycle.viewmodel.compose.android)
     // Material icons
     implementation("androidx.compose.material:material-icons-extended")
 }

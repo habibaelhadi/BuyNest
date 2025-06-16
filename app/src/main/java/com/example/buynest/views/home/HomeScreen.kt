@@ -1,5 +1,7 @@
 package com.example.buynest.views.home
 
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -117,6 +119,7 @@ fun HomeScreen(onCategoryClick: (String) -> Unit = {}) {
     val phenomenaBold = FontFamily(
         Font(R.font.phenomena_bold)
     )
+    val activity = LocalActivity.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -124,6 +127,10 @@ fun HomeScreen(onCategoryClick: (String) -> Unit = {}) {
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
+        BackHandler(enabled = true) {
+            activity?.finishAffinity()
+        }
+        Spacer(modifier = Modifier.height(8.dp))
         Text("BuyNest", fontSize = 20.sp,
             fontFamily = phenomenaBold, color = MainColor)
         Spacer(modifier = Modifier.height(24.dp))

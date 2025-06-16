@@ -13,6 +13,7 @@ val MainColor = Color(0xFF004182)
 val Gray = Color(0xFFD3D3D3)
 val LightGray = Color(0xFFF2F2F5)
 val white = Color(0xFFFFFFFF)
+val snackbarColor = Color(0xFF323232)
 val Yellow = Color(0xFFFDD835)
 
 val lightBlue = Color(0xFF9DD1F1)
