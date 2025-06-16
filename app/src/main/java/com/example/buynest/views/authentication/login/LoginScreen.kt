@@ -157,8 +157,7 @@ fun LoginScreen(
             Text(
                 text = "Please sign in with your mail",
                 color = white,
-                fontSize = 20.sp,
-                fontFamily = FontFamily(Font(R.font.phenomena_regular)),
+                fontSize = 16.sp,
                 modifier = Modifier.align(Alignment.Start)
             )
 

@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
             RoutesScreens.Home.route,
             RoutesScreens.Categories.route,
             RoutesScreens.Favourite.route,
-            RoutesScreens.Profile.route
+            RoutesScreens.Settings.route
         )
 
         Scaffold(
