@@ -91,6 +91,7 @@ fun LoginScreen(
         if (snackbarMessage.value == "Success") {
             navigateToHome()
             SharedPreferencesImpl.setLogIn(context = context, true)
+            SharedPreferencesImpl.setAuthenticationMode(context,"emailPassword")
         }
     }
 
@@ -267,9 +268,16 @@ fun LoginScreen(
                     IconButton(
                         onClick = {
                             val strategy = GoogleAuthenticationStrategy(context = context, launcher = googleSignInLauncher)
-                            viewModel.authenticate(strategy)
-                            SharedPreferencesImpl.setLogIn(context = context,true)
-                            navigateToHome()
+                            val validation = viewModel.setGoogleStrategy(strategy)
+
+                            if (validation == null) {
+                                SharedPreferencesImpl.setAuthenticationMode(context, "google")
+                                viewModel.getGoogleSignInIntent(context)?.let { intent ->
+                                    googleSignInLauncher.launch(intent)
+                                }
+                            } else {
+                                snackbarMessage.value = validation
+                            }
                         },
                         modifier = Modifier
                             .size(48.dp)
@@ -288,7 +296,7 @@ fun LoginScreen(
                     IconButton(
                         onClick = {
                             navigateToHome()
-                            SharedPreferencesImpl.setLogIn(context,false)
+                            SharedPreferencesImpl.setAuthenticationMode(context,"guest")
                         },
                         modifier = Modifier
                             .size(48.dp)

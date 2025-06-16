@@ -56,6 +56,10 @@ class AuthenticationRepoImpl: AuthenticationRepo {
         }
     }
 
+    override fun getGoogleSignInIntent(context: Context): Intent? {
+        return firebase.apply { connectToGoogle(context) }.getGoogleSignInIntent()
+    }
+
     override suspend fun logout(): Result<Unit> {
         firebase.logout()
         var result: Result<Unit> = Result.failure(Exception("Login failed"))

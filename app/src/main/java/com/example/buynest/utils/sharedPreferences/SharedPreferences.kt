@@ -8,4 +8,7 @@ interface SharedPreferences {
 
     fun setLogIn(context: Context, isLoggedIn: Boolean)
     fun getLogIn(context: Context):Boolean
+
+    fun setAuthenticationMode(context: Context, authMode: String)
+    fun getAuthenticationMode(context: Context):String
 }

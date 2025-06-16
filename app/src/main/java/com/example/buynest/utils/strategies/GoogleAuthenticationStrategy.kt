@@ -6,8 +6,8 @@ import androidx.activity.result.ActivityResultLauncher
 import com.example.buynest.repos.authenticationrepo.AuthenticationRepo
 
 class GoogleAuthenticationStrategy(
-    private val context: Context,
-    private val launcher: ActivityResultLauncher<Intent>
+     val context: Context,
+     val launcher: ActivityResultLauncher<Intent>
 ): AuthenticationStrategy {
 
     override suspend fun authenticate(repo: AuthenticationRepo): Result<Unit> {

@@ -1,5 +1,6 @@
 package com.example.buynest.viewmodels.authentication
 
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
@@ -11,6 +12,8 @@ import com.example.buynest.repos.authenticationrepo.AuthenticationRepo
 import com.example.buynest.repos.authenticationrepo.firebase.Firebase
 import com.example.buynest.utils.sharedPreferences.SharedPreferencesImpl
 import com.example.buynest.utils.strategies.AuthenticationStrategy
+import com.example.buynest.utils.strategies.GoogleAuthenticationStrategy
+import com.example.buynest.utils.validators.GoogleValidator
 import com.example.buynest.utils.validators.LoginValidator
 import com.example.buynest.utils.validators.SignUpValidator
 import com.example.buynest.utils.validators.ValidationHandler
@@ -25,9 +28,25 @@ import kotlinx.coroutines.launch
 class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewModel() {
 
     private lateinit var googleLauncher: ActivityResultLauncher<Intent>
-    private var validationChain: ValidationHandler = SignUpValidator()
+    private var validationChain: ValidationHandler = GoogleValidator().apply {
+        setNext(LoginValidator().apply {
+            setNext(SignUpValidator())
+        })
+    }
     private val mutableMessage = MutableSharedFlow<String>()
     val message = mutableMessage.asSharedFlow()
+
+    private lateinit var googleStrategy: GoogleAuthenticationStrategy
+
+    fun setGoogleStrategy(strategy: GoogleAuthenticationStrategy): String? {
+        return GoogleValidator().validate(strategy).also {
+            if (it == null) googleStrategy = strategy
+        }
+    }
+
+    fun getGoogleSignInIntent(context: Context): Intent? {
+        return authRepo.getGoogleSignInIntent(context)
+    }
 
     fun setGoogleLauncher(launcher: ActivityResultLauncher<Intent>) {
         googleLauncher = launcher
@@ -41,10 +60,14 @@ class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewMo
             if (account != null && account.idToken != null) {
                 signInWithGoogle(account.idToken!!)
             } else {
-                //onFailure.invoke("ID token is null")
+                viewModelScope.launch {
+                    mutableMessage.emit("Google Sign-In failed: ID token is null")
+                }
             }
         } catch (e: ApiException) {
-            //onFailure.invoke("Google Sign-In failed: ${e.message}")
+            viewModelScope.launch {
+                mutableMessage.emit("Google Sign-In failed: ${e.message}")
+            }
         }
     }
 
@@ -52,16 +75,17 @@ class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewMo
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         Firebase.auth.signInWithCredential(credential)
             .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                   // onSuccess.invoke()
-                } else {
-                    //onFailure.invoke(task.exception?.message ?: "Sign-in failed")
+                viewModelScope.launch {
+                    if (task.isSuccessful) {
+                        mutableMessage.emit("Success")
+                    } else {
+                        mutableMessage.emit(task.exception?.message ?: "Google Sign-In failed")
+                    }
                 }
             }
     }
 
     fun authenticate(strategy: AuthenticationStrategy){
-        validationChain.setNext(LoginValidator())
         viewModelScope.launch {
             val validationResult = validationChain.handle(strategy)
             if (validationResult != null) {
