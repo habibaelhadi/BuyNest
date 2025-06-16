@@ -1,5 +1,6 @@
 package com.example.buynest.views.profile
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
@@ -8,6 +9,12 @@ import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -15,11 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,10 +34,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.ui.theme.MainColor
+import com.example.buynest.ui.theme.lightBlue
+import com.example.buynest.ui.theme.lightGreen
+import com.example.buynest.ui.theme.lightOrange
+import com.example.buynest.ui.theme.lightPurple
 
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("AutoboxingStateCreation")
 @Composable
 fun ProfileScreen() {
     val scrollState = rememberScrollState()
+    var expandedIndex by remember { mutableStateOf(-1) }
+    var isEditing by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -108,51 +120,231 @@ fun ProfileScreen() {
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                ProfileOption(icon = Icons.Default.Person, title = "Change User Name", iconColor = Color(0xFF9DD1F1))
-                Spacer(modifier = Modifier.height(12.dp))
+                val options = listOf(
+                    ProfileOptionItem(Icons.Default.Person, "Change User Name", lightBlue),
+                    ProfileOptionItem(Icons.Default.Email, "Change Email", lightGreen),
+                    ProfileOptionItem(Icons.Default.Lock, "Change Password", lightOrange),
+                    ProfileOptionItem(Icons.Default.Phone, "Change Phone", lightPurple)
+                )
 
-                ProfileOption(icon = Icons.Default.Email, title = "Change Email", iconColor = Color(0xFFA9EFA3))
-                Spacer(modifier = Modifier.height(12.dp))
-
-                ProfileOption(icon = Icons.Default.Lock, title = "Change Password", iconColor = Color(0xFFFFD9A0))
-                Spacer(modifier = Modifier.height(12.dp))
-
-                ProfileOption(icon = Icons.Default.Phone, title = "Change Phone", iconColor = Color(0xFFB5A9EF))
+                options.forEachIndexed { index, option ->
+                    ProfileOption(
+                        option = option,
+                        isExpanded = expandedIndex == index,
+                        isEditing = isEditing,
+                        onClick = {
+                            if (expandedIndex == index && isEditing) {
+                                isEditing = false
+                            }
+                            expandedIndex = if (expandedIndex == index) -1 else index
+                        },
+                        onEditingChange = { editing ->
+                            if (!editing) {
+                            } else {
+                                isEditing = true
+                            }
+                        },
+                        onSaveRequested = {
+                            showDialog = true
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
             }
+        }
+
+        if (showDialog) {
+            CustomConfirmationDialog(
+                onConfirm = {
+                    isEditing = false
+                    showDialog = false
+                },
+                onDismiss = {
+                    showDialog = false
+                }
+            )
+        }
+    }
+}
+
+
+data class ProfileOptionItem(
+    val icon: ImageVector,
+    val title: String,
+    val iconColor: Color
+)
+
+@ExperimentalMaterial3Api
+@Composable
+fun ProfileOption(
+    option: ProfileOptionItem,
+    isExpanded: Boolean,
+    isEditing: Boolean,
+    onClick: () -> Unit,
+    onEditingChange: (Boolean) -> Unit,
+    onSaveRequested: () -> Unit
+) {
+    Column(
+        modifier = Modifier.animateContentSize()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onClick() }
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .background(option.iconColor.copy(alpha = 0.2f), shape = CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = option.icon,
+                    contentDescription = null,
+                    tint = option.iconColor,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(
+                text = option.title,
+                fontSize = 15.sp,
+                color = Color.Black,
+                modifier = Modifier.weight(1f)
+            )
+
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = Color.Gray
+            )
+        }
+
+        if (isExpanded) {
+            EditableProfileOption(
+                isEditing = isEditing,
+                onEditingChange = onEditingChange,
+                onSaveRequested = onSaveRequested
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditableProfileOption(
+    isEditing: Boolean,
+    onEditingChange: (Boolean) -> Unit,
+    onSaveRequested: () -> Unit
+) {
+    var text by remember { mutableStateOf("") }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 4.dp, top = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextField(
+                value = text,
+                onValueChange = { text = it },
+                enabled = isEditing,
+                placeholder = { Text("Enter new value") },
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                ),
+                modifier = Modifier.weight(1f)
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = if (isEditing) "Save" else "Change",
+                color = MainColor,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                modifier = Modifier
+                    .clickable {
+                        if (isEditing) {
+                            onSaveRequested()
+                        } else {
+                            onEditingChange(true)
+                        }
+                    }
+                    .padding(horizontal = 8.dp)
+            )
         }
     }
 }
 
 
 @Composable
-fun ProfileOption(icon: ImageVector, title: String, iconColor: Color) {
-    Row(
+fun CustomConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    var visible by remember { mutableStateOf(true) }
+
+    AnimatedVisibility(
+        visible = visible,
+        enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+        exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp)
+            .zIndex(10f)
+
     ) {
         Box(
             modifier = Modifier
-                .size(36.dp)
-                .background(iconColor.copy(alpha = 0.2f), shape = CircleShape),
-            contentAlignment = Alignment.Center
+                .background(Color.White, shape = RoundedCornerShape(16.dp))
+                .border(1.dp, Color.LightGray, shape = RoundedCornerShape(16.dp))
+                .padding(16.dp)
         ) {
-            Icon(imageVector = icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(20.dp))
+            Column {
+                Text(
+                    text = "Confirm Change",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Are you sure you want to save the changes?",
+                    fontSize = 15.sp,
+                    color = Color.DarkGray
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TextButton(onClick = {
+                        visible = false
+                        onDismiss()
+                    }) {
+                        Text("Cancel", color = Color.Red)
+                    }
+                    TextButton(onClick = {
+                        visible = false
+                        onConfirm()
+                    }) {
+                        Text("Confirm", color = Color.Green)
+                    }
+                }
+            }
         }
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Text(
-            text = title,
-            fontSize = 15.sp,
-            color = Color.Black,
-            modifier = Modifier.weight(1f)
-        )
-
-        Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null, tint = Color.Gray)
     }
 }
+
 
 @Composable
 fun ProfileImagePicker() {
@@ -217,7 +409,6 @@ fun ProfileImagePicker() {
         }
     }
 }
-
 
 fun loadBitmapFromUri(context: Context, uri: Uri): Bitmap? {
     return try {
