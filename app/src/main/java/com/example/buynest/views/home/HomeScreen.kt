@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -32,10 +32,12 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,12 +46,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.times
 import androidx.compose.ui.util.lerp
 import com.example.buynest.R
 import com.example.buynest.ui.theme.*
@@ -110,7 +115,10 @@ val brandsList = listOf(
 
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onCategoryClick: (String) -> Unit = {}) {
+    val phenomenaBold = FontFamily(
+        Font(R.font.phenomena_bold)
+    )
     val activity = LocalActivity.current
     Column(
         modifier = Modifier
@@ -123,13 +131,15 @@ fun HomeScreen() {
             activity?.finishAffinity()
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Text("BuyNest", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MainColor)
+        Text("BuyNest", fontSize = 20.sp,
+            fontFamily = phenomenaBold, color = MainColor)
         Spacer(modifier = Modifier.height(24.dp))
         SearchBar()
         Spacer(modifier = Modifier.height(24.dp))
         AdsSection(offers = offers)
         Spacer(modifier = Modifier.height(24.dp))
-        CategoriesSection(items = categoriesList)
+        TopBrandsSection(items = categoriesList,
+            onCategoryClick = onCategoryClick)
         Spacer(modifier = Modifier.height(24.dp))
         BrandSection( items = brandsList)
     }
@@ -156,134 +166,134 @@ fun SearchBar() {
             )
         )
         Spacer(modifier = Modifier.width(20.dp))
-        Icon(Icons.Default.ShoppingCart, contentDescription = null, tint = MainColor)
+        Icon(Icons.Default.ShoppingCart,
+            contentDescription = null
+            , tint = MainColor,
+            modifier = Modifier.size(35.dp))
     }
 }
 
 @Composable
 fun AdsSection(offers: List<OfferModel>) {
     val pagerState = rememberPagerState(offers.size)
-    val pageSpacing = 8.dp
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        HorizontalPager(
-            count = offers.size,
-            state = pagerState,
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            itemSpacing = pageSpacing,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(220.dp)
-        ) { page ->
-
-            val pageOffset = calculateCurrentOffsetForPage(page)
-            val absOffset = abs(pageOffset)
-
-            val scale = lerp(0.85f, 1f, 1f - absOffset.coerceIn(0f, 1f))
-            var alpha = lerp(0.4f, 1f, 1f - absOffset.coerceIn(0f, 1f))
-            val imageOffsetX = (pageOffset * 60).dp
-
-            Box(
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            HorizontalPager(
+                count = offers.size,
+                state = pagerState,
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                itemSpacing = 8.dp,
                 modifier = Modifier
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                        this.alpha = alpha
-                        cameraDistance = 12f * density
-                    }
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-            ) {
-                Image(
-                    painter = painterResource(id = offers[page].imageRes),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .offset(x = imageOffsetX)
-                        .fillMaxSize()
-                        .alpha(0.85f)
-                )
+                    .height(220.dp)
+            ) { page ->
 
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(start = 16.dp, end = 16.dp)
-                        .graphicsLayer {
-                            translationX = -pageOffset * 50.dp.toPx()
-                            alpha = lerp(0f, 1f, 1f - absOffset)
-                        }
-                ) {
-                    Text(
-                        text = offers[page].title,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MainColor,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.width(120.dp)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = offers[page].subtitle,
-                        fontSize = 14.sp,
-                        color = MainColor,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.width(140.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF003366)),
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            offers[page].buttonText,
-                            color = Color.White,
-                            fontSize = 14.sp
-                        )
-                    }
-                }
-            }
-        }
+                val pageOffset = calculateCurrentOffsetForPage(page)
+                val absOffset = abs(pageOffset)
 
-        Row(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 8.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            repeat(offers.size) { index ->
-                val selected = pagerState.currentPage == index
-                val dotAlpha by animateFloatAsState(
-                    targetValue = if (selected) 1f else 0.5f,
-                    animationSpec = tween(300)
-                )
+                val scale = lerp(0.85f, 1f, 1f - absOffset.coerceIn(0f, 1f))
+                val alpha = lerp(0.4f, 1f, 1f - absOffset.coerceIn(0f, 1f))
+                val imageOffsetX = (pageOffset * 60).dp
 
                 Box(
                     modifier = Modifier
-                        .padding(4.dp)
-                        .size(if (selected) 10.dp else 8.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF003366).copy(alpha = dotAlpha))
-                )
+                        .graphicsLayer {
+                            scaleY = scale
+                            scaleX = scale
+                            this.alpha = alpha
+                        }
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(20.dp))
+                ) {
+                    Image(
+                        painter = painterResource(id = offers[page].imageRes),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .offset(x = imageOffsetX)
+                            .fillMaxSize()
+                            .alpha(0.85f)
+                    )
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .padding(start = 16.dp, end = 16.dp)
+                    ) {
+                        Text(
+                            text = offers[page].title,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MainColor,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.width(120.dp)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = offers[page].subtitle,
+                            fontSize = 14.sp,
+                            color = MainColor,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.width(140.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = { },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF003366)),
+                            shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                offers[page].buttonText,
+                                color = Color.White,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                repeat(offers.size) { index ->
+                    val selected = pagerState.currentPage == index
+                    val dotAlpha by animateFloatAsState(
+                        targetValue = if (selected) 1f else 0.5f,
+                        animationSpec = tween(300)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .size(if (selected) 10.dp else 8.dp)
+                            .clip(CircleShape)
+                            .background(MainColor.copy(alpha = dotAlpha))
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun CategoriesSection(items: List<ItemModel>) {
+fun TopBrandsSection(items: List<ItemModel>, onCategoryClick: (String) -> Unit ) {
+    val phenomena_bold = FontFamily(
+        Font(R.font.phenomena_bold)
+    )
     Column(modifier = Modifier.padding(horizontal = 8.dp)) {
         Text(
-            text = "Categories",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
+            text = "Brands",
+            fontFamily = phenomena_bold,
+            fontSize = 24.sp,
             modifier = Modifier.padding(bottom = 8.dp),
             color = MainColor
         )
@@ -302,6 +312,7 @@ fun CategoriesSection(items: List<ItemModel>) {
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
                                 .padding(bottom = 16.dp)
+                                .clickable { onCategoryClick(item.name) }
                         ) {
                             Image(
                                 painter = painterResource(id = item.imageRes),
@@ -314,7 +325,7 @@ fun CategoriesSection(items: List<ItemModel>) {
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(item.name, fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = Color.Black)
                         }
                     }
@@ -324,15 +335,17 @@ fun CategoriesSection(items: List<ItemModel>) {
     }
 }
 
+
+
 @Composable
 fun BrandSection(items: List<ItemModel>) {
     Column (
         modifier = Modifier.padding(horizontal = 8.dp)
     ){
         Text(
-            text = "Top Brands",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
+            text = "For You",
+            fontFamily = FontFamily(Font(R.font.phenomena_bold)),
+            fontSize = 24.sp,
             modifier = Modifier.padding(bottom = 8.dp),
             color = MainColor
         )
@@ -358,9 +371,16 @@ fun BrandSection(items: List<ItemModel>) {
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        item.name, fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                        item.name,
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodySmall,
+                        )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "120.00 LE",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Black,
+                        modifier = Modifier.padding(horizontal = 8.dp)
                     )
                 }
             }

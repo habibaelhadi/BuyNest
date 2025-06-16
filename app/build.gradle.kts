@@ -91,4 +91,6 @@ dependencies {
     implementation (libs.gms.play.services.auth)
     //view model
     implementation(libs.androidx.lifecycle.viewmodel.compose.android)
+    // Material icons
+    implementation("androidx.compose.material:material-icons-extended")
 }
