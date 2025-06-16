@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.buynest.views.categories.CategoriesScreen
+import com.example.buynest.views.categories.products.CategoryDetailsScreen
 import com.example.buynest.views.favourites.FavouriteScreen
 import com.example.buynest.views.home.HomeScreen
 import com.example.buynest.views.profile.ProfileScreen
@@ -18,7 +19,17 @@ fun SetupNavHost(mainNavController: NavHostController) {
         navController = mainNavController, startDestination = RoutesScreens.Home.route
     ) {
         composable(RoutesScreens.Home.route) {
-            HomeScreen()
+            HomeScreen(
+                onCategoryClick = { categoryName ->
+                    mainNavController.navigate(RoutesScreens.CategoryDetails.route.replace("{categoryName}", categoryName))
+                }
+            )
+        }
+        composable(RoutesScreens.CategoryDetails.route) { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("categoryName")
+            if (categoryName != null) {
+                CategoryDetailsScreen(categoryName)
+            }
         }
         composable(RoutesScreens.Favourite.route) {
             FavouriteScreen()
