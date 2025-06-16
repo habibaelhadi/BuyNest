@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,6 +44,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -108,7 +111,7 @@ val brandsList = listOf(
 
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onCategoryClick: (String) -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -122,7 +125,8 @@ fun HomeScreen() {
         Spacer(modifier = Modifier.height(24.dp))
         AdsSection(offers = offers)
         Spacer(modifier = Modifier.height(24.dp))
-        CategoriesSection(items = categoriesList)
+        CategoriesSection(items = categoriesList,
+            onCategoryClick = onCategoryClick)
         Spacer(modifier = Modifier.height(24.dp))
         BrandSection( items = brandsList)
     }
@@ -274,11 +278,19 @@ fun AdsSection(offers: List<OfferModel>) {
 }
 
 @Composable
-fun CategoriesSection(items: List<ItemModel>) {
+fun CategoriesSection(items: List<ItemModel>,onCategoryClick: (String) -> Unit ) {
+    val phenomena_bold = FontFamily(
+        Font(R.font.phenomena_bold)
+    )
+    val phenomena_regular = FontFamily(
+        Font(R.font.phenomena_regular)
+    )
+
     Column(modifier = Modifier.padding(horizontal = 8.dp)) {
         Text(
             text = "Categories",
             fontWeight = FontWeight.Bold,
+            fontFamily = phenomena_bold,
             fontSize = 18.sp,
             modifier = Modifier.padding(bottom = 8.dp),
             color = MainColor
@@ -298,6 +310,7 @@ fun CategoriesSection(items: List<ItemModel>) {
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
                                 .padding(bottom = 16.dp)
+                                .clickable { onCategoryClick(item.name) }
                         ) {
                             Image(
                                 painter = painterResource(id = item.imageRes),
@@ -310,6 +323,7 @@ fun CategoriesSection(items: List<ItemModel>) {
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(item.name, fontSize = 12.sp,
+                                fontFamily = phenomena_regular,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.Black)
                         }
