@@ -82,5 +82,4 @@ dependencies {
     implementation (libs.accompanist.pager.indicators.v0340)
     // Material icons
     implementation("androidx.compose.material:material-icons-extended")
-
 }
