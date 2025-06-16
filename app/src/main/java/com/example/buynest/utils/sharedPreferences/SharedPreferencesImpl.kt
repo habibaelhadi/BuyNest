@@ -11,6 +11,7 @@ object SharedPreferencesImpl:
 
     private const val APP_PREFS = "app_prefs"
     private const val LAST_SEEN = "skip_splash"
+    private const val LOGGED_IN = "logged_in"
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun setLastSeen(context: Context) {
@@ -30,5 +31,17 @@ object SharedPreferencesImpl:
             seen = true
         }
         return seen
+    }
+
+    override fun setLogIn(context: Context, isLoggedIn: Boolean) {
+        val prefs = context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(LOGGED_IN, isLoggedIn)
+            .apply()
+    }
+
+    override fun getLogIn(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
+        return prefs.getBoolean(LOGGED_IN,false)
     }
 }

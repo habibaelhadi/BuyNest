@@ -21,8 +21,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -39,12 +42,14 @@ import com.example.buynest.R
 import com.example.buynest.repos.authenticationrepo.AuthenticationRepoImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
+import com.example.buynest.utils.sharedPreferences.SharedPreferencesImpl
 import com.example.buynest.utils.strategies.SignUpAuthenticationStrategy
 import com.example.buynest.viewmodels.authentication.AuthenticationViewModel
 import com.example.buynest.views.authentication.CustomTextField
+import com.example.buynest.views.customsnackbar.CustomSnackbar
 
 @Composable
-fun SignUpScreen(mainNavController: NavHostController) {
+fun SignUpScreen( navigateToLogin: () -> Unit) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val name = remember { mutableStateOf("") }
@@ -55,6 +60,19 @@ fun SignUpScreen(mainNavController: NavHostController) {
         factory = AuthenticationViewModel.AuthenticationViewModelFactory(AuthenticationRepoImpl())
     )
 
+    val snackbarMessage = remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        viewModel.message.collect { msg ->
+            if (msg == "Success") {
+                snackbarMessage.value = null
+                navigateToLogin()
+            } else {
+                snackbarMessage.value = msg
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -62,6 +80,12 @@ fun SignUpScreen(mainNavController: NavHostController) {
             .imePadding()
             .focusable()
     ){
+        if (snackbarMessage.value != null) {
+            CustomSnackbar(message = snackbarMessage.value!!) {
+                snackbarMessage.value = null
+            }
+        }
+
         Column(
             modifier = Modifier
                 .verticalScroll(scrollState)
@@ -188,7 +212,7 @@ fun SignUpScreen(mainNavController: NavHostController) {
                 Spacer(modifier = Modifier.width(4.dp))
                 androidx.compose.material.Text(
                     text = "Login",
-                    modifier = Modifier.clickable { mainNavController.popBackStack() },
+                    modifier = Modifier.clickable { navigateToLogin() },
                     color = white,
                     fontSize = 14.sp,
                     fontFamily = FontFamily(Font(R.font.phenomena_bold)),

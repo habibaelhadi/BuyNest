@@ -1,13 +1,10 @@
 package com.example.buynest.views.authentication.login
 
 import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,6 +31,7 @@ import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -49,7 +47,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.buynest.R
@@ -57,13 +54,17 @@ import com.example.buynest.navigation.RoutesScreens
 import com.example.buynest.repos.authenticationrepo.AuthenticationRepoImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
+import com.example.buynest.utils.sharedPreferences.SharedPreferencesImpl
 import com.example.buynest.utils.strategies.GoogleAuthenticationStrategy
 import com.example.buynest.utils.strategies.LoginAuthenticationStrategy
 import com.example.buynest.viewmodels.authentication.AuthenticationViewModel
 import com.example.buynest.views.authentication.CustomTextField
+import com.example.buynest.views.customsnackbar.CustomSnackbar
 
 @Composable
-fun LoginScreen(mainNavController: NavHostController) {
+fun LoginScreen(
+    navigateToHome: () -> Unit,
+    navigateToSignUp: () -> Unit) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val passwordVisible = remember { mutableStateOf(false) }
@@ -84,9 +85,25 @@ fun LoginScreen(mainNavController: NavHostController) {
         }
     }
 
+    val snackbarMessage = remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(snackbarMessage.value) {
+        if (snackbarMessage.value == "Success") {
+            navigateToHome()
+            SharedPreferencesImpl.setLogIn(context = context, true)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.message.collect {
+            snackbarMessage.value = it
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.setGoogleLauncher(googleSignInLauncher)
     }
+
 
     Box(
         modifier = Modifier
@@ -95,11 +112,17 @@ fun LoginScreen(mainNavController: NavHostController) {
             .imePadding()
             .focusable()
     ) {
+        if (snackbarMessage.value != null) {
+            CustomSnackbar(message = snackbarMessage.value!!) {
+                snackbarMessage.value = null
+            }
+        }
+
         Column(
             modifier = Modifier
                 .verticalScroll(scrollState)
                 .fillMaxSize()
-                .padding(horizontal = 16.dp,vertical = 16.dp)
+                .padding(horizontal = 16.dp, vertical = 16.dp)
                 .padding(top = 100.dp),
             horizontalAlignment = Alignment.Start
         ) {
@@ -181,7 +204,7 @@ fun LoginScreen(mainNavController: NavHostController) {
                 text = "Forgot password?",
                 modifier = Modifier
                     .align(Alignment.End)
-                    .clickable {  },
+                    .clickable { },
                 color = white,
                 fontSize = 12.sp,
                 fontFamily = FontFamily(Font(R.font.phenomena_bold))
@@ -225,7 +248,7 @@ fun LoginScreen(mainNavController: NavHostController) {
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "Create Account",
-                    modifier = Modifier.clickable { mainNavController.navigate(RoutesScreens.SignUp.route) },
+                    modifier = Modifier.clickable { navigateToSignUp() },
                     color = white,
                     fontSize = 14.sp,
                     fontFamily = FontFamily(Font(R.font.phenomena_bold)),
@@ -245,6 +268,8 @@ fun LoginScreen(mainNavController: NavHostController) {
                         onClick = {
                             val strategy = GoogleAuthenticationStrategy(context = context, launcher = googleSignInLauncher)
                             viewModel.authenticate(strategy)
+                            SharedPreferencesImpl.setLogIn(context = context,true)
+                            navigateToHome()
                         },
                         modifier = Modifier
                             .size(48.dp)
@@ -261,7 +286,10 @@ fun LoginScreen(mainNavController: NavHostController) {
                     Spacer(modifier = Modifier.width(16.dp))
 
                     IconButton(
-                        onClick = {  },
+                        onClick = {
+                            navigateToHome()
+                            SharedPreferencesImpl.setLogIn(context,false)
+                        },
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)

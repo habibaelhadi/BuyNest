@@ -5,45 +5,45 @@ import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import com.example.buynest.repos.authenticationrepo.firebase.Firebase
 import com.example.buynest.repos.authenticationrepo.firebase.FirebaseResponse
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class AuthenticationRepoImpl: AuthenticationRepo {
     private val firebase = Firebase.instance
 
-    override suspend fun loginWithEmailAndPassword(email: String, password: String): Result<Unit> {
-        firebase.login(email,password)
-        var result: Result<Unit> = Result.failure(Exception("Login failed"))
-
+    override suspend fun loginWithEmailAndPassword(
+        email: String,
+        password: String
+    ): Result<Unit> = suspendCoroutine { continuation ->
         firebase.setFirebaseResponse(object : FirebaseResponse {
             override fun onResponseSuccess(message: String?) {
-                result = Result.success(Unit)
+                continuation.resume(Result.success(Unit))
             }
 
             override fun onResponseFailure(message: String?) {
-                result = Result.failure(Exception(message))
+                continuation.resume(Result.failure(Exception(message)))
             }
-
         })
-        return result
+        firebase.login(email, password)
     }
+
 
     override suspend fun registerWithEmailAndPassword(
         name: String,
         phone: String,
         email: String,
         password: String
-    ): Result<Unit> {
-        firebase.signup(name, phone, email, password)
-        var result: Result<Unit> = Result.failure(Exception("Login failed"))
+    ): Result<Unit> = suspendCoroutine { continuation ->
         firebase.setFirebaseResponse(object : FirebaseResponse {
             override fun onResponseSuccess(message: String?) {
-                result = Result.success(Unit)
+                continuation.resume(Result.success(Unit))
             }
 
             override fun onResponseFailure(message: String?) {
-               result = Result.failure(Exception(message))
+                continuation.resume(Result.failure(Exception(message)))
             }
         })
-        return result
+        firebase.signup(name, phone, email, password)
     }
 
     override suspend fun logInWithGoogle(context: Context, launcher: ActivityResultLauncher<Intent>): Result<Unit> {

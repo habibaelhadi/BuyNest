@@ -1,22 +1,33 @@
 package com.example.buynest.viewmodels.authentication
 
 import android.content.Intent
+import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.buynest.repos.authenticationrepo.AuthenticationRepo
 import com.example.buynest.repos.authenticationrepo.firebase.Firebase
+import com.example.buynest.utils.sharedPreferences.SharedPreferencesImpl
 import com.example.buynest.utils.strategies.AuthenticationStrategy
+import com.example.buynest.utils.validators.LoginValidator
+import com.example.buynest.utils.validators.SignUpValidator
+import com.example.buynest.utils.validators.ValidationHandler
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.google.android.play.integrity.internal.l
 import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
 class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewModel() {
 
     private lateinit var googleLauncher: ActivityResultLauncher<Intent>
+    private var validationChain: ValidationHandler = SignUpValidator()
+    private val mutableMessage = MutableSharedFlow<String>()
+    val message = mutableMessage.asSharedFlow()
 
     fun setGoogleLauncher(launcher: ActivityResultLauncher<Intent>) {
         googleLauncher = launcher
@@ -50,8 +61,19 @@ class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewMo
     }
 
     fun authenticate(strategy: AuthenticationStrategy){
+        validationChain.setNext(LoginValidator())
         viewModelScope.launch {
-            strategy.authenticate(authRepo)
+            val validationResult = validationChain.handle(strategy)
+            if (validationResult != null) {
+                mutableMessage.emit(validationResult)
+                return@launch
+            }
+            val result = strategy.authenticate(authRepo)
+            if (result.isSuccess) {
+                mutableMessage.emit("Success")
+            }else{
+                mutableMessage.emit(result.exceptionOrNull()?.message ?: "Unknown error")
+            }
         }
     }
 

@@ -1,5 +1,7 @@
 package com.example.buynest.utils.validators
 
+import com.example.buynest.utils.strategies.AuthenticationStrategy
+
 abstract class ValidationHandler {
     private var next: ValidationHandler? = null
 
@@ -8,10 +10,15 @@ abstract class ValidationHandler {
         return handler
     }
 
-    fun handle(): String? {
-        val result = validate()
-        return result ?: next?.handle()
+    fun handle(strategy: AuthenticationStrategy): String? {
+        return if (handleStrategy(strategy)) {
+            validate(strategy)
+        } else {
+            next?.handle(strategy)
+        }
     }
 
-    protected abstract fun validate(): String?
+    protected abstract fun handleStrategy(strategy: AuthenticationStrategy): Boolean
+
+    protected abstract fun validate(strategy: AuthenticationStrategy): String?
 }

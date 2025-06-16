@@ -3,8 +3,8 @@ package com.example.buynest.utils.strategies
 import com.example.buynest.repos.authenticationrepo.AuthenticationRepo
 
 class LoginAuthenticationStrategy(
-    private val email: String,
-    private val password: String
+     val email: String,
+     val password: String
 ): AuthenticationStrategy {
 
     override suspend fun authenticate(repo: AuthenticationRepo): Result<Unit> {

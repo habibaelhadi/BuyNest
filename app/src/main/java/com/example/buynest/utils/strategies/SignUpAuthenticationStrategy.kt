@@ -3,10 +3,10 @@ package com.example.buynest.utils.strategies
 import com.example.buynest.repos.authenticationrepo.AuthenticationRepo
 
 class SignUpAuthenticationStrategy(
-    private val name: String,
-    private val phone: String,
-    private val email: String,
-    private val password: String
+     val name: String,
+     val phone: String,
+     val email: String,
+     val password: String
 ): AuthenticationStrategy {
 
     override suspend fun authenticate(repo: AuthenticationRepo): Result<Unit> {
