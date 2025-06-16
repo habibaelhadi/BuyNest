@@ -1,4 +1,4 @@
-package com.example.buynest.views.categories.products
+package com.example.buynest.views.brandProducts
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -44,7 +44,7 @@ import com.example.buynest.views.categories.CategoryItem
 import com.example.buynest.views.home.SearchBar
 
 @Composable
-fun CategoryDetailsScreen(categoryName: String) {
+fun BrandDetailsScreen(categoryName: String) {
     val phenomenaFontFamily = FontFamily(
         Font(R.font.phenomena_bold)
     )

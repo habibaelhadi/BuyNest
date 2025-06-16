@@ -172,7 +172,7 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    fun hideSystemUI() {
+    private fun hideSystemUI() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.insetsController?.let {
                 it.hide(WindowInsets.Type.navigationBars()) // Hide only navigation bar

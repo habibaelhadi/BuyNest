@@ -7,10 +7,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.buynest.views.categories.CategoriesScreen
-import com.example.buynest.views.categories.products.CategoryDetailsScreen
+import com.example.buynest.views.brandProducts.BrandDetailsScreen
 import com.example.buynest.views.favourites.FavouriteScreen
 import com.example.buynest.views.home.HomeScreen
 import com.example.buynest.views.profile.ProfileScreen
+import com.example.buynest.views.settings.SettingsScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -28,7 +29,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
         composable(RoutesScreens.CategoryDetails.route) { backStackEntry ->
             val categoryName = backStackEntry.arguments?.getString("categoryName")
             if (categoryName != null) {
-                CategoryDetailsScreen(categoryName)
+                BrandDetailsScreen(categoryName)
             }
         }
         composable(RoutesScreens.Favourite.route) {
@@ -39,6 +40,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
         }
         composable(RoutesScreens.Profile.route) {
             ProfileScreen()
+        }
+        composable(RoutesScreens.Settings.route) {
+            SettingsScreen()
         }
     }
 }
