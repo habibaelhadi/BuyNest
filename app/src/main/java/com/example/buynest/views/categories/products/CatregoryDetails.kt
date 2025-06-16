@@ -148,7 +148,7 @@ fun ProductItem(){
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "EGP 120.00",
+                text = "120.00 LE",
                 style = MaterialTheme.typography.titleSmall,
                 color = MainColor,
                 modifier = Modifier.padding(horizontal = 8.dp)
