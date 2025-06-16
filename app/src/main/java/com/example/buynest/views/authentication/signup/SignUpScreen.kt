@@ -1,15 +1,20 @@
 package com.example.buynest.views.authentication.signup
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -25,15 +30,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.buynest.R
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.views.authentication.CustomTextField
 
 @Composable
-fun SignUpScreen(){
+fun SignUpScreen(mainNavController: NavHostController) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val name = remember { mutableStateOf("") }
@@ -156,6 +163,30 @@ fun SignUpScreen(){
                     fontFamily = FontFamily(Font(R.font.phenomena_bold)),
                 )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row (modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                androidx.compose.material.Text(
+                    text = "Already have an account? ",
+                    color = white,
+                    fontSize = 12.sp
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                androidx.compose.material.Text(
+                    text = "Login",
+                    modifier = Modifier.clickable { mainNavController.popBackStack() },
+                    color = white,
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily(Font(R.font.phenomena_bold)),
+                    textDecoration = TextDecoration.Underline
+                )
+            }
         }
     }
+
+    BackHandler(enabled = true) {}
 }

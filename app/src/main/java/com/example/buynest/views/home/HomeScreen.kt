@@ -1,5 +1,7 @@
 package com.example.buynest.views.home
 
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -109,6 +111,7 @@ val brandsList = listOf(
 
 @Composable
 fun HomeScreen() {
+    val activity = LocalActivity.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -116,6 +119,9 @@ fun HomeScreen() {
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
+        BackHandler(enabled = true) {
+            activity?.finishAffinity()
+        }
         Spacer(modifier = Modifier.height(8.dp))
         Text("BuyNest", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MainColor)
         Spacer(modifier = Modifier.height(24.dp))

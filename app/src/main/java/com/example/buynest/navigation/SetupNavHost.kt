@@ -35,7 +35,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
             LoginScreen(mainNavController)
         }
         composable(RoutesScreens.SignUp.route) {
-            SignUpScreen()
+            SignUpScreen(mainNavController)
         }
     }
 }

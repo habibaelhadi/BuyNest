@@ -207,6 +207,9 @@ class MainActivity : ComponentActivity() {
         window.navigationBarColor = Color.Transparent.toArgb()
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+    }
 }
 
 

@@ -1,4 +1,4 @@
-package com.example.buynest.utils
+package com.example.buynest.utils.sharedPreferences
 
 import android.content.Context
 import android.os.Build

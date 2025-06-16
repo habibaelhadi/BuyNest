@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -82,4 +83,7 @@ dependencies {
     implementation (libs.accompanist.pager.indicators.v0340)
     //compose
     implementation(libs.androidx.material.icons.extended)
+    //firebase
+    implementation(libs.firebase.analytics)
+    implementation(platform(libs.firebase.bom))
 }
