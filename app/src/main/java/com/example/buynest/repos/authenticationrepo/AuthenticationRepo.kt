@@ -11,4 +11,5 @@ interface AuthenticationRepo {
     suspend fun logInWithGoogle(context: Context, launcher: ActivityResultLauncher<Intent>): Result<Unit>
     suspend fun logout(): Result<Unit>
     fun getGoogleSignInIntent(context: Context): Intent?
+    suspend fun sendResetPasswordEmail(email: String): Result<String>
 }

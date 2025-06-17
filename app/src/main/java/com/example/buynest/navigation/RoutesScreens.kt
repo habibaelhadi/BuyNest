@@ -15,4 +15,5 @@ sealed class RoutesScreens (val route: String,  val icon: Int){
     data object Settings : RoutesScreens("settings", R.drawable.baseline_settings_24)
     object Login : RoutesScreens("login", 0)
     object SignUp : RoutesScreens("signup", 0)
+    object ForgotPassword : RoutesScreens("forgotPassword", 0)
 }

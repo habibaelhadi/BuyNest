@@ -60,6 +60,21 @@ class AuthenticationRepoImpl: AuthenticationRepo {
         return firebase.apply { connectToGoogle(context) }.getGoogleSignInIntent()
     }
 
+    override suspend fun sendResetPasswordEmail(email: String): Result<String> {
+        return suspendCoroutine { continuation ->
+            firebase.setFirebaseResponse(object : FirebaseResponse {
+                override fun onResponseSuccess(message: String?) {
+                    continuation.resume(Result.success("Password reset email sent."))
+                }
+
+                override fun onResponseFailure(message: String?) {
+                    continuation.resume(Result.failure(Exception(message)))
+                }
+            })
+            firebase.sendPasswordResetEmail(email)
+        }
+    }
+
     override suspend fun logout(): Result<Unit> {
         firebase.logout()
         var result: Result<Unit> = Result.failure(Exception("Login failed"))

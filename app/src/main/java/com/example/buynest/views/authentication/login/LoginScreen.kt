@@ -64,7 +64,8 @@ import com.example.buynest.views.customsnackbar.CustomSnackbar
 @Composable
 fun LoginScreen(
     navigateToHome: () -> Unit,
-    navigateToSignUp: () -> Unit) {
+    navigateToSignUp: () -> Unit,
+    navigateToForgotPassword: () -> Unit) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val passwordVisible = remember { mutableStateOf(false) }
@@ -204,7 +205,7 @@ fun LoginScreen(
                 text = "Forgot password?",
                 modifier = Modifier
                     .align(Alignment.End)
-                    .clickable { },
+                    .clickable { navigateToForgotPassword() },
                 color = white,
                 fontSize = 12.sp,
                 fontFamily = FontFamily(Font(R.font.phenomena_bold))

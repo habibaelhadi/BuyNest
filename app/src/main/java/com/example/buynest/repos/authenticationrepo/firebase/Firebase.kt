@@ -11,6 +11,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 class Firebase private constructor() {
     private var googleSignInClient: GoogleSignInClient? = null
@@ -111,6 +112,17 @@ class Firebase private constructor() {
 
     fun getGoogleSignInIntent(): Intent? {
         return googleSignInClient?.signInIntent
+    }
+
+    fun sendPasswordResetEmail(email: String) {
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    firebaseResponse?.onResponseSuccess("Success")
+                } else {
+                    firebaseResponse?.onResponseFailure(task.exception?.message)
+                }
+            }
     }
 
     companion object {
