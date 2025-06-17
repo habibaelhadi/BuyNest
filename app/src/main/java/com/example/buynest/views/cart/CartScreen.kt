@@ -37,7 +37,7 @@ data class CartItem(
 @OptIn(ExperimentalMaterialApi::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun CartScreen(navController: NavController) {
+fun CartScreen(onBackClicked: () -> Unit) {
     var cartItems by remember {
         mutableStateOf(
             listOf(
@@ -53,7 +53,9 @@ fun CartScreen(navController: NavController) {
     val totalPrice = cartItems.sumOf { it.price * it.quantity }
 
     Scaffold(
-        topBar = { CartTopBar(navController) },
+        topBar = { CartTopBar(
+            backClicked = onBackClicked
+        ) },
         bottomBar = { BottomSection(totalPrice) }
     ) {
         LazyColumn(

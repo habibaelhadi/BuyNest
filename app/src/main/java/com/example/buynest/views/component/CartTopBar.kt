@@ -16,7 +16,7 @@ import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CartTopBar(navController: NavController) {
+fun CartTopBar(backClicked :()->Unit) {
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -27,7 +27,9 @@ fun CartTopBar(navController: NavController) {
             )
         },
         navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
+            IconButton(onClick = {
+                backClicked()
+            }) {
                 Icon(
                     Icons.Default.ArrowBack,
                     contentDescription = null,
