@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.model.entity.ProfileOptionItem
-import com.example.buynest.views.profile.EditableProfileOption
 
 
 @ExperimentalMaterial3Api
