@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.buynest.utils.sharedPreferences.SharedPreferencesImpl
+import com.example.buynest.views.authentication.forgotpassword.ForgotPasswordScreen
 import com.example.buynest.views.authentication.login.LoginScreen
 import com.example.buynest.views.authentication.signup.SignUpScreen
 import com.example.buynest.views.categories.CategoriesScreen
@@ -70,9 +71,11 @@ fun SetupNavHost(mainNavController: NavHostController) {
                         inclusive = true
                     }
                 }
-            }){
+            }, navigateToSignUp = {
                 mainNavController.navigate(RoutesScreens.SignUp.route)
-            }
+            }, navigateToForgotPassword = {
+                mainNavController.navigate(RoutesScreens.ForgotPassword.route)
+            })
         }
         composable(RoutesScreens.SignUp.route) {
             SignUpScreen{
@@ -85,6 +88,13 @@ fun SetupNavHost(mainNavController: NavHostController) {
         composable(RoutesScreens.Card.route) {
             CartScreen(
                 onBackClicked = {
+                    mainNavController.popBackStack()
+                }
+            )
+        }
+        composable(RoutesScreens.ForgotPassword.route) {
+            ForgotPasswordScreen(
+                onBackToLogin = {
                     mainNavController.popBackStack()
                 }
             )

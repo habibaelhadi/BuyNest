@@ -22,6 +22,8 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.play.integrity.internal.l
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
@@ -37,6 +39,21 @@ class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewMo
     val message = mutableMessage.asSharedFlow()
 
     private lateinit var googleStrategy: GoogleAuthenticationStrategy
+
+    fun resetPassword(email: String) {
+        viewModelScope.launch {
+            if (email.isEmpty()) {
+                mutableMessage.emit("Email cannot be empty")
+                return@launch
+            }
+            val result = authRepo.sendResetPasswordEmail(email)
+            if (result.isSuccess){
+                mutableMessage.emit("Success")
+            }else{
+               mutableMessage.emit(result.exceptionOrNull()?.message ?: "Unknown error")
+            }
+        }
+    }
 
     fun setGoogleStrategy(strategy: GoogleAuthenticationStrategy): String? {
         return GoogleValidator().validate(strategy).also {
