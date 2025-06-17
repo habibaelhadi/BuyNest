@@ -1,6 +1,5 @@
 package com.example.buynest.views.cart
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -17,25 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.example.buynest.R
+import com.example.buynest.model.entity.CartItem
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.views.component.BottomSection
 import com.example.buynest.views.component.CartItemRow
 import com.example.buynest.views.component.CartTopBar
 
-data class CartItem(
-    val id: Int,
-    val name: String,
-    val price: Int,
-    val color: String,
-    val size: Int,
-    val imageRes: Int,
-    val quantity: Int
-)
-
 @OptIn(ExperimentalMaterialApi::class)
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun CartScreen(onBackClicked: () -> Unit) {
     var cartItems by remember {
@@ -53,15 +41,17 @@ fun CartScreen(onBackClicked: () -> Unit) {
     val totalPrice = cartItems.sumOf { it.price * it.quantity }
 
     Scaffold(
+        modifier = Modifier.padding(top = 32.dp),
         topBar = { CartTopBar(
             backClicked = onBackClicked
         ) },
         bottomBar = { BottomSection(totalPrice) }
-    ) {
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(paddingValues),
         ) {
             items(cartItems, key = { it.id }) { item ->
                 val dismissState = rememberDismissState(
@@ -156,7 +146,8 @@ fun CartScreen(onBackClicked: () -> Unit) {
                 }) {
                     Text("Cancel", color = Color.Gray)
                 }
-            }
+            },
+            shape = RoundedCornerShape(12.dp)
         )
     }
 }
