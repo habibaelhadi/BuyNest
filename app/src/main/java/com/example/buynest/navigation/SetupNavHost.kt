@@ -15,7 +15,7 @@ import com.example.buynest.views.brandProducts.BrandDetailsScreen
 import com.example.buynest.views.cart.CartScreen
 import com.example.buynest.views.favourites.FavouriteScreen
 import com.example.buynest.views.home.HomeScreen
-import com.example.buynest.views.orders.AllOrdersScreen
+import com.example.buynest.views.orderdetails.OrderDetailsScreen
 import com.example.buynest.views.orders.OrdersHistoryScreen
 import com.example.buynest.views.profile.ProfileScreen
 import com.example.buynest.views.settings.SettingsScreen
@@ -39,6 +39,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 }
             )
         }
+
         composable(RoutesScreens.BrandDetails.route) { backStackEntry ->
             val categoryName = backStackEntry.arguments?.getString("categoryName")
             if (categoryName != null) {
@@ -99,16 +100,20 @@ fun SetupNavHost(mainNavController: NavHostController) {
         }
         composable(RoutesScreens.OrdersHistory.route) {
             OrdersHistoryScreen(
-                gotoAllOrders = {
-                    mainNavController.navigate(RoutesScreens.AllOrders.route)
+                backClicked = {
+                    mainNavController.popBackStack()
                 },
+                gotoOrderDetails ={
+                    mainNavController.navigate(RoutesScreens.OrderDetails.route)
+                }
+            )
+        }
+        composable(RoutesScreens.OrderDetails.route) {
+            OrderDetailsScreen(
                 backClicked = {
                     mainNavController.popBackStack()
                 }
             )
-        }
-        composable(RoutesScreens.AllOrders.route) {
-            AllOrdersScreen()
         }
     }
 }
