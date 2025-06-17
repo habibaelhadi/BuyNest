@@ -19,13 +19,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.ui.theme.MainColor
 
 @Composable
-fun BottomSection(totalPrice: Int) {
+fun BottomSection(
+    totalPrice: Int,
+    icon: ImageVector,
+    title: String
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -57,12 +62,12 @@ fun BottomSection(totalPrice: Int) {
                 .fillMaxWidth(),
         ) {
             Text(
-                "Check Out",
+                title,
                 color = Color.White,
                 fontSize = 18.sp
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Icon(Icons.Default.ArrowForward, contentDescription = null, tint = Color.White)
+            Icon(icon, contentDescription = null, tint = Color.White)
         }
     }
 }

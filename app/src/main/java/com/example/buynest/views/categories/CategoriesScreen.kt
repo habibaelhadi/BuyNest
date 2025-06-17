@@ -50,7 +50,7 @@ import com.example.buynest.views.brandProducts.ProductGrid
 import com.example.buynest.views.home.SearchBar
 
 @Composable
-fun CategoriesScreen(onCartClicked:()->Unit) {
+fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:()->Unit) {
     var selectedCategory by remember { mutableStateOf<String?>("Kids") }
     var selectedSubcategory by remember { mutableStateOf<String?>(null) }
     val phenomenaBold = FontFamily(
@@ -92,7 +92,7 @@ fun CategoriesScreen(onCartClicked:()->Unit) {
                     color = MainColor
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                ProductGrid("Categories")
+                ProductGrid("Categories", onProductClicked)
             }
         }
     }

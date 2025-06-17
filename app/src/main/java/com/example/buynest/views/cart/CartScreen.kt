@@ -11,6 +11,8 @@ import androidx.compose.material.*
 import androidx.compose.material.DismissDirection
 import androidx.compose.material.DismissValue
 import androidx.compose.material.SwipeToDismiss
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,7 +58,7 @@ fun CartScreen(onBackClicked: () -> Unit) {
         topBar = { CartTopBar(
             backClicked = onBackClicked
         ) },
-        bottomBar = { BottomSection(totalPrice) }
+        bottomBar = { BottomSection(totalPrice, Icons.Default.ArrowForward, "Check Out") }
     ) {
         LazyColumn(
             modifier = Modifier

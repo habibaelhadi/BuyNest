@@ -16,6 +16,7 @@ import com.example.buynest.views.brandProducts.BrandDetailsScreen
 import com.example.buynest.views.cart.CartScreen
 import com.example.buynest.views.favourites.FavouriteScreen
 import com.example.buynest.views.home.HomeScreen
+import com.example.buynest.views.productInfo.ProductInfo
 import com.example.buynest.views.profile.ProfileScreen
 import com.example.buynest.views.settings.SettingsScreen
 
@@ -47,6 +48,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
                     },
                     backClicked = {
                         mainNavController.popBackStack()
+                    },
+                    onProductClicked = {
+                        mainNavController.navigate(RoutesScreens.ProductInfo.route)
                     }
                 )
             }
@@ -61,7 +65,10 @@ fun SetupNavHost(mainNavController: NavHostController) {
         composable(RoutesScreens.Categories.route) {
             CategoriesScreen(onCartClicked = {
                 mainNavController.navigate(RoutesScreens.Cart.route)
-            }
+            },
+                onProductClicked = {
+                    mainNavController.navigate(RoutesScreens.ProductInfo.route)
+                }
             )
         }
         composable(RoutesScreens.Profile.route) {
@@ -99,6 +106,16 @@ fun SetupNavHost(mainNavController: NavHostController) {
             ForgotPasswordScreen(
                 onBackToLogin = {
                     mainNavController.popBackStack()
+                }
+            )
+        }
+        composable(RoutesScreens.ProductInfo.route) {
+            ProductInfo(
+                backClicked = {
+                    mainNavController.popBackStack()
+                },
+                navigateToCart = {
+                    mainNavController.navigate(RoutesScreens.Cart.route)
                 }
             )
         }

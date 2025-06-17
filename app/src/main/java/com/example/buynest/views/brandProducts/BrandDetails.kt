@@ -47,7 +47,7 @@ import com.example.buynest.views.home.SearchBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrandDetailsScreen(categoryName: String,onCartClicked:()->Unit,backClicked:()->Unit) {
+fun BrandDetailsScreen(categoryName: String,onCartClicked:()->Unit,backClicked:()->Unit,onProductClicked:()->Unit) {
     val phenomenaFontFamily = FontFamily(
         Font(R.font.phenomena_bold)
     )
@@ -88,13 +88,13 @@ fun BrandDetailsScreen(categoryName: String,onCartClicked:()->Unit,backClicked:(
             onCartClicked = onCartClicked
         )
         Spacer(modifier = Modifier.height(24.dp))
-        ProductGrid("")
+        ProductGrid("",onProductClicked)
     }
 }
 
 
 @Composable
-fun ProductGrid(screenName:String) {
+fun ProductGrid(screenName: String, onProductClicked: () -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier
@@ -108,21 +108,22 @@ fun ProductGrid(screenName:String) {
             }
         }else {
             items(20) {
-                ProductItem()
+                ProductItem(onProductClicked)
             }
         }
     }
 }
 
 @Composable
-fun ProductItem(){
+fun ProductItem(onProductClicked: () -> Unit) {
     Card (
         modifier = Modifier
             .width(200.dp)
             .padding(6.dp),
         border = BorderStroke(1.dp, MainColor.copy(0.5f)),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+        elevation = CardDefaults.cardElevation(4.dp),
+        onClick = { onProductClicked() }
     ){
         Column(
             modifier = Modifier.background(white)
