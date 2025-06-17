@@ -17,6 +17,8 @@ import com.example.buynest.views.brandProducts.BrandDetailsScreen
 import com.example.buynest.views.cart.CartScreen
 import com.example.buynest.views.favourites.FavouriteScreen
 import com.example.buynest.views.home.HomeScreen
+import com.example.buynest.views.orderdetails.OrderDetailsScreen
+import com.example.buynest.views.orders.OrdersHistoryScreen
 import com.example.buynest.views.profile.ProfileScreen
 import com.example.buynest.views.settings.SettingsScreen
 
@@ -32,14 +34,15 @@ fun SetupNavHost(mainNavController: NavHostController) {
         composable(RoutesScreens.Home.route) {
             HomeScreen(
                 onCategoryClick = { categoryName ->
-                    mainNavController.navigate(RoutesScreens.CategoryDetails.route.replace("{categoryName}", categoryName))
+                    mainNavController.navigate(RoutesScreens.BrandDetails.route.replace("{categoryName}", categoryName))
                 },
                 onCardClicked = {
                     mainNavController.navigate(RoutesScreens.Card.route)
                 }
             )
         }
-        composable(RoutesScreens.CategoryDetails.route) { backStackEntry ->
+
+        composable(RoutesScreens.BrandDetails.route) { backStackEntry ->
             val categoryName = backStackEntry.arguments?.getString("categoryName")
             if (categoryName != null) {
                 BrandDetailsScreen(categoryName,
@@ -83,7 +86,14 @@ fun SetupNavHost(mainNavController: NavHostController) {
             }
         }
         composable(RoutesScreens.Settings.route) {
-            SettingsScreen()
+            SettingsScreen(
+                gotoProfileScreen = {
+                    mainNavController.navigate(RoutesScreens.Profile.route)
+                },
+                gotoOrdersHistoryScreen = {
+                    mainNavController.navigate(RoutesScreens.OrdersHistory.route)
+                }
+            )
         }
         composable(RoutesScreens.Card.route) {
             CartScreen(
@@ -95,6 +105,23 @@ fun SetupNavHost(mainNavController: NavHostController) {
         composable(RoutesScreens.ForgotPassword.route) {
             ForgotPasswordScreen(
                 onBackToLogin = {
+                    mainNavController.popBackStack()
+                }
+            )
+        }
+        composable(RoutesScreens.OrdersHistory.route) {
+            OrdersHistoryScreen(
+                backClicked = {
+                    mainNavController.popBackStack()
+                },
+                gotoOrderDetails ={
+                    mainNavController.navigate(RoutesScreens.OrderDetails.route)
+                }
+            )
+        }
+        composable(RoutesScreens.OrderDetails.route) {
+            OrderDetailsScreen(
+                backClicked = {
                     mainNavController.popBackStack()
                 }
             )

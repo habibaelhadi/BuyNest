@@ -19,7 +19,8 @@ import com.example.buynest.ui.theme.white
 fun SettingsCard(
     title: String,
     icon: ImageVector,
-    bold: Boolean = false
+    bold: Boolean = false,
+    onClick: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier
@@ -28,7 +29,10 @@ fun SettingsCard(
         colors = CardDefaults.cardColors(containerColor = white),
         shape = RoundedCornerShape(6.dp),
         border = BorderStroke(1.dp, white),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        onClick = {
+            onClick()
+        }
     ) {
         Row(
             modifier = Modifier
