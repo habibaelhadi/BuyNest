@@ -3,6 +3,7 @@ package com.example.buynest.views.component
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,11 +31,14 @@ import com.example.buynest.ui.theme.MainColor
 fun CartItemRow(
     item: CartItem,
     onQuantityChange: (Int, Int) -> Unit,
-    onDelete: (Int) -> Unit
+    onDelete: (Int) -> Unit,
+    onItemClick: (CartItem) -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onItemClick(item) },
+    shape = RoundedCornerShape(16.dp),
         border = BorderStroke(1.dp, LightGray2)
     ) {
         Row(

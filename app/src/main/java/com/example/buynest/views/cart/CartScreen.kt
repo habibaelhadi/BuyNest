@@ -115,11 +115,13 @@ fun CartScreen(onBackClicked: () -> Unit) {
                             onDelete = { id ->
                                 itemToDelete = cartItems.find { it.id == id }
                                 showConfirmDialog = true
+                            },
+                            onItemClick = {
+                                /* Handle item click here*/
                             }
                         )
                     }
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
