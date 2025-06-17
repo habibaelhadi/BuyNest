@@ -3,11 +3,11 @@ package com.example.buynest.views.component
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -23,19 +23,22 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.buynest.model.entity.CartItem
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
-import com.example.buynest.views.cart.CartItem
 
 @Composable
 fun CartItemRow(
     item: CartItem,
     onQuantityChange: (Int, Int) -> Unit,
-    onDelete: (Int) -> Unit
+    onDelete: (Int) -> Unit,
+    onItemClick: (CartItem) -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onItemClick(item) },
+    shape = RoundedCornerShape(16.dp),
         border = BorderStroke(1.dp, LightGray2)
     ) {
         Row(
