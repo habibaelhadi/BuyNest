@@ -27,10 +27,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.buynest.model.entity.CartItem
 import com.example.buynest.ui.theme.Gray
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
-import com.example.buynest.views.cart.CartItem
 
 @Composable
 fun OrderProductItem(

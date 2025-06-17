@@ -15,19 +15,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.R
 import com.example.buynest.ui.theme.*
-import com.example.buynest.views.cart.CartItem
 import com.example.buynest.views.component.OrderProductItem
 import com.example.buynest.views.component.PaymentDetails
 import com.example.buynest.views.orders.phenomenaFontFamily
+import com.example.buynest.model.entity.CartItem
 
 val cartItems = listOf(
-            CartItem(1, "Nike Air Jordan", 3500, "Orange", 40, R.drawable.product, 1),
+    CartItem(1, "Nike Air Jordan", 3500, "Orange", 40, R.drawable.product, 1),
             CartItem(2, "Adidas Runner", 2800, "Blue", 42, R.drawable.product, 2),
             CartItem(2, "Adidas Runner", 2800, "Blue", 42, R.drawable.product, 2),
             CartItem(1, "Nike Air Jordan", 3500, "Orange", 40, R.drawable.product, 1),
