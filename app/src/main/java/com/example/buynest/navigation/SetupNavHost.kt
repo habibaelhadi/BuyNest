@@ -13,6 +13,7 @@ import com.example.buynest.views.authentication.login.LoginScreen
 import com.example.buynest.views.authentication.signup.SignUpScreen
 import com.example.buynest.views.categories.CategoriesScreen
 import com.example.buynest.views.brandProducts.BrandDetailsScreen
+import com.example.buynest.views.cart.CartScreen
 import com.example.buynest.views.favourites.FavouriteScreen
 import com.example.buynest.views.home.HomeScreen
 import com.example.buynest.views.profile.ProfileScreen
@@ -31,20 +32,33 @@ fun SetupNavHost(mainNavController: NavHostController) {
             HomeScreen(
                 onCategoryClick = { categoryName ->
                     mainNavController.navigate(RoutesScreens.CategoryDetails.route.replace("{categoryName}", categoryName))
+                },
+                onCardClicked = {
+                    mainNavController.navigate(RoutesScreens.Card.route)
                 }
             )
         }
         composable(RoutesScreens.CategoryDetails.route) { backStackEntry ->
             val categoryName = backStackEntry.arguments?.getString("categoryName")
             if (categoryName != null) {
-                BrandDetailsScreen(categoryName)
+                BrandDetailsScreen(categoryName,
+                    onCardClicked = {
+                        mainNavController.navigate(RoutesScreens.Card.route)
+                    },
+                    backClicked = {
+                        mainNavController.popBackStack()
+                    }
+                )
             }
         }
         composable(RoutesScreens.Favourite.route) {
             FavouriteScreen()
         }
         composable(RoutesScreens.Categories.route) {
-            CategoriesScreen()
+            CategoriesScreen(onCardClicked = {
+                mainNavController.navigate(RoutesScreens.Card.route)
+            }
+            )
         }
         composable(RoutesScreens.Profile.route) {
             ProfileScreen()
@@ -67,6 +81,13 @@ fun SetupNavHost(mainNavController: NavHostController) {
         }
         composable(RoutesScreens.Settings.route) {
             SettingsScreen()
+        }
+        composable(RoutesScreens.Card.route) {
+            CartScreen(
+                onBackClicked = {
+                    mainNavController.popBackStack()
+                }
+            )
         }
     }
 }

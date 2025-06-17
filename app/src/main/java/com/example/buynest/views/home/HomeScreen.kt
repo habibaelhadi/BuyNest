@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -115,7 +116,7 @@ val brandsList = listOf(
 
 
 @Composable
-fun HomeScreen(onCategoryClick: (String) -> Unit = {}) {
+fun HomeScreen(onCategoryClick: (String) -> Unit ,onCardClicked:()->Unit) {
     val phenomenaBold = FontFamily(
         Font(R.font.phenomena_bold)
     )
@@ -134,7 +135,9 @@ fun HomeScreen(onCategoryClick: (String) -> Unit = {}) {
         Text("BuyNest", fontSize = 20.sp,
             fontFamily = phenomenaBold, color = MainColor)
         Spacer(modifier = Modifier.height(24.dp))
-        SearchBar()
+        SearchBar(
+            onCardClicked = onCardClicked
+        )
         Spacer(modifier = Modifier.height(24.dp))
         AdsSection(offers = offers)
         Spacer(modifier = Modifier.height(24.dp))
@@ -146,7 +149,7 @@ fun HomeScreen(onCategoryClick: (String) -> Unit = {}) {
 }
 
 @Composable
-fun SearchBar() {
+fun SearchBar(onCardClicked:()->Unit) {
     Row (
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -166,10 +169,16 @@ fun SearchBar() {
             )
         )
         Spacer(modifier = Modifier.width(20.dp))
-        Icon(Icons.Default.ShoppingCart,
-            contentDescription = null
-            , tint = MainColor,
-            modifier = Modifier.size(35.dp))
+        IconButton(
+            onClick = onCardClicked,
+            modifier = Modifier.weight(3F)
+        ) {
+            Icon(
+                Icons.Default.ShoppingCart,
+                contentDescription = null, tint = MainColor,
+                modifier = Modifier.size(35.dp),
+            )
+        }
     }
 }
 
@@ -360,12 +369,14 @@ fun BrandSection(items: List<ItemModel>) {
                         contentDescription = item.name,
                         modifier = Modifier
                             .size(170.dp)
-                            .clip(RoundedCornerShape(
-                                topStart = 16.dp,
-                                topEnd = 16.dp,
-                                bottomStart = 16.dp,
-                                bottomEnd = 16.dp
-                            ))
+                            .clip(
+                                RoundedCornerShape(
+                                    topStart = 16.dp,
+                                    topEnd = 16.dp,
+                                    bottomStart = 16.dp,
+                                    bottomEnd = 16.dp
+                                )
+                            )
                             .background(Color.LightGray),
                         contentScale = ContentScale.Crop
                     )

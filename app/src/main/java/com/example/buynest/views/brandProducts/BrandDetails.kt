@@ -19,10 +19,13 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.R
@@ -43,8 +47,9 @@ import com.example.buynest.ui.theme.*
 import com.example.buynest.views.categories.CategoryItem
 import com.example.buynest.views.home.SearchBar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrandDetailsScreen(categoryName: String) {
+fun BrandDetailsScreen(categoryName: String,onCardClicked:()->Unit,backClicked:()->Unit) {
     val phenomenaFontFamily = FontFamily(
         Font(R.font.phenomena_bold)
     )
@@ -54,17 +59,36 @@ fun BrandDetailsScreen(categoryName: String) {
             .background(Color.White)
             .padding(16.dp)
     ) {
-        Text(categoryName, fontSize = 20.sp,
-            fontFamily = phenomenaFontFamily,
-            fontWeight = FontWeight.Bold,
-            color = MainColor,
-            modifier = Modifier.align(Alignment.CenterHorizontally))
+        CenterAlignedTopAppBar(
+            title = {
+                Text(
+                    categoryName, fontSize = 20.sp,
+                    fontFamily = phenomenaFontFamily,
+                    color = MainColor,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            },
+            navigationIcon = {
+                IconButton(onClick = {
+                    backClicked()
+                }) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null,
+                        tint = MainColor
+                    )
+                }
+            }
+        )
+
         Spacer(modifier = Modifier.height(4.dp))
         Text("BuyNest", fontSize = 20.sp,
             fontFamily = phenomenaFontFamily,
-            fontWeight = FontWeight.Bold, color = MainColor)
+             color = MainColor)
         Spacer(modifier = Modifier.height(24.dp))
-        SearchBar()
+        SearchBar(
+            onCardClicked = onCardClicked
+        )
         Spacer(modifier = Modifier.height(24.dp))
         ProductGrid("")
     }
@@ -155,7 +179,7 @@ fun ProductItem(){
             )
             Spacer(modifier = Modifier.height(4.dp))
             Row (
-                Modifier.padding(bottom = 16.dp)
+                Modifier.padding(bottom = 16.dp, end = 8.dp)
             ){
                 Text(
                     text = "Review (4.8) ",
@@ -168,12 +192,13 @@ fun ProductItem(){
                     contentDescription = null,
                     tint = Yellow,
                     modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.width(26.dp))
+                Spacer(modifier = Modifier.weight(1f))
                 IconButton(
                     onClick = {},
                     modifier = Modifier
                         .background(MainColor, shape = CircleShape)
                         .size(24.dp)
+                        .align(Alignment.CenterVertically)
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Add,
