@@ -136,7 +136,7 @@ fun HomeScreen(onCategoryClick: (String) -> Unit ,onCardClicked:()->Unit) {
             fontFamily = phenomenaBold, color = MainColor)
         Spacer(modifier = Modifier.height(24.dp))
         SearchBar(
-            onCardClicked = onCardClicked
+            onCartClicked = onCardClicked
         )
         Spacer(modifier = Modifier.height(24.dp))
         AdsSection(offers = offers)
@@ -149,7 +149,7 @@ fun HomeScreen(onCategoryClick: (String) -> Unit ,onCardClicked:()->Unit) {
 }
 
 @Composable
-fun SearchBar(onCardClicked:()->Unit) {
+fun SearchBar(onCartClicked:()->Unit) {
     Row (
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -170,7 +170,7 @@ fun SearchBar(onCardClicked:()->Unit) {
         )
         Spacer(modifier = Modifier.width(20.dp))
         IconButton(
-            onClick = onCardClicked,
+            onClick = onCartClicked,
             modifier = Modifier.weight(3F)
         ) {
             Icon(

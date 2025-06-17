@@ -2,7 +2,6 @@ package com.example.buynest.navigation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -35,7 +34,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
                     mainNavController.navigate(RoutesScreens.CategoryDetails.route.replace("{categoryName}", categoryName))
                 },
                 onCardClicked = {
-                    mainNavController.navigate(RoutesScreens.Card.route)
+                    mainNavController.navigate(RoutesScreens.Cart.route)
                 }
             )
         }
@@ -43,8 +42,8 @@ fun SetupNavHost(mainNavController: NavHostController) {
             val categoryName = backStackEntry.arguments?.getString("categoryName")
             if (categoryName != null) {
                 BrandDetailsScreen(categoryName,
-                    onCardClicked = {
-                        mainNavController.navigate(RoutesScreens.Card.route)
+                    onCartClicked = {
+                        mainNavController.navigate(RoutesScreens.Cart.route)
                     },
                     backClicked = {
                         mainNavController.popBackStack()
@@ -53,11 +52,15 @@ fun SetupNavHost(mainNavController: NavHostController) {
             }
         }
         composable(RoutesScreens.Favourite.route) {
-            FavouriteScreen()
+            FavouriteScreen(
+                onCartClicked = {
+                    mainNavController.navigate(RoutesScreens.Cart.route)
+                }
+            )
         }
         composable(RoutesScreens.Categories.route) {
-            CategoriesScreen(onCardClicked = {
-                mainNavController.navigate(RoutesScreens.Card.route)
+            CategoriesScreen(onCartClicked = {
+                mainNavController.navigate(RoutesScreens.Cart.route)
             }
             )
         }
@@ -85,7 +88,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
         composable(RoutesScreens.Settings.route) {
             SettingsScreen()
         }
-        composable(RoutesScreens.Card.route) {
+        composable(RoutesScreens.Cart.route) {
             CartScreen(
                 onBackClicked = {
                     mainNavController.popBackStack()

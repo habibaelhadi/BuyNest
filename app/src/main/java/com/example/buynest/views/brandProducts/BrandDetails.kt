@@ -38,8 +38,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.R
@@ -49,7 +47,7 @@ import com.example.buynest.views.home.SearchBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrandDetailsScreen(categoryName: String,onCardClicked:()->Unit,backClicked:()->Unit) {
+fun BrandDetailsScreen(categoryName: String,onCartClicked:()->Unit,backClicked:()->Unit) {
     val phenomenaFontFamily = FontFamily(
         Font(R.font.phenomena_bold)
     )
@@ -87,7 +85,7 @@ fun BrandDetailsScreen(categoryName: String,onCardClicked:()->Unit,backClicked:(
              color = MainColor)
         Spacer(modifier = Modifier.height(24.dp))
         SearchBar(
-            onCardClicked = onCardClicked
+            onCartClicked = onCartClicked
         )
         Spacer(modifier = Modifier.height(24.dp))
         ProductGrid("")

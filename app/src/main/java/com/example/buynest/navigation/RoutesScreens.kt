@@ -16,6 +16,6 @@ sealed class RoutesScreens (val route: String,  val icon: Int){
     data object Login : RoutesScreens("login", 0)
     data object SignUp : RoutesScreens("signup", 0)
     data object ForgotPassword : RoutesScreens("forgotPassword", 0)
-    data object Card : RoutesScreens("card", 0)
+    data object Cart : RoutesScreens("cart", 0)
 
 }
