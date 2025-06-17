@@ -32,62 +32,82 @@ val cartItems = listOf(
             CartItem(2, "Adidas Runner", 2800, "Blue", 42, R.drawable.product, 2),
             CartItem(1, "Nike Air Jordan", 3500, "Orange", 40, R.drawable.product, 1),
             CartItem(2, "Adidas Runner", 2800, "Blue", 42, R.drawable.product, 2),
-//                CartItem(1, "Nike Air Jordan", 3500, "Orange", 40, R.drawable.product, 1),
-//                CartItem(2, "Adidas Runner", 2800, "Blue", 42, R.drawable.product, 2),
-//                CartItem(1, "Nike Air Jordan", 3500, "Orange", 40, R.drawable.product, 1),
-//                CartItem(2, "Adidas Runner", 2800, "Blue", 42, R.drawable.product, 2),
-//                CartItem(1, "Nike Air Jordan", 3500, "Orange", 40, R.drawable.product, 1),
-//                CartItem(2, "Adidas Runner", 2800, "Blue", 42, R.drawable.product, 2),
+            CartItem(1, "Nike Air Jordan", 3500, "Orange", 40, R.drawable.product, 1),
+            CartItem(2, "Adidas Runner", 2800, "Blue", 42, R.drawable.product, 2),
+            CartItem(1, "Nike Air Jordan", 3500, "Orange", 40, R.drawable.product, 1),
+            CartItem(2, "Adidas Runner", 2800, "Blue", 42, R.drawable.product, 2),
+            CartItem(1, "Nike Air Jordan", 3500, "Orange", 40, R.drawable.product, 1),
+            CartItem(2, "Adidas Runner", 2800, "Blue", 42, R.drawable.product, 2),
 
         )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderDetailsScreen(backClicked:()->Unit){
-    Column (
+fun OrderDetailsScreen(backClicked: () -> Unit) {
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(white)
-            .padding(start = 24.dp)
-    ){
-        Spacer(modifier = Modifier.height(8.dp))
-        CenterAlignedTopAppBar(
-            title = {
-                Text(
-                    "Order Details", fontSize = 20.sp,
-                    fontFamily = phenomenaFontFamily,
-                    color = MainColor,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-            },
-            navigationIcon = {
-                IconButton(onClick = {
-                    backClicked()
-                }) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null,
-                        tint = MainColor
+            .padding(start = 24.dp, end = 18.dp)
+    ) {
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        "Order Details", fontSize = 20.sp,
+                        fontFamily = phenomenaFontFamily,
+                        color = MainColor,
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        backClicked()
+                    }) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null,
+                            tint = MainColor
+                        )
+                    }
                 }
-            }
-        )
-        Text("Order Products",
-            fontSize = 20.sp,
-            fontFamily = phenomenaFontFamily,
-            color = MainColor,
-            modifier = Modifier.padding(start = 4.dp))
-        OrdersItemsList(cartItems)
-        Spacer(modifier = Modifier.height(24.dp))
-        Text("Payment Details",
-            fontSize = 20.sp,
-            fontFamily = phenomenaFontFamily,
-            color = MainColor,
-            modifier = Modifier.padding(start = 4.dp))
-        Spacer(modifier = Modifier.height(16.dp))
-        PaymentDetails()
+            )
+        }
+
+        item {
+            Text(
+                "Order Products",
+                fontSize = 20.sp,
+                fontFamily = phenomenaFontFamily,
+                color = MainColor,
+                modifier = Modifier.padding(top = 8.dp, start = 4.dp)
+            )
+        }
+
+        items(cartItems.size) {
+            OrderProductItem(item = cartItems[it])
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                "Payment Details",
+                fontSize = 20.sp,
+                fontFamily = phenomenaFontFamily,
+                color = MainColor,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            PaymentDetails()
+            Spacer(modifier = Modifier.height(24.dp))
+        }
     }
 }
+
 
 @Composable
 fun OrdersItemsList(itemsList:List<CartItem>){
