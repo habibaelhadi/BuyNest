@@ -1,13 +1,21 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    id("com.apollographql.apollo3").version("3.8.6")
 }
 
 android {
     namespace = "com.example.buynest"
     compileSdk = 35
+
+    val file = rootProject.file("local.properties")
+    val properties = Properties()
+    properties.load(FileInputStream(file))
 
     defaultConfig {
         applicationId = "com.example.buynest"
@@ -17,6 +25,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "SHOPIFY_ACCESS_TOKEN", properties.getProperty("SHOPIFY_ACCESS_TOKEN"))
     }
 
     buildTypes {
@@ -37,6 +47,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -93,4 +104,15 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose.android)
     // Material icons
     implementation("androidx.compose.material:material-icons-extended")
+    // Apollo-GraphQL
+    implementation("com.apollographql.apollo3:apollo-runtime:3.8.6")
+
+}
+
+apollo {
+    service("shopify") {
+        packageName.set("com.example.buynest")
+        schemaFile.set(file("src/main/graphql/shopify/schema.graphqls"))
+        srcDir("src/main/graphql/shopify")
+    }
 }
