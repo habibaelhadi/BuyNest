@@ -25,7 +25,10 @@ import com.example.buynest.ui.theme.white
 import com.example.buynest.views.component.SettingsCard
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    gotoProfileScreen: () -> Unit,
+    gotoOrdersHistoryScreen: () -> Unit
+) {
 
     Column(
         modifier = Modifier
@@ -40,12 +43,18 @@ fun SettingsScreen() {
         Spacer(modifier = Modifier.height(12.dp))
 
 
-        SettingsCard("Flores Juanita", icon = Icons.Default.Person, bold = true)
+        SettingsCard("Flores Juanita", icon = Icons.Default.Person, bold = true,
+            onClick = {
+                gotoProfileScreen()
+            })
         Spacer(modifier = Modifier.height(12.dp))
 
         SettingsCard("Address Book", Icons.Default.Home)
         SettingsCard("Payment Option", Icons.Default.Payment)
-        SettingsCard("Orders History", Icons.Default.History)
+        SettingsCard("Orders History", Icons.Default.History,
+            onClick = {
+                gotoOrdersHistoryScreen()
+            })
         Spacer(modifier = Modifier.height(12.dp))
 
         SettingsCard("Country/Region", Icons.Default.Public)

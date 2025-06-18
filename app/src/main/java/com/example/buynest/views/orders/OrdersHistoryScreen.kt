@@ -1,14 +1,12 @@
-package com.example.buynest.views.brandProducts
+package com.example.buynest.views.orders
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -19,33 +17,56 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.R
 import com.example.buynest.ui.theme.*
-import com.example.buynest.views.component.CategoryItem
-import com.example.buynest.views.component.ProductItem
-import com.example.buynest.views.component.SearchBar
+import com.example.buynest.views.component.OrderItem
+
+data class Order(
+    val id: Int,
+    val deliveryDate: String,
+    val imageRes: Int
+)
+val pastOrders =
+    listOf(
+        Order(1001, "June 17, 2025", R.drawable.product),
+        Order(2521, "June 15, 2025", R.drawable.product),
+        Order(2545, "June 15, 2025", R.drawable.product),
+        Order(2, "June 15, 2025", R.drawable.product),
+        Order(2, "June 15, 2025", R.drawable.product),
+        Order(2, "June 15, 2025", R.drawable.product),
+        Order(2, "June 15, 2025", R.drawable.product),
+        Order(2, "June 15, 2025", R.drawable.product),
+        Order(2, "June 15, 2025", R.drawable.product),
+        Order(2, "June 15, 2025", R.drawable.product),
+        Order(101654, "June 17, 2025", R.drawable.product),
+        Order(25454, "June 15, 2025", R.drawable.product),
+        Order(2, "June 15, 2025", R.drawable.product),
+        Order(2, "June 15, 2025", R.drawable.product),
+    )
+
+val phenomenaFontFamily = FontFamily(
+    Font(R.font.phenomena_bold)
+)
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrandDetailsScreen(categoryName: String,onCartClicked:()->Unit,backClicked:()->Unit,onProductClicked:()->Unit) {
-    val phenomenaFontFamily = FontFamily(
-        Font(R.font.phenomena_bold)
-    )
-    Column(
+fun OrdersHistoryScreen(backClicked:()->Unit,gotoOrderDetails:()->Unit){
+    Column (
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
-            .padding(16.dp)
-    ) {
+            .background(white)
+            .padding(start = 24.dp)
+    ){
+        Spacer(modifier = Modifier.height(8.dp))
         CenterAlignedTopAppBar(
             title = {
                 Text(
-                    categoryName, fontSize = 20.sp,
+                    "Order History", fontSize = 20.sp,
                     fontFamily = phenomenaFontFamily,
                     color = MainColor,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -63,35 +84,21 @@ fun BrandDetailsScreen(categoryName: String,onCartClicked:()->Unit,backClicked:(
                 }
             }
         )
-        SearchBar(
-            onCartClicked = onCartClicked
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        ProductGrid("",onProductClicked)
+        AllOrdersList(pastOrders,gotoOrderDetails)
     }
 }
 
 
 @Composable
-fun ProductGrid(screenName: String, onProductClicked: () -> Unit) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ){
-        if (screenName == "Categories"){
-            items(4){
-                CategoryItem()
-            }
-        }else {
-            items(20) {
-                ProductItem(onProductClicked)
+fun AllOrdersList(orders:List<Order>,gotoOrderDetails:()->Unit){
+        LazyColumn(
+            modifier = Modifier.padding(top = 16.dp, end = 18.dp)
+        ){
+            items(orders.size){
+                OrderItem(order = orders[it],gotoOrderDetails)
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
-    }
 }
-
 
 

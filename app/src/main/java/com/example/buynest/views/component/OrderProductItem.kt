@@ -1,17 +1,21 @@
 package com.example.buynest.views.component
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,22 +28,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.model.entity.CartItem
-import com.example.buynest.ui.theme.LightGray2
+import com.example.buynest.ui.theme.Gray
 import com.example.buynest.ui.theme.MainColor
+import com.example.buynest.ui.theme.white
 
 @Composable
-fun CartItemRow(
+fun OrderProductItem(
     item: CartItem,
-    onQuantityChange: (Int, Int) -> Unit,
-    onDelete: (Int) -> Unit,
-    onItemClick: (CartItem) -> Unit
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onItemClick(item) },
-    shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, LightGray2)
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(white),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(2.dp, Gray),
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -87,23 +88,13 @@ fun CartItemRow(
                     color = MainColor
                 )
             }
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                IconButton(
-                    onClick = { onDelete(item.id) },
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.DeleteOutline,
-                        contentDescription = null,
-                        tint = MainColor
-                    )
-                }
-                QuantitySelector(
-                    quantity = item.quantity,
-                    onChange = { newQty -> onQuantityChange(item.id, newQty) }
-                )
-            }
+            Text(
+                text = "x${item.quantity}",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = MainColor,
+                modifier = Modifier.padding(end = 16.dp)
+            )
         }
     }
 }

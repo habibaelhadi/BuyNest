@@ -38,8 +38,7 @@ import com.example.buynest.R
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
-import com.example.buynest.views.component.CartItemRow
-import com.example.buynest.views.home.SearchBar
+import com.example.buynest.views.component.SearchBar
 
 data class FavItem(
     val id: Int,
@@ -73,10 +72,6 @@ fun FavouriteScreen(onCartClicked:()->Unit) {
             .padding(16.dp)
     ) {
         Spacer(modifier = Modifier.height(8.dp))
-        Text("BuyNest", fontSize = 20.sp,
-            fontFamily = phenomenaBold, color = MainColor
-        )
-        Spacer(modifier = Modifier.height(24.dp))
         SearchBar(
             onCartClicked = onCartClicked
         )
