@@ -80,7 +80,7 @@ fun LoginScreen(
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val data = result.data
-            viewModel.handleGoogleSignInResult(123, data)
+            viewModel.handleGoogleSignInResult(123, data,context)
         } else {
             Log.e("GoogleSignIn", "Sign-in failed or canceled.")
         }
