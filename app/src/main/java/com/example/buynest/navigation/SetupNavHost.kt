@@ -109,7 +109,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 gotoOrdersHistoryScreen = {
                     mainNavController.navigate(RoutesScreens.OrdersHistory.route)
                 },
-                gotorAddressScreen = {
+                gotoAddressScreen = {
                     mainNavController.navigate(RoutesScreens.Address.route)
                 }
             )

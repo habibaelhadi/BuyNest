@@ -28,7 +28,7 @@ import com.example.buynest.views.component.SettingsCard
 fun SettingsScreen(
     gotoProfileScreen: () -> Unit,
     gotoOrdersHistoryScreen: () -> Unit,
-    gotorAddressScreen: () -> Unit
+    gotoAddressScreen: () -> Unit
 ) {
 
     Column(
@@ -36,7 +36,7 @@ fun SettingsScreen(
             .fillMaxSize()
             .background(white)
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 16.dp, vertical = 24.dp)
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -52,7 +52,7 @@ fun SettingsScreen(
 
         SettingsCard("Address Book", Icons.Default.Home,
             onClick = {
-            gotorAddressScreen()
+            gotoAddressScreen()
         })
 
         SettingsCard("Payment Option", Icons.Default.Payment)
