@@ -27,7 +27,6 @@ class Firebase private constructor() {
     }
 
     fun connectToGoogle(context: Context) {
-        Log.i("TAG", "connectToGoogle: ")
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(context.getString(R.string.default_web_client_id))
             .requestEmail()
@@ -41,7 +40,6 @@ class Firebase private constructor() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-
                     val profileUpdates = UserProfileChangeRequest.Builder()
                         .setDisplayName(name)
                         .build()
