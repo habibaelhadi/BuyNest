@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -27,7 +28,9 @@ import com.example.buynest.views.component.ProfileOption
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("AutoboxingStateCreation")
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(
+    onBackClicked: () -> Unit
+) {
     val scrollState = rememberScrollState()
     var expandedIndex by remember { mutableStateOf(-1) }
     var isEditing by remember { mutableStateOf(false) }
@@ -37,6 +40,7 @@ fun ProfileScreen() {
         modifier = Modifier
             .fillMaxSize()
             .background(MainColor)
+            .padding(top = 24.dp)
     ) {
         Column(
             modifier = Modifier
@@ -49,6 +53,17 @@ fun ProfileScreen() {
                     .fillMaxWidth()
                     .height(330.dp)
             ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(16.dp)
+                        .clickable{
+                            onBackClicked()
+                        }
+                )
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -73,7 +88,6 @@ fun ProfileScreen() {
                         fontSize = 20.sp
                     )
                 }
-
                 Icon(
                     imageVector = Icons.Default.MoreVert,
                     contentDescription = null,

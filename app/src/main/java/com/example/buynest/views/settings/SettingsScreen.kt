@@ -44,7 +44,7 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
 
-        SettingsCard("Flores Juanita", icon = Icons.Default.Person, bold = true,
+        SettingsCard("Youssef Fayad", icon = Icons.Default.Person, bold = true,
             onClick = {
                 gotoProfileScreen()
             })

@@ -77,7 +77,11 @@ fun SetupNavHost(mainNavController: NavHostController) {
             )
         }
         composable(RoutesScreens.Profile.route) {
-            ProfileScreen()
+            ProfileScreen(
+                onBackClicked = {
+                    mainNavController.popBackStack()
+                }
+            )
         }
         composable(RoutesScreens.Login.route) {
             LoginScreen(navigateToHome = {
