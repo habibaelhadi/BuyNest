@@ -27,7 +27,8 @@ import com.example.buynest.views.component.SettingsCard
 @Composable
 fun SettingsScreen(
     gotoProfileScreen: () -> Unit,
-    gotoOrdersHistoryScreen: () -> Unit
+    gotoOrdersHistoryScreen: () -> Unit,
+    gotorAddressScreen: () -> Unit
 ) {
 
     Column(
@@ -49,8 +50,13 @@ fun SettingsScreen(
             })
         Spacer(modifier = Modifier.height(12.dp))
 
-        SettingsCard("Address Book", Icons.Default.Home)
+        SettingsCard("Address Book", Icons.Default.Home,
+            onClick = {
+            gotorAddressScreen()
+        })
+
         SettingsCard("Payment Option", Icons.Default.Payment)
+
         SettingsCard("Orders History", Icons.Default.History,
             onClick = {
                 gotoOrdersHistoryScreen()

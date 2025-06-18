@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.buynest.utils.sharedPreferences.SharedPreferencesImpl
+import com.example.buynest.views.address.AddressScreen
 import com.example.buynest.views.authentication.forgotpassword.ForgotPasswordScreen
 import com.example.buynest.views.authentication.login.LoginScreen
 import com.example.buynest.views.authentication.signup.SignUpScreen
@@ -103,6 +104,16 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 gotoOrdersHistoryScreen = {
                     mainNavController.navigate(RoutesScreens.OrdersHistory.route)
+                },
+                gotorAddressScreen = {
+                    mainNavController.navigate(RoutesScreens.Address.route)
+                }
+            )
+        }
+        composable(RoutesScreens.Address.route) {
+            AddressScreen(
+                onBackClicked = {
+                    mainNavController.popBackStack()
                 }
             )
         }

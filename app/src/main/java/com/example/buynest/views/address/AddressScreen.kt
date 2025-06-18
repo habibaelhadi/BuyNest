@@ -17,7 +17,9 @@ import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.views.component.AddressItem
 
 @Composable
-fun AddressScreen() {
+fun AddressScreen(
+    onBackClicked: () -> Unit
+) {
     val addressList = remember {
         mutableStateListOf(
             Address(
@@ -62,7 +64,7 @@ fun AddressScreen() {
                         .padding(horizontal = 4.dp)
                 ) {
                     IconButton(
-                        onClick = { /* Handle back */ },
+                        onClick = { onBackClicked() },
                         modifier = Modifier.align(Alignment.CenterStart)
                     ) {
                         Icon(
