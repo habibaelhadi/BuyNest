@@ -2,16 +2,14 @@ package com.example.buynest.repos.authenticationrepo.firebase
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
-import androidx.annotation.StringRes
 import com.example.buynest.R
+import com.example.buynest.repos.FirebaseAuthObject
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 
 class Firebase private constructor() {
     private var googleSignInClient: GoogleSignInClient? = null
@@ -19,7 +17,7 @@ class Firebase private constructor() {
     private var message: String? = null
 
     init {
-        auth = FirebaseAuth.getInstance()
+        auth = FirebaseAuthObject.getAuth()
     }
 
     fun setFirebaseResponse(firebaseResponse: FirebaseResponse?) {
@@ -27,7 +25,6 @@ class Firebase private constructor() {
     }
 
     fun connectToGoogle(context: Context) {
-        Log.i("TAG", "connectToGoogle: ")
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(context.getString(R.string.default_web_client_id))
             .requestEmail()
@@ -41,7 +38,6 @@ class Firebase private constructor() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-
                     val profileUpdates = UserProfileChangeRequest.Builder()
                         .setDisplayName(name)
                         .build()
@@ -135,5 +131,34 @@ class Firebase private constructor() {
                 }
                 return firebase!!
             }
+
+        fun saveGoogleUserToFirestore(context: Context) {
+            val user = auth.currentUser
+            user?.let {
+                val name = it.displayName ?: "No Name"
+                val email = it.email ?: "No Email"
+                val phone = it.phoneNumber ?: "No Phone" // Usually null from Google
+
+                val userMap = hashMapOf(
+                    "name" to name,
+                    "email" to email,
+                    "phone" to phone
+                )
+
+                FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .document(user.uid)
+                    .set(userMap)
+                    .addOnSuccessListener {
+                        instance.firebaseResponse?.onResponseSuccess("Google user saved to Firestore")
+                    }
+                    .addOnFailureListener { e ->
+                        instance.firebaseResponse?.onResponseFailure(e.message)
+                    }
+            } ?: run {
+                instance.firebaseResponse?.onResponseFailure("No authenticated Google user found")
+            }
+        }
+
     }
 }

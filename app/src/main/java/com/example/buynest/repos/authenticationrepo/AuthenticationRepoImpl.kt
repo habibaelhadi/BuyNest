@@ -50,6 +50,7 @@ class AuthenticationRepoImpl: AuthenticationRepo {
         val signInIntent = firebase.apply { connectToGoogle(context) }.getGoogleSignInIntent()
         return if (signInIntent != null) {
             launcher.launch(signInIntent)
+            //firebase.saveGoogleUserToFirestore(context)
             Result.success(Unit)
         } else {
             Result.failure(Exception("Missing dependencies"))
