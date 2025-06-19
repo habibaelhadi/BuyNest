@@ -120,6 +120,9 @@ dependencies {
     // Kotlin Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
+    //coil for image
+    implementation(libs.coil.compose)
+
 }
 
 apollo {
