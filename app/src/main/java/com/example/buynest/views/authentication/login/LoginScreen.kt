@@ -51,7 +51,7 @@ import com.example.buynest.R
 import com.example.buynest.repository.authenticationrepo.AuthenticationRepoImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
-import com.example.buynest.utils.sharedPreferences.SharedPreferencesImpl
+import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.utils.strategies.GoogleAuthenticationStrategy
 import com.example.buynest.utils.strategies.LoginAuthenticationStrategy
 import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
@@ -88,8 +88,8 @@ fun LoginScreen(
     LaunchedEffect(snackbarMessage.value) {
         if (snackbarMessage.value == "Success") {
             navigateToHome()
-            SharedPreferencesImpl.setLogIn(context = context, true)
-            SharedPreferencesImpl.setAuthenticationMode(context,"emailPassword")
+            SharedPrefHelper.setLogIn(context = context, true)
+            SharedPrefHelper.setAuthenticationMode(context,"emailPassword")
         }
     }
 
@@ -268,7 +268,7 @@ fun LoginScreen(
                             val validation = viewModel.setGoogleStrategy(strategy)
 
                             if (validation == null) {
-                                SharedPreferencesImpl.setAuthenticationMode(context, "google")
+                                SharedPrefHelper.setAuthenticationMode(context, "google")
                                 viewModel.getGoogleSignInIntent(context)?.let { intent ->
                                     googleSignInLauncher.launch(intent)
                                 }
@@ -293,7 +293,7 @@ fun LoginScreen(
                     IconButton(
                         onClick = {
                             navigateToHome()
-                            SharedPreferencesImpl.setAuthenticationMode(context,"guest")
+                            SharedPrefHelper.setAuthenticationMode(context,"guest")
                         },
                         modifier = Modifier
                             .size(48.dp)
