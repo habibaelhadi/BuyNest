@@ -5,4 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface IHomeRepository {
     fun getBrands():  Flow<BrandsAndProductsQuery.Data?>
+    fun getBrandProducts(): Flow<BrandsAndProductsQuery.Data?>
 }

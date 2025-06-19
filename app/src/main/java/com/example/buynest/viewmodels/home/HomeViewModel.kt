@@ -19,7 +19,7 @@ class HomeViewModel (val repository: IHomeRepository) : ViewModel() {
                     _mutableBrand.value = ResponseState.Loading
                     if (it != null) {
                         val products = it.products.edges.map { edge -> edge.node }
-                        val brands = it.brands.nodes
+                        val brands = it.collections
                         _mutableBrand.value = ResponseState.Success(Pair(brands, products))
                     } else {
                         _mutableBrand.value = ResponseState.Error("No data received.")

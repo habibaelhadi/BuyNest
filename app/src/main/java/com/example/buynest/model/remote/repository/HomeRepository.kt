@@ -17,4 +17,12 @@ class HomeRepository : IHomeRepository {
         emit(null)
     }
 
+    override fun getBrandProducts(): Flow<BrandsAndProductsQuery.Data?>  = flow{
+        val response = ApolloClient.apolloClient
+            .query(BrandsAndProductsQuery())
+            .execute()
+        emit(response.data)
+    }.catch{
+        emit(null)
+    }
 }

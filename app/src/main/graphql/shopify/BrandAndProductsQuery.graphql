@@ -1,5 +1,5 @@
 query BrandsAndProducts {
-    products: products(first: 250) {
+    products(first: 100) {
         edges {
             node {
                 id
@@ -10,26 +10,28 @@ query BrandsAndProducts {
                 featuredImage {
                     url
                 }
-                variants(first: 100) {
+                variants(first: 5) {
                     edges {
                         node {
                             id
-                            price
+                            price {
+                                amount
+                                currencyCode
+                            }
                             selectedOptions {
                                 name
                                 value
                             }
-                            inventoryQuantity
                         }
                     }
                 }
-                media(first: 10) {
+                media(first: 5) {
                     edges {
                         node {
-                            preview {
-                                image {
-                                    url
-                                }
+                            mediaContentType
+                            alt
+                            previewImage {
+                                url
                             }
                         }
                     }
@@ -41,25 +43,13 @@ query BrandsAndProducts {
         }
     }
 
-    discountCodes: codeDiscountNodes(first: 100) {
+    collections(first: 13) {
         nodes {
             id
-            codeDiscount {
-                ... on DiscountCodeBasic {
-                    title
-                    summary
-                }
-            }
-        }
-    }
-
-    brands: collections(first: 13) {
-        nodes {
-            id
+            title
             image {
                 url
             }
-            title
         }
     }
 }
