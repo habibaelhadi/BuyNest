@@ -29,6 +29,7 @@ android {
         buildConfigField("String", "SHOPIFY_ACCESS_TOKEN", properties.getProperty("SHOPIFY_ACCESS_TOKEN"))
         buildConfigField("String", "STRIPE_PUBLISHABLE_KEY", properties.getProperty("STRIPE_PUBLISHABLE_KEY"))
         buildConfigField("String", "STRIPE_SECRET_KEY", properties.getProperty("STRIPE_SECRET_KEY"))
+        buildConfigField("String", "CRUUENCY_API_KEY", properties.getProperty("CRUUENCY_API_KEY"))
     }
 
     buildTypes {
