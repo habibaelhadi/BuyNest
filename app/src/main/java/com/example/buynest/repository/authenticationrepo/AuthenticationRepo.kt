@@ -1,4 +1,4 @@
-package com.example.buynest.repos.authenticationrepo
+package com.example.buynest.repository.authenticationrepo
 
 import android.content.Context
 import android.content.Intent
