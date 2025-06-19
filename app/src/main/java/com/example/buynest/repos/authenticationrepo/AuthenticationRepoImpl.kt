@@ -16,12 +16,12 @@ class AuthenticationRepoImpl: AuthenticationRepo {
         password: String
     ): Result<Unit> = suspendCoroutine { continuation ->
         firebase.setFirebaseResponse(object : FirebaseResponse {
-            override fun onResponseSuccess(message: String?) {
+            override fun <T> onResponseSuccess(message: T) {
                 continuation.resume(Result.success(Unit))
             }
 
-            override fun onResponseFailure(message: String?) {
-                continuation.resume(Result.failure(Exception(message)))
+            override fun <T> onResponseFailure(message: T) {
+                continuation.resume(Result.failure(Exception(message.toString())))
             }
         })
         firebase.login(email, password)
@@ -35,12 +35,12 @@ class AuthenticationRepoImpl: AuthenticationRepo {
         password: String
     ): Result<Unit> = suspendCoroutine { continuation ->
         firebase.setFirebaseResponse(object : FirebaseResponse {
-            override fun onResponseSuccess(message: String?) {
+            override fun <T> onResponseSuccess(message: T) {
                 continuation.resume(Result.success(Unit))
             }
 
-            override fun onResponseFailure(message: String?) {
-                continuation.resume(Result.failure(Exception(message)))
+            override fun <T> onResponseFailure(message: T) {
+                continuation.resume(Result.failure(Exception(message.toString())))
             }
         })
         firebase.signup(name, phone, email, password)
@@ -50,7 +50,6 @@ class AuthenticationRepoImpl: AuthenticationRepo {
         val signInIntent = firebase.apply { connectToGoogle(context) }.getGoogleSignInIntent()
         return if (signInIntent != null) {
             launcher.launch(signInIntent)
-            //firebase.saveGoogleUserToFirestore(context)
             Result.success(Unit)
         } else {
             Result.failure(Exception("Missing dependencies"))
@@ -64,12 +63,12 @@ class AuthenticationRepoImpl: AuthenticationRepo {
     override suspend fun sendResetPasswordEmail(email: String): Result<String> {
         return suspendCoroutine { continuation ->
             firebase.setFirebaseResponse(object : FirebaseResponse {
-                override fun onResponseSuccess(message: String?) {
+                override fun <T> onResponseSuccess(message: T) {
                     continuation.resume(Result.success("Password reset email sent."))
                 }
 
-                override fun onResponseFailure(message: String?) {
-                    continuation.resume(Result.failure(Exception(message)))
+                override fun <T> onResponseFailure(message: T) {
+                    continuation.resume(Result.failure(Exception(message.toString())))
                 }
             })
             firebase.sendPasswordResetEmail(email)
@@ -81,12 +80,12 @@ class AuthenticationRepoImpl: AuthenticationRepo {
         var result: Result<Unit> = Result.failure(Exception("Login failed"))
 
         firebase.setFirebaseResponse(object : FirebaseResponse {
-            override fun onResponseSuccess(message: String?) {
+            override fun <T> onResponseSuccess(message: T) {
                 result = Result.success(Unit)
             }
 
-            override fun onResponseFailure(message: String?) {
-                result = Result.failure(Exception(message))
+            override fun <T> onResponseFailure(message: T) {
+                result = Result.failure(Exception(message.toString()))
             }
 
         })

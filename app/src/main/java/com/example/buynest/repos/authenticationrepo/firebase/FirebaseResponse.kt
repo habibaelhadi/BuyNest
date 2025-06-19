@@ -1,6 +1,6 @@
 package com.example.buynest.repos.authenticationrepo.firebase
 
 interface FirebaseResponse {
-    fun onResponseSuccess(message: String?)
-    fun onResponseFailure(message: String?)
+    fun <T> onResponseSuccess(message: T)
+    fun <T> onResponseFailure(message: T)
 }
