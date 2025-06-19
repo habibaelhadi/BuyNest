@@ -1,4 +1,4 @@
-package com.example.buynest.viewmodels.home
+package com.example.buynest.viewmodel.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -19,7 +19,7 @@ class HomeViewModel (val repository: IHomeRepository) : ViewModel() {
                     _mutableBrand.value = ResponseState.Loading
                     if (it != null) {
                         val products = it.products.edges.map { edge -> edge.node }
-                        val brands = it.collections
+                        val brands = it.collections.nodes
                         _mutableBrand.value = ResponseState.Success(Pair(brands, products))
                     } else {
                         _mutableBrand.value = ResponseState.Error("No data received.")

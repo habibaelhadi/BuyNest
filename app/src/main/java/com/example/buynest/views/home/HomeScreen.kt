@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,8 +25,8 @@ import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.R
 import com.example.buynest.model.remote.repository.HomeRepository
 import com.example.buynest.model.uistate.ResponseState
-import com.example.buynest.viewmodels.home.HomeFactory
-import com.example.buynest.viewmodels.home.HomeViewModel
+import com.example.buynest.viewmodel.home.HomeFactory
+import com.example.buynest.viewmodel.home.HomeViewModel
 import com.example.buynest.views.component.AdsSection
 import com.example.buynest.views.component.ForYouSection
 import com.example.buynest.views.component.Indicator
@@ -67,7 +66,7 @@ val phenomenaBold = FontFamily(
     Font(R.font.phenomena_bold)
 )
 @Composable
-fun HomeScreen(onCategoryClick: (String) -> Unit ,onCardClicked:()->Unit) {
+fun HomeScreen(onCategoryClick: (String,String) -> Unit ,onCardClicked:()->Unit) {
     val activity = LocalActivity.current
     val homeViewModel: HomeViewModel = viewModel(
         factory = HomeFactory(HomeRepository())
@@ -102,7 +101,7 @@ fun HomeScreen(onCategoryClick: (String) -> Unit ,onCardClicked:()->Unit) {
                 Indicator()
             }
             is ResponseState.Success<*> -> {
-                val (brandList, productList) = result.data as Pair<List<BrandsAndProductsQuery.Node4>, List<BrandsAndProductsQuery.Node>>
+                val (brandList, productList) = result.data as Pair<List<BrandsAndProductsQuery.Node3>, List<BrandsAndProductsQuery.Node>>
                 TopBrandsSection(items = brandList.drop(1), onCategoryClick = onCategoryClick)
                 Spacer(modifier = Modifier.height(24.dp))
                 ForYouSection(items = productList.drop(10))

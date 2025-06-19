@@ -1,5 +1,6 @@
 package com.example.buynest.views.brandProducts
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,18 +27,38 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.buynest.ProductsByCollectionIDQuery
 import com.example.buynest.R
+import com.example.buynest.model.remote.repository.HomeRepository
+import com.example.buynest.model.uistate.ResponseState
 import com.example.buynest.ui.theme.*
+import com.example.buynest.viewmodel.brandproducts.BrandDetailsViewModel
+import com.example.buynest.viewmodel.brandproducts.BrandProductsFactory
 import com.example.buynest.views.component.CategoryItem
+import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.ProductItem
 import com.example.buynest.views.component.SearchBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrandDetailsScreen(categoryName: String,onCartClicked:()->Unit,backClicked:()->Unit,onProductClicked:()->Unit) {
+fun BrandDetailsScreen(brandID:String,categoryName: String,onCartClicked:()->Unit,backClicked:()->Unit,onProductClicked:()->Unit) {
     val phenomenaFontFamily = FontFamily(
         Font(R.font.phenomena_bold)
     )
+
+    val brandProductsViewModel: BrandDetailsViewModel = viewModel(
+        factory = BrandProductsFactory(HomeRepository())
+    )
+    val brandProducts by brandProductsViewModel.brandProducts.collectAsStateWithLifecycle()
+
+    LaunchedEffect(brandID) {
+        val id = "gid://shopify/Collection/$brandID"
+        brandProductsViewModel.getBrandProducts(id)
+    }
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -67,13 +90,30 @@ fun BrandDetailsScreen(categoryName: String,onCartClicked:()->Unit,backClicked:(
             onCartClicked = onCartClicked
         )
         Spacer(modifier = Modifier.height(24.dp))
-        ProductGrid("",onProductClicked)
+        when (val result = brandProducts) {
+            is ResponseState.Error -> {
+                Text(text = result.message)
+            }
+            ResponseState.Loading -> {
+                Indicator()
+            }
+            is ResponseState.Success<*> -> {
+                val data = result.data as? ProductsByCollectionIDQuery.Data
+                val productList = data?.collection?.products?.edges?.map { it.node }
+                ProductGrid(categoryName, onProductClicked, productList)
+            }
+
+        }
     }
 }
 
 
 @Composable
-fun ProductGrid(screenName: String, onProductClicked: () -> Unit) {
+fun ProductGrid(
+    screenName: String,
+    onProductClicked: () -> Unit,
+    bradProduct: List<ProductsByCollectionIDQuery.Node>? = null
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier
@@ -86,8 +126,8 @@ fun ProductGrid(screenName: String, onProductClicked: () -> Unit) {
                 CategoryItem()
             }
         }else {
-            items(20) {
-                ProductItem(onProductClicked)
+            items(bradProduct?.size ?: 0) {
+                ProductItem(onProductClicked, bradProduct?.get(it))
             }
         }
     }

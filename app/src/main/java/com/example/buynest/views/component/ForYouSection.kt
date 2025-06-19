@@ -45,7 +45,7 @@ fun ForYouSection(items: List<BrandsAndProductsQuery.Node>) {
                 val firstVariant = item.variants.edges.firstOrNull()?.node
 
                 // Convert price (Any) to Double safely
-                val rawPrice = firstVariant?.presentmentPrices?.edges[0]?.node?.price
+                val rawPrice = firstVariant?.price?.amount
                 val priceDouble = when (rawPrice) {
                     is Number -> rawPrice.toDouble()
                     is String -> rawPrice.toDoubleOrNull() ?: 0.0

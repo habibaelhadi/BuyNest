@@ -1,6 +1,7 @@
 package com.example.buynest.navigation
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -34,8 +35,12 @@ fun SetupNavHost(mainNavController: NavHostController) {
     ) {
         composable(RoutesScreens.Home.route) {
             HomeScreen(
-                onCategoryClick = { categoryName ->
-                    mainNavController.navigate(RoutesScreens.BrandDetails.route.replace("{categoryName}", categoryName))
+                onCategoryClick = { categoryName,brandId ->
+                    mainNavController.navigate(
+                        RoutesScreens.BrandDetails.route
+                            .replace("{categoryName}", categoryName)
+                            .replace("{brandID}", brandId)
+                    )
                 },
                 onCardClicked = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
@@ -45,8 +50,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
 
         composable(RoutesScreens.BrandDetails.route) { backStackEntry ->
             val categoryName = backStackEntry.arguments?.getString("categoryName")
+            val brandId = backStackEntry.arguments?.getString("brandID").toString()
             if (categoryName != null) {
-                BrandDetailsScreen(categoryName,
+                BrandDetailsScreen(brandID = brandId ,categoryName = categoryName,
                     onCartClicked = {
                         mainNavController.navigate(RoutesScreens.Cart.route)
                     },
