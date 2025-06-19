@@ -32,7 +32,7 @@ import com.example.buynest.R
 import com.example.buynest.ui.theme.MainColor
 
 @Composable
-fun TopBrandsSection(items: List<BrandsAndProductsQuery.Node4>, onCategoryClick: (String) -> Unit ) {
+fun TopBrandsSection(items: List<BrandsAndProductsQuery.Node3>, onCategoryClick: (String,String) -> Unit ) {
     val phenomena_bold = FontFamily(
         Font(R.font.phenomena_bold)
     )
@@ -57,11 +57,14 @@ fun TopBrandsSection(items: List<BrandsAndProductsQuery.Node4>, onCategoryClick:
                 ) {
                     columnItems.forEach { item ->
                         val imageUrl = item.image?.url.toString()
+                        val gid = item.id
+                        val numericId = gid.substringAfterLast("/")
+
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
                                 .padding(bottom = 24.dp)
-                                .clickable { onCategoryClick(item.title) }
+                                .clickable { onCategoryClick(item.title,numericId) }
                         ) {
                             Image(
                                 painter = rememberAsyncImagePainter(imageUrl),

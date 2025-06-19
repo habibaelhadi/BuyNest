@@ -30,13 +30,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
+import com.example.buynest.ProductsByCollectionIDQuery
 import com.example.buynest.R
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.Yellow
 import com.example.buynest.ui.theme.white
 
 @Composable
-fun ProductItem(onProductClicked: () -> Unit){
+fun ProductItem(onProductClicked: () -> Unit, bradProduct: ProductsByCollectionIDQuery.Node?){
     Card (
         modifier = Modifier
             .width(200.dp)
@@ -46,8 +48,16 @@ fun ProductItem(onProductClicked: () -> Unit){
         elevation = CardDefaults.cardElevation(4.dp),
         onClick = onProductClicked
     ){
+        val productImageUrl = bradProduct?.featuredImage?.url.toString()
+        val productPrice = bradProduct?.variants?.edges?.firstOrNull()?.node?.price?.amount.toString()
+        val compareAtPrice = bradProduct?.variants?.edges?.firstOrNull()?.node?.compareAtPrice?.amount?.toString()
+        val cleanedTitle = bradProduct?.title?.replace(Regex("\\(.*?\\)"), "")?.trim()
+        val parts = cleanedTitle?.split("|")?.map { it.trim() }
+        val productName = if (parts != null && parts.size >= 2) parts[1] else "there is no name"
+
         Column(
             modifier = Modifier.background(white)
+                .height(260.dp)
         ){
             Box(
                 modifier = Modifier
@@ -56,10 +66,10 @@ fun ProductItem(onProductClicked: () -> Unit){
 
             ){
                 Image(
-                    painter = painterResource(id = R.drawable.product),
+                    painter = rememberAsyncImagePainter(productImageUrl),
                     contentDescription = null,
-                    modifier = Modifier.align(Alignment.Center),
-                    contentScale = ContentScale.FillHeight
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.Crop
                 )
                 Box(
                     modifier = Modifier
@@ -85,14 +95,14 @@ fun ProductItem(onProductClicked: () -> Unit){
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Nike Air Jordon",
+                text = productName.toString(),
                 style = MaterialTheme.typography.titleMedium,
                 color = MainColor,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "120.00 LE",
+                text = productPrice,
                 style = MaterialTheme.typography.titleSmall,
                 color = MainColor,
                 modifier = Modifier.padding(horizontal = 8.dp)
@@ -102,7 +112,7 @@ fun ProductItem(onProductClicked: () -> Unit){
                 Modifier.padding(bottom = 16.dp, end = 8.dp)
             ){
                 Text(
-                    text = "Review (4.8) ",
+                    text = compareAtPrice.toString(),
                     style = MaterialTheme.typography.titleSmall,
                     color = MainColor,
                     modifier = Modifier.padding(horizontal = 8.dp)
@@ -130,3 +140,4 @@ fun ProductItem(onProductClicked: () -> Unit){
         }
     }
 }
+
