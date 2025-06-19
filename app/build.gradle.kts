@@ -107,6 +107,9 @@ dependencies {
     // Apollo-GraphQL
     implementation("com.apollographql.apollo3:apollo-runtime:3.8.6")
 
+    //coil for image
+    implementation(libs.coil.compose)
+
 }
 
 apollo {
