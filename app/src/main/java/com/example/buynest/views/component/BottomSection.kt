@@ -1,6 +1,5 @@
 package com.example.buynest.views.component
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,8 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -29,7 +26,8 @@ import com.example.buynest.ui.theme.MainColor
 fun BottomSection(
     totalPrice: Int,
     icon: ImageVector,
-    title: String
+    title: String,
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -54,7 +52,7 @@ fun BottomSection(
         Spacer(modifier = Modifier.width(12.dp))
 
         Button(
-            onClick = { },
+            onClick = onClick,
             colors = ButtonDefaults.buttonColors(containerColor = MainColor),
             shape = RoundedCornerShape(24.dp),
             modifier = Modifier

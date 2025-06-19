@@ -98,7 +98,9 @@ fun ProductInfo(
     val scrollState = rememberScrollState()
     Scaffold (
         topBar = { ProductInfoTopBar(backClicked, navigateToCart) },
-        bottomBar = { BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart")}
+        bottomBar = { BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart"){
+            //TODO: Add to cart
+        }}
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             Column(
