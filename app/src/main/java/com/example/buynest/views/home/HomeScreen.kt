@@ -76,7 +76,7 @@ val phenomenaBold = FontFamily(
     Font(R.font.phenomena_bold)
 )
 @Composable
-fun HomeScreen(onCategoryClick: (String) -> Unit ,onCardClicked:()->Unit) {
+fun HomeScreen(onCategoryClick: (String) -> Unit ,onCardClicked:()->Unit, onSearchClicked: () -> Unit) {
     val activity = LocalActivity.current
     Column(
         modifier = Modifier
@@ -89,7 +89,8 @@ fun HomeScreen(onCategoryClick: (String) -> Unit ,onCardClicked:()->Unit) {
             activity?.finishAffinity()
         }
         SearchBar(
-            onCartClicked = onCardClicked
+            onCartClicked = onCardClicked,
+            onSearchClicked = onSearchClicked
         )
         Spacer(modifier = Modifier.height(24.dp))
         AdsSection(offers = offers)

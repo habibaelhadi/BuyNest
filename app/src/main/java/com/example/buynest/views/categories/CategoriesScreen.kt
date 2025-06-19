@@ -27,7 +27,7 @@ import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.component.SideNavigation
 
 @Composable
-fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:()->Unit) {
+fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:()->Unit,onSearchClicked:()->Unit) {
     var selectedCategory by remember { mutableStateOf<String?>("Kids") }
     var selectedSubcategory by remember { mutableStateOf<String?>(null) }
     val phenomenaBold = FontFamily(
@@ -40,7 +40,8 @@ fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:()->Unit) {
             .padding(horizontal = 16.dp)
     ) {
         SearchBar(
-            onCartClicked = onCartClicked
+            onCartClicked = onCartClicked,
+            onSearchClicked = onSearchClicked
         )
         Spacer(modifier = Modifier.height(32.dp))
 

@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Card
 import androidx.compose.material.DismissDirection
@@ -36,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.R
 import com.example.buynest.ui.theme.LightGray2
-import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.views.component.SearchBar
 
@@ -50,7 +47,7 @@ data class FavItem(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun FavouriteScreen(onCartClicked:()->Unit) {
+fun FavouriteScreen(onCartClicked:()->Unit, onSearchClicked:()->Unit) {
     var favItems by remember {
         mutableStateOf(
             listOf(
@@ -73,7 +70,8 @@ fun FavouriteScreen(onCartClicked:()->Unit) {
     ) {
         Spacer(modifier = Modifier.height(8.dp))
         SearchBar(
-            onCartClicked = onCartClicked
+            onCartClicked = onCartClicked,
+            onSearchClicked = onSearchClicked
         )
         Spacer(modifier = Modifier.height(24.dp))
         LazyColumn(

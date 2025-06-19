@@ -22,6 +22,7 @@ import com.example.buynest.views.orderdetails.OrderDetailsScreen
 import com.example.buynest.views.orders.OrdersHistoryScreen
 import com.example.buynest.views.productInfo.ProductInfo
 import com.example.buynest.views.profile.ProfileScreen
+import com.example.buynest.views.search.SearchScreen
 import com.example.buynest.views.settings.SettingsScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -40,6 +41,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 onCardClicked = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
+                },
+                onSearchClicked = {
+                    mainNavController.navigate(RoutesScreens.Search.route)
                 }
             )
         }
@@ -56,6 +60,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
                     },
                     onProductClicked = {
                         mainNavController.navigate(RoutesScreens.ProductInfo.route)
+                    },
+                    onSearchClicked = {
+                        mainNavController.navigate(RoutesScreens.Search.route)
                     }
                 )
             }
@@ -64,6 +71,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
             FavouriteScreen(
                 onCartClicked = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
+                },
+                onSearchClicked = {
+                    mainNavController.navigate(RoutesScreens.Search.route)
                 }
             )
         }
@@ -73,6 +83,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
             },
                 onProductClicked = {
                     mainNavController.navigate(RoutesScreens.ProductInfo.route)
+                },
+                onSearchClicked = {
+                    mainNavController.navigate(RoutesScreens.Search.route)
                 }
             )
         }
@@ -161,6 +174,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
                     mainNavController.navigate(RoutesScreens.Cart.route)
                 }
             )
+        }
+        composable(RoutesScreens.Search.route) {
+            SearchScreen()
         }
     }
 }

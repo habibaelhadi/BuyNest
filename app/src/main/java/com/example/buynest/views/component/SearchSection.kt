@@ -1,6 +1,9 @@
 package com.example.buynest.views.component
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,7 +31,7 @@ import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.views.home.phenomenaBold
 
 @Composable
-fun SearchBar(onCartClicked:()->Unit) {
+fun SearchBar(onCartClicked: () -> Unit, onSearchClicked: () -> Unit) {
     Column {
         Spacer(modifier = Modifier.height(20.dp))
         Text("BuyNest", fontSize = 20.sp,
@@ -40,19 +43,26 @@ fun SearchBar(onCartClicked:()->Unit) {
             verticalAlignment = Alignment.CenterVertically
         ){
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
-                placeholder = { Text("What do you search for?") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                modifier = Modifier
-                    .weight(30F)
-                    .background(Color.White),
-                shape = RoundedCornerShape(24.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MainColor,
-                    unfocusedBorderColor = Gray
+                    value = "",
+                    onValueChange = {},
+                    placeholder = { Text("What do you search for?") },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    modifier = Modifier
+                        .weight(30F)
+                        .background(Color.White)
+                        .clickable {
+                            Log.i("TAG", "SearchBar: *********************")
+                            onSearchClicked()
+                        },
+                    readOnly = true,
+                    enabled = false,
+                    shape = RoundedCornerShape(24.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MainColor,
+                        unfocusedBorderColor = Gray
+                    )
                 )
-            )
+
             Spacer(modifier = Modifier.width(20.dp))
             IconButton(
                 onClick = onCartClicked,
