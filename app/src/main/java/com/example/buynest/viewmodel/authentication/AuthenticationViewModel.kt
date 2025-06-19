@@ -1,4 +1,4 @@
-package com.example.buynest.viewmodels.authentication
+package com.example.buynest.viewmodel.authentication
 
 import android.content.Context
 import android.content.Intent
@@ -6,8 +6,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.buynest.repos.authenticationrepo.AuthenticationRepo
-import com.example.buynest.repos.authenticationrepo.firebase.Firebase
+import com.example.buynest.repository.authenticationrepo.AuthenticationRepo
+import com.example.buynest.repository.authenticationrepo.firebase.Firebase
 import com.example.buynest.utils.strategies.AuthenticationStrategy
 import com.example.buynest.utils.strategies.GoogleAuthenticationStrategy
 import com.example.buynest.utils.validators.GoogleValidator
@@ -63,7 +63,7 @@ class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewMo
         googleLauncher = launcher
     }
 
-    fun handleGoogleSignInResult(requestCode: Int, data: Intent?,context: Context) {
+    fun handleGoogleSignInResult(requestCode: Int, data: Intent?, context: Context) {
         if (requestCode != 123) return
         val task = GoogleSignIn.getSignedInAccountFromIntent(data)
         try {
@@ -84,11 +84,11 @@ class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewMo
 
     private fun signInWithGoogle(idToken: String, context: Context) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
-        Firebase.auth.signInWithCredential(credential)
+        Firebase.Companion.auth.signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 viewModelScope.launch {
                     if (task.isSuccessful) {
-                        Firebase.saveGoogleUserToFirestore(context = context)
+                        Firebase.Companion.saveGoogleUserToFirestore(context = context)
                         mutableMessage.emit("Success")
                     } else {
                         mutableMessage.emit(task.exception?.message ?: "Google Sign-In failed")

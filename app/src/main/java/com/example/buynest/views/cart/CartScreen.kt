@@ -1,5 +1,6 @@
 package com.example.buynest.views.cart
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,18 +17,31 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.buynest.BuildConfig
 import com.example.buynest.R
 import com.example.buynest.model.entity.CartItem
+import com.example.buynest.model.remote.rest.RemoteDataSourceImpl
+import com.example.buynest.model.remote.rest.StripeClient
+import com.example.buynest.repository.payment.PaymentRepositoryImpl
 import com.example.buynest.ui.theme.LightGray2
+import com.example.buynest.viewmodel.payment.PaymentViewModel
 import com.example.buynest.views.component.BottomSection
 import com.example.buynest.views.component.CartItemRow
 import com.example.buynest.views.component.CartTopBar
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.paymentsheet.rememberPaymentSheet
 
+@SuppressLint("ViewModelConstructorInComposable")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun CartScreen(onBackClicked: () -> Unit) {
+fun CartScreen(
+    onBackClicked: () -> Unit
+) {
     var cartItems by remember {
         mutableStateOf(
             listOf(
@@ -37,8 +51,38 @@ fun CartScreen(onBackClicked: () -> Unit) {
         )
     }
 
+    val paymentViewModel = PaymentViewModel(
+        repository = PaymentRepositoryImpl(
+            RemoteDataSourceImpl(StripeClient.api)
+        )
+    )
+    val context = LocalContext.current
+
+    val paymentSheet = rememberPaymentSheet(
+        paymentResultCallback = { result ->
+            when (result) {
+                is PaymentSheetResult.Completed -> {
+                    // Payment completed successfully
+                }
+                is PaymentSheetResult.Canceled -> {
+                    // Payment canceled
+                }
+                is PaymentSheetResult.Failed -> {
+                    // Payment failed
+                }
+            }
+        }
+    )
+    LaunchedEffect(Unit) {
+        PaymentConfiguration.init(
+            context,
+            BuildConfig.STRIPE_PUBLISHABLE_KEY
+        )
+    }
+
     var showConfirmDialog by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<CartItem?>(null) }
+    var  error by remember { mutableStateOf<String?>(null) }
 
     val totalPrice = cartItems.sumOf { it.price * it.quantity }
 
@@ -47,7 +91,26 @@ fun CartScreen(onBackClicked: () -> Unit) {
         topBar = { CartTopBar(
             backClicked = onBackClicked
         ) },
-        bottomBar = { BottomSection(totalPrice, Icons.Default.ArrowRightAlt,"Check Out") }
+        bottomBar = {
+            BottomSection(totalPrice, Icons.Default.ArrowRightAlt, "Check Out") {
+                paymentViewModel.initiatePaymentFlow(
+                    amount = totalPrice*100 ,
+                    onClientSecretReady = {
+                        paymentViewModel.initiatePaymentFlow(
+                            amount = totalPrice * 100,
+                            onClientSecretReady = { secret ->
+                                paymentSheet.presentWithPaymentIntent(
+                                    paymentIntentClientSecret = secret,
+                                    configuration = PaymentSheet.Configuration(
+                                        merchantDisplayName = "BuyNest"
+                                    )
+                                )
+                            }
+                        )
+                    }
+                )
+            }
+        }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier

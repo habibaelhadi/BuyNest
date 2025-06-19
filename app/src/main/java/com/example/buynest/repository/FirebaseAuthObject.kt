@@ -1,4 +1,4 @@
-package com.example.buynest.repos
+package com.example.buynest.repository
 
 import com.google.firebase.auth.FirebaseAuth
 
