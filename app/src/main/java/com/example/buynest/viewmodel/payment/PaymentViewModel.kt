@@ -2,17 +2,16 @@ package com.example.buynest.viewmodel.payment
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.buynest.repository.payment.PaymentRepository
+import com.example.buynest.repository.payment.IPaymentRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class PaymentViewModel(
-    private val repository: PaymentRepository
+    private val repository: IPaymentRepository
 ) : ViewModel() {
 
     private val _clientSecret = MutableStateFlow<String?>(null)
-    val clientSecret: StateFlow<String?> = _clientSecret
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error

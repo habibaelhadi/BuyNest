@@ -3,7 +3,7 @@ package com.example.buynest.model.remote.rest
 import com.google.gson.JsonObject
 import retrofit2.Response
 
-class RemoteDataSource(
+class RemoteDataSourceImpl(
     private val stripeAPI: StripeAPI
 ) : IRemoteDataSource {
 

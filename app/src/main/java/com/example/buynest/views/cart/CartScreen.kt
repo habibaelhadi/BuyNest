@@ -1,7 +1,6 @@
 package com.example.buynest.views.cart
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -24,17 +23,15 @@ import androidx.compose.ui.unit.sp
 import com.example.buynest.BuildConfig
 import com.example.buynest.R
 import com.example.buynest.model.entity.CartItem
-import com.example.buynest.model.remote.rest.RemoteDataSource
-import com.example.buynest.model.remote.rest.StripeAPI
+import com.example.buynest.model.remote.rest.RemoteDataSourceImpl
 import com.example.buynest.model.remote.rest.StripeClient
-import com.example.buynest.repository.payment.PaymentRepository
+import com.example.buynest.repository.payment.PaymentRepositoryImpl
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.viewmodel.payment.PaymentViewModel
 import com.example.buynest.views.component.BottomSection
 import com.example.buynest.views.component.CartItemRow
 import com.example.buynest.views.component.CartTopBar
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule_Companion_ContextFactory.context
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.rememberPaymentSheet
@@ -55,8 +52,8 @@ fun CartScreen(
     }
 
     val paymentViewModel = PaymentViewModel(
-        repository = PaymentRepository(
-            RemoteDataSource(StripeClient.api)
+        repository = PaymentRepositoryImpl(
+            RemoteDataSourceImpl(StripeClient.api)
         )
     )
     val context = LocalContext.current
@@ -85,6 +82,7 @@ fun CartScreen(
 
     var showConfirmDialog by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<CartItem?>(null) }
+    var  error by remember { mutableStateOf<String?>(null) }
 
     val totalPrice = cartItems.sumOf { it.price * it.quantity }
 

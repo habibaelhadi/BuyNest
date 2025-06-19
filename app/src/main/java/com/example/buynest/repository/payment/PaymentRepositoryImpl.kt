@@ -4,12 +4,12 @@ import com.example.buynest.model.remote.rest.IRemoteDataSource
 import com.google.gson.JsonObject
 import retrofit2.Response
 
-class PaymentRepository(private val remoteDataSource: IRemoteDataSource) {
+class PaymentRepositoryImpl(private val remoteDataSource: IRemoteDataSource) : IPaymentRepository {
 
-    suspend fun createPaymentIntent(
+    override  suspend fun createPaymentIntent(
         amount: Int,
         currency: String,
-        paymentMethod: String = "card"
+        paymentMethod: String
     ): Response<JsonObject> {
         return remoteDataSource.createPaymentIntent(amount, currency)
     }
