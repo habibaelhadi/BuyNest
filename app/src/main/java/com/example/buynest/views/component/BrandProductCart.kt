@@ -60,10 +60,11 @@ fun ProductItem(onProductClicked: () -> Unit, bradProduct: ProductsByCollectionI
     ){
         val productImageUrl = bradProduct?.featuredImage?.url.toString()
         val productPrice = bradProduct?.variants?.edges?.firstOrNull()?.node?.price?.amount.toString()
-        val compareAtPrice = bradProduct?.variants?.edges?.firstOrNull()?.node?.compareAtPrice?.amount?.toString()
+
         val cleanedTitle = bradProduct?.title?.replace(Regex("\\(.*?\\)"), "")?.trim()
         val parts = cleanedTitle?.split("|")?.map { it.trim() }
         val productName = if (parts != null && parts.size >= 2) parts[1] else "there is no name"
+
         val productId = bradProduct?.id.toString()
         val favoriteProducts by favViewModel.favorite.collectAsState()
         val isFav = favoriteProducts.contains(productId)

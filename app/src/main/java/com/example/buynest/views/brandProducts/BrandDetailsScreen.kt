@@ -37,7 +37,6 @@ import com.example.buynest.ui.theme.*
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.viewmodel.brandproducts.BrandDetailsViewModel
 import com.example.buynest.viewmodel.brandproducts.BrandProductsFactory
-import com.example.buynest.views.component.CategoryItem
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.ProductItem
 import com.example.buynest.views.component.SearchBar
@@ -104,9 +103,8 @@ fun BrandDetailsScreen(brandID:String,categoryName: String,onCartClicked:()->Uni
             is ResponseState.Success<*> -> {
                 val data = result.data as? ProductsByCollectionIDQuery.Data
                 val productList = data?.collection?.products?.edges?.map { it.node }
-                ProductGrid(categoryName, onProductClicked, productList,favViewModel)
+                ProductGrid( onProductClicked, productList,favViewModel)
             }
-
         }
     }
 }
@@ -114,7 +112,6 @@ fun BrandDetailsScreen(brandID:String,categoryName: String,onCartClicked:()->Uni
 
 @Composable
 fun ProductGrid(
-    screenName: String,
     onProductClicked: () -> Unit,
     bradProduct: List<ProductsByCollectionIDQuery.Node>? = null,
     favViewModel: FavouritesViewModel
@@ -126,14 +123,9 @@ fun ProductGrid(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ){
-        if (screenName == "Categories"){
-            items(4){
-                CategoryItem()
-            }
-        }else {
-            items(bradProduct?.size ?: 0) {
-                ProductItem(onProductClicked, bradProduct?.get(it),favViewModel)
-            }
+        items(bradProduct?.size ?: 0) {
+            ProductItem(onProductClicked, bradProduct?.get(it),favViewModel)
+
         }
     }
 }

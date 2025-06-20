@@ -36,7 +36,7 @@ fun SideNavigation(
     onSubcategorySelected: (String) -> Unit,
     selectedSubcategory: String?
 ) {
-    val categories = listOf("Kids", "Women", "Men", "Home")
+    val categories = listOf("Kid", "Women", "Men")
     val subcategories = listOf("Accessories", "T-Shirts", "Shoes")
 
     LazyColumn(

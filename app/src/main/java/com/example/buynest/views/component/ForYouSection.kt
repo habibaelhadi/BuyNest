@@ -43,8 +43,6 @@ fun ForYouSection(items: List<BrandsAndProductsQuery.Node>) {
             items(items) { item ->
                 val imageUrl = item.featuredImage?.url
                 val firstVariant = item.variants.edges.firstOrNull()?.node
-
-                // Convert price (Any) to Double safely
                 val rawPrice = firstVariant?.price?.amount
                 val priceDouble = when (rawPrice) {
                     is Number -> rawPrice.toDouble()
