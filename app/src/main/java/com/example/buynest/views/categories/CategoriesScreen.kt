@@ -35,10 +35,12 @@ import com.example.buynest.views.component.CategoryItem
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.component.SideNavigation
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:()->Unit) {
-    var selectedCategory by remember { mutableStateOf<String?>("Kids") }
+    var selectedCategory by remember { mutableStateOf<String?>("Kid") }
     var selectedSubcategory by remember { mutableStateOf<String?>(null) }
     val phenomenaBold = FontFamily(
         Font(R.font.phenomena_bold)
@@ -96,7 +98,12 @@ fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:()->Unit) {
                     is ResponseState.Success<*> -> {
                         val data = result.data as ProductsByHandleQuery.Data
                         val edges = data.collectionByHandle?.products?.edges
-                        CategoryProducts( onProductClicked,edges)
+                        val filteredEdges = if (selectedSubcategory != null) {
+                            edges?.filter { it.node.productType.contains(selectedSubcategory!!, ignoreCase = true) }
+                        } else {
+                            edges
+                        }
+                        CategoryProducts(onProductClicked, filteredEdges)
                     }
                 }
             }
