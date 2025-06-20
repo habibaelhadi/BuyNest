@@ -2,6 +2,7 @@ package com.example.buynest.views.settings
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -165,17 +166,27 @@ fun SettingsScreen(
         }
         if (launchEmailIntent.value) {
             LaunchedEffect(Unit) {
-                val intent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = Uri.parse("mailto:support@buynest.com")
+                val baseIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "message/rfc822"
+                    putExtra(Intent.EXTRA_EMAIL, arrayOf("team.buynest@gmail.com"))
+                    putExtra(Intent.EXTRA_SUBJECT, "Contact from BuyNest")
+                    putExtra(Intent.EXTRA_TEXT, "Hello, I’d like to get in touch with your team.")
                 }
 
-                if (intent.resolveActivity(context.packageManager) != null) {
-                    context.startActivity(intent)
+                val pm = context.packageManager
+                val emailApps = pm.queryIntentActivities(baseIntent, 0)
+
+                if (emailApps.isNotEmpty()) {
+                    val chooser = Intent.createChooser(baseIntent, "Send Email")
+                    context.startActivity(chooser)
+                } else {
+                    Log.e("EmailIntent", "No email app found.")
                 }
 
                 launchEmailIntent.value = false
             }
         }
+
         if (showAboutDialog.value) {
             AlertDialog(
                 onDismissRequest = { showAboutDialog.value = false },

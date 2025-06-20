@@ -18,6 +18,8 @@ import com.example.buynest.views.brandProducts.BrandDetailsScreen
 import com.example.buynest.views.cart.CartScreen
 import com.example.buynest.views.favourites.FavouriteScreen
 import com.example.buynest.views.home.HomeScreen
+import com.example.buynest.views.map.MapScreen
+import com.example.buynest.views.map.MapSearchScreen
 import com.example.buynest.views.orderdetails.OrderDetailsScreen
 import com.example.buynest.views.orders.OrdersHistoryScreen
 import com.example.buynest.views.productInfo.ProductInfo
@@ -123,6 +125,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
             AddressScreen(
                 onBackClicked = {
                     mainNavController.popBackStack()
+                },
+                onMapClicked = {
+                    mainNavController.navigate(RoutesScreens.Map.route)
                 }
             )
         }
@@ -164,6 +169,27 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 navigateToCart = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
+                }
+            )
+        }
+        composable(RoutesScreens.Map.route) {
+            MapScreen(
+                backClicked = {
+                    mainNavController.popBackStack()
+                },
+                onMapSearchClicked = {
+                    mainNavController.navigate(RoutesScreens.MapSearch.route)
+                }
+            )
+        }
+        composable(RoutesScreens.MapSearch.route) {
+            MapSearchScreen(
+                onBack = {
+                    mainNavController.popBackStack()
+                },
+                onPlaceSelected = { geoPoint, name ->
+                    Log.d("MapSearchScreen", "Selected place: $name, $geoPoint")
+                    mainNavController.popBackStack()
                 }
             )
         }

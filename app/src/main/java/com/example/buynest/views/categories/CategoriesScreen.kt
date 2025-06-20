@@ -25,8 +25,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.ProductsByCollectionIDQuery
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.R
+import com.example.buynest.repository.favoriteRepo.FavoriteRepoImpl
 import com.example.buynest.ui.theme.*
+import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.views.brandProducts.ProductGrid
 import com.example.buynest.views.component.CategoryItem
 import com.example.buynest.views.component.ProductItem
@@ -39,6 +42,9 @@ fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:()->Unit) {
     var selectedSubcategory by remember { mutableStateOf<String?>(null) }
     val phenomenaBold = FontFamily(
         Font(R.font.phenomena_bold)
+    )
+    val favViewModel: FavouritesViewModel = viewModel(
+        factory = FavouritesViewModel.FavouritesFactory(FavoriteRepoImpl())
     )
     Column(
         modifier = Modifier
@@ -72,6 +78,7 @@ fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:()->Unit) {
                     color = MainColor
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+                ProductGrid("Categories", onProductClicked,favViewModel= favViewModel)
                 CategoryProducts( onProductClicked)
             }
         }

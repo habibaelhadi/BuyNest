@@ -1,0 +1,51 @@
+query ProductsDetailsByIDs($ids: [ID!]!) {
+    nodes(ids: $ids) {
+        ... on Product {
+            id
+            title
+            vendor
+            productType
+            description
+            featuredImage {
+                url
+            }
+            variants(first: 5) {
+                edges {
+                    node {
+                        id
+                        price {
+                            amount
+                            currencyCode
+                        }
+                        compareAtPrice {
+                            amount
+                            currencyCode
+                        }
+                        selectedOptions {
+                            name
+                            value
+                        }
+                    }
+                }
+            }
+            media(first: 5) {
+                edges {
+                    node {
+                        mediaContentType
+                        alt
+                        ... on MediaImage {
+                            image {
+                                url
+                                altText
+                            }
+                        }
+                    }
+                }
+            }
+            options(first: 2) {
+                name
+                values
+            }
+        }
+    }
+}
