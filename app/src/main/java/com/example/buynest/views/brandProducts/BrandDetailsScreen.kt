@@ -33,7 +33,9 @@ import com.example.buynest.ProductsByCollectionIDQuery
 import com.example.buynest.R
 import com.example.buynest.model.remote.repository.HomeRepository
 import com.example.buynest.model.uistate.ResponseState
+import com.example.buynest.repository.favoriteRepo.FavoriteRepoImpl
 import com.example.buynest.ui.theme.*
+import com.example.buynest.viewmodel.FavouritesViewModel
 import com.example.buynest.viewmodel.brandproducts.BrandDetailsViewModel
 import com.example.buynest.viewmodel.brandproducts.BrandProductsFactory
 import com.example.buynest.views.component.CategoryItem
@@ -52,6 +54,9 @@ fun BrandDetailsScreen(brandID:String,categoryName: String,onCartClicked:()->Uni
         factory = BrandProductsFactory(HomeRepository())
     )
     val brandProducts by brandProductsViewModel.brandProducts.collectAsStateWithLifecycle()
+    val favViewModel: FavouritesViewModel = viewModel(
+        factory = FavouritesViewModel.FavouritesFactory(FavoriteRepoImpl())
+    )
 
     LaunchedEffect(brandID) {
         val id = "gid://shopify/Collection/$brandID"
@@ -100,7 +105,7 @@ fun BrandDetailsScreen(brandID:String,categoryName: String,onCartClicked:()->Uni
             is ResponseState.Success<*> -> {
                 val data = result.data as? ProductsByCollectionIDQuery.Data
                 val productList = data?.collection?.products?.edges?.map { it.node }
-                ProductGrid(categoryName, onProductClicked, productList)
+                ProductGrid(categoryName, onProductClicked, productList,favViewModel)
             }
 
         }
@@ -112,7 +117,8 @@ fun BrandDetailsScreen(brandID:String,categoryName: String,onCartClicked:()->Uni
 fun ProductGrid(
     screenName: String,
     onProductClicked: () -> Unit,
-    bradProduct: List<ProductsByCollectionIDQuery.Node>? = null
+    bradProduct: List<ProductsByCollectionIDQuery.Node>? = null,
+    favViewModel: FavouritesViewModel
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -127,7 +133,7 @@ fun ProductGrid(
             }
         }else {
             items(bradProduct?.size ?: 0) {
-                ProductItem(onProductClicked, bradProduct?.get(it))
+                ProductItem(onProductClicked, bradProduct?.get(it),favViewModel)
             }
         }
     }

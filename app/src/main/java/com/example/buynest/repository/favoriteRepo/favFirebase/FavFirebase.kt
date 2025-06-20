@@ -1,7 +1,7 @@
-package com.example.buynest.repos.favoriteRepo.favFirebase
+package com.example.buynest.repository.favoriteRepo.favFirebase
 
-import com.example.buynest.repos.FirebaseAuthObject
-import com.example.buynest.repos.authenticationrepo.firebase.FirebaseResponse
+import com.example.buynest.repository.FirebaseAuthObject
+import com.example.buynest.repository.authenticationrepo.firebase.FirebaseResponse
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -10,7 +10,7 @@ object FavFirebase {
     private var firebaseResponse: FirebaseResponse? = null
 
     fun setFirebaseResponse(firebaseResponse: FirebaseResponse?) {
-        this.firebaseResponse = firebaseResponse
+        FavFirebase.firebaseResponse = firebaseResponse
     }
 
     fun addToFavorite(productId: String){

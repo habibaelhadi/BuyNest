@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
@@ -25,6 +26,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -36,9 +40,11 @@ import com.example.buynest.R
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.Yellow
 import com.example.buynest.ui.theme.white
+import com.example.buynest.viewmodel.FavouritesViewModel
+import com.example.buynest.viewmodel.brandproducts.BrandDetailsViewModel
 
 @Composable
-fun ProductItem(onProductClicked: () -> Unit, bradProduct: ProductsByCollectionIDQuery.Node?){
+fun ProductItem(onProductClicked: () -> Unit, bradProduct: ProductsByCollectionIDQuery.Node?,favViewModel: FavouritesViewModel){
     Card (
         modifier = Modifier
             .width(200.dp)
@@ -54,6 +60,14 @@ fun ProductItem(onProductClicked: () -> Unit, bradProduct: ProductsByCollectionI
         val cleanedTitle = bradProduct?.title?.replace(Regex("\\(.*?\\)"), "")?.trim()
         val parts = cleanedTitle?.split("|")?.map { it.trim() }
         val productName = if (parts != null && parts.size >= 2) parts[1] else "there is no name"
+        val productId = bradProduct?.id.toString()
+        val numericId = productId.substringAfterLast("/")
+        val favoriteProducts by favViewModel.favorite.collectAsState()
+        val isFav = favoriteProducts.contains(numericId)
+
+        LaunchedEffect(Unit) {
+            favViewModel.getAllFavorites()
+        }
 
         Column(
             modifier = Modifier.background(white)
@@ -77,16 +91,21 @@ fun ProductItem(onProductClicked: () -> Unit, bradProduct: ProductsByCollectionI
                         .align(Alignment.TopEnd)
                 ){
                     IconButton(
-                        onClick = {},
+                        onClick = {
+                            if (isFav){
+                                favViewModel.removeFromFavorite(numericId)
+                            }else {
+                                favViewModel.addToFavorite(numericId)
+                            }
+                        },
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .background(white, shape = CircleShape)
                             .size(32.dp)
                             .padding(8.dp)
-
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.FavoriteBorder,
+                            imageVector = if (isFav) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                             contentDescription = null,
                             tint = MainColor
                         )
