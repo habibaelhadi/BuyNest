@@ -120,9 +120,11 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
     // Kotlin Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
     //coil for image
     implementation(libs.coil.compose)
+    // OpenStreetMap
+    implementation("org.osmdroid:osmdroid-android:6.1.16")
+
 
 }
 
