@@ -1,5 +1,7 @@
 package com.example.buynest.views.settings
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,17 +13,30 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.buynest.R
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
+import com.example.buynest.utils.SharedPrefHelper
+import com.example.buynest.views.component.CountryOptionBottomSheet
+import com.example.buynest.views.component.CurrencyOptionBottomSheet
+import com.example.buynest.views.component.PaymentOptionBottomSheet
 import com.example.buynest.views.component.SettingsCard
 
 @Composable
@@ -30,6 +45,18 @@ fun SettingsScreen(
     gotoOrdersHistoryScreen: () -> Unit,
     gotoAddressScreen: () -> Unit
 ) {
+    val context = LocalContext.current
+    val phenomenaBold = FontFamily(Font(R.font.phenomena_bold))
+    val showSheet = remember { mutableStateOf(false) }
+    val selectedPayment = remember { mutableStateOf(SharedPrefHelper.getPaymentMethod(context)) }
+    val showCountrySheet = remember { mutableStateOf(false) }
+    val selectedCountry = remember { mutableStateOf(SharedPrefHelper.getCountry(context)) }
+    val showCurrencySheet = remember { mutableStateOf(false) }
+    val selectedCurrency = remember { mutableStateOf(SharedPrefHelper.getCurrency(context)) }
+    val launchEmailIntent = remember { mutableStateOf(false) }
+    val showAboutDialog = remember { mutableStateOf(false) }
+
+
 
     Column(
         modifier = Modifier
@@ -40,7 +67,13 @@ fun SettingsScreen(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("BuyNest", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MainColor)
+        Text(
+            "BuyNest",
+            fontSize = 20.sp,
+            fontFamily = phenomenaBold,
+            fontWeight = FontWeight.Bold,
+            color = MainColor
+        )
         Spacer(modifier = Modifier.height(12.dp))
 
 
@@ -55,21 +88,34 @@ fun SettingsScreen(
             gotoAddressScreen()
         })
 
-        SettingsCard("Payment Option", Icons.Default.Payment)
-
         SettingsCard("Orders History", Icons.Default.History,
             onClick = {
                 gotoOrdersHistoryScreen()
             })
+
+        SettingsCard("Payment Option", Icons.Default.Payment,
+            onClick = { showSheet.value = true }
+        )
         Spacer(modifier = Modifier.height(12.dp))
 
-        SettingsCard("Country/Region", Icons.Default.Public)
-        SettingsCard("Currency", Icons.Default.AttachMoney)
+        SettingsCard("Country/Region", Icons.Default.Public,
+            onClick = { showCountrySheet.value = true }
+        )
+        SettingsCard("Currency", Icons.Default.AttachMoney,
+            onClick = { showCurrencySheet.value = true }
+        )
         Spacer(modifier = Modifier.height(12.dp))
 
 
-        SettingsCard("Connect with Us", Icons.Default.Phone)
-        SettingsCard("About", Icons.Default.Info)
+        SettingsCard("Connect with Us", Icons.Default.Phone) {
+            launchEmailIntent.value = true
+        }
+
+        SettingsCard("About", Icons.Default.Info,
+            onClick = {
+                showAboutDialog.value = true
+            }
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -86,5 +132,65 @@ fun SettingsScreen(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        if (showSheet.value) {
+            PaymentOptionBottomSheet(
+                selectedOption = selectedPayment.value,
+                onDismiss = { showSheet.value = false },
+                onSelectOption = {
+                    selectedPayment.value = it
+                    SharedPrefHelper.savePaymentMethod(context, it)
+                }
+            )
+        }
+        if (showCountrySheet.value) {
+            CountryOptionBottomSheet(
+                selectedCountry = selectedCountry.value,
+                onDismiss = { showCountrySheet.value = false },
+                onSelect = {
+                    selectedCountry.value = it
+                    SharedPrefHelper.saveCountry(context, it)
+                }
+            )
+        }
+        if (showCurrencySheet.value) {
+            CurrencyOptionBottomSheet(
+                selectedCurrency = selectedCurrency.value,
+                onDismiss = { showCurrencySheet.value = false },
+                onSelect = {
+                    selectedCurrency.value = it
+                    SharedPrefHelper.saveCurrency(context, it)
+                }
+            )
+        }
+        if (launchEmailIntent.value) {
+            LaunchedEffect(Unit) {
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("mailto:support@buynest.com")
+                }
+
+                if (intent.resolveActivity(context.packageManager) != null) {
+                    context.startActivity(intent)
+                }
+
+                launchEmailIntent.value = false
+            }
+        }
+        if (showAboutDialog.value) {
+            AlertDialog(
+                onDismissRequest = { showAboutDialog.value = false },
+                title = { Text("About BuyNest") },
+                text = {
+                    Text("BuyNest is a shopping app that provides high-quality products with smooth delivery and excellent service.\n\nVersion 1.0.0")
+                },
+                confirmButton = {
+                    TextButton(onClick = { showAboutDialog.value = false }) {
+                        Text("OK", color = MainColor)
+                    }
+                }
+            )
+        }
+
+
     }
 }

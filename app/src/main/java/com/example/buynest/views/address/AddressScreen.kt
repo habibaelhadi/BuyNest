@@ -18,7 +18,8 @@ import com.example.buynest.views.component.AddressItem
 
 @Composable
 fun AddressScreen(
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    onMapClicked: () -> Unit
 ) {
     val addressList = remember {
         mutableStateListOf(
@@ -100,7 +101,7 @@ fun AddressScreen(
                     )
                 ) {
                     TextButton(
-                        onClick = { /* Handle navigate to map */ },
+                        onClick = { onMapClicked() },
                     ) {
                         Icon(Icons.Default.Add, contentDescription = "Add", tint = White)
                         Spacer(modifier = Modifier.width(4.dp))

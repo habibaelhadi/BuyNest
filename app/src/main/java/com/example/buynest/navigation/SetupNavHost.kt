@@ -1,14 +1,14 @@
 package com.example.buynest.navigation
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.buynest.utils.sharedPreferences.SharedPreferencesImpl
+import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.views.address.AddressScreen
 import com.example.buynest.views.authentication.forgotpassword.ForgotPasswordScreen
 import com.example.buynest.views.authentication.login.LoginScreen
@@ -18,6 +18,7 @@ import com.example.buynest.views.brandProducts.BrandDetailsScreen
 import com.example.buynest.views.cart.CartScreen
 import com.example.buynest.views.favourites.FavouriteScreen
 import com.example.buynest.views.home.HomeScreen
+import com.example.buynest.views.map.MapScreen
 import com.example.buynest.views.orderdetails.OrderDetailsScreen
 import com.example.buynest.views.orders.OrdersHistoryScreen
 import com.example.buynest.views.productInfo.ProductInfo
@@ -28,15 +29,19 @@ import com.example.buynest.views.settings.SettingsScreen
 @Composable
 fun SetupNavHost(mainNavController: NavHostController) {
     val context = LocalContext.current
-    val isLoggedIn = SharedPreferencesImpl.getLogIn(context)
+    val isLoggedIn = SharedPrefHelper.getLogIn(context)
     val startDestination = if (isLoggedIn) RoutesScreens.Home.route else RoutesScreens.Login.route
     NavHost(
         navController = mainNavController, startDestination = startDestination
     ) {
         composable(RoutesScreens.Home.route) {
             HomeScreen(
-                onCategoryClick = { categoryName ->
-                    mainNavController.navigate(RoutesScreens.BrandDetails.route.replace("{categoryName}", categoryName))
+                onCategoryClick = { categoryName,brandId ->
+                    mainNavController.navigate(
+                        RoutesScreens.BrandDetails.route
+                            .replace("{categoryName}", categoryName)
+                            .replace("{brandID}", brandId)
+                    )
                 },
                 onCardClicked = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
@@ -46,8 +51,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
 
         composable(RoutesScreens.BrandDetails.route) { backStackEntry ->
             val categoryName = backStackEntry.arguments?.getString("categoryName")
+            val brandId = backStackEntry.arguments?.getString("brandID").toString()
             if (categoryName != null) {
-                BrandDetailsScreen(categoryName,
+                BrandDetailsScreen(brandID = brandId ,categoryName = categoryName,
                     onCartClicked = {
                         mainNavController.navigate(RoutesScreens.Cart.route)
                     },
@@ -118,6 +124,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
             AddressScreen(
                 onBackClicked = {
                     mainNavController.popBackStack()
+                },
+                onMapClicked = {
+                    mainNavController.navigate(RoutesScreens.Map.route)
                 }
             )
         }
@@ -159,6 +168,13 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 navigateToCart = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
+                }
+            )
+        }
+        composable(RoutesScreens.Map.route) {
+            MapScreen(
+                backClicked = {
+                    mainNavController.popBackStack()
                 }
             )
         }

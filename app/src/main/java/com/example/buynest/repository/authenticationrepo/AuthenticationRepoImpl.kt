@@ -1,10 +1,10 @@
-package com.example.buynest.repos.authenticationrepo
+package com.example.buynest.repository.authenticationrepo
 
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
-import com.example.buynest.repos.authenticationrepo.firebase.Firebase
-import com.example.buynest.repos.authenticationrepo.firebase.FirebaseResponse
+import com.example.buynest.repository.authenticationrepo.firebase.Firebase
+import com.example.buynest.repository.authenticationrepo.firebase.FirebaseResponse
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
