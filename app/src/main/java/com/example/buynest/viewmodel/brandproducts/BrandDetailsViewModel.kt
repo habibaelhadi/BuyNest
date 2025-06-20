@@ -3,9 +3,8 @@ package com.example.buynest.viewmodel.brandproducts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.buynest.model.remote.repository.IHomeRepository
+import com.example.buynest.repository.homeRepository.IHomeRepository
 import com.example.buynest.model.uistate.ResponseState
-import com.example.buynest.viewmodel.home.HomeViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
