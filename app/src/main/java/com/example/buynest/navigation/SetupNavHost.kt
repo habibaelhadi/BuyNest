@@ -19,6 +19,7 @@ import com.example.buynest.views.cart.CartScreen
 import com.example.buynest.views.favourites.FavouriteScreen
 import com.example.buynest.views.home.HomeScreen
 import com.example.buynest.views.map.MapScreen
+import com.example.buynest.views.map.MapSearchScreen
 import com.example.buynest.views.orderdetails.OrderDetailsScreen
 import com.example.buynest.views.orders.OrdersHistoryScreen
 import com.example.buynest.views.productInfo.ProductInfo
@@ -174,6 +175,20 @@ fun SetupNavHost(mainNavController: NavHostController) {
         composable(RoutesScreens.Map.route) {
             MapScreen(
                 backClicked = {
+                    mainNavController.popBackStack()
+                },
+                onMapSearchClicked = {
+                    mainNavController.navigate(RoutesScreens.MapSearch.route)
+                }
+            )
+        }
+        composable(RoutesScreens.MapSearch.route) {
+            MapSearchScreen(
+                onBack = {
+                    mainNavController.popBackStack()
+                },
+                onPlaceSelected = { geoPoint, name ->
+                    Log.d("MapSearchScreen", "Selected place: $name, $geoPoint")
                     mainNavController.popBackStack()
                 }
             )

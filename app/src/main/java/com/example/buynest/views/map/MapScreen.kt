@@ -36,7 +36,10 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen(backClicked: () -> Unit) {
+fun MapScreen(
+    backClicked: () -> Unit,
+    onMapSearchClicked: () -> Unit
+) {
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -78,7 +81,9 @@ fun MapScreen(backClicked: () -> Unit) {
         topBar = {
             MapTopBar(
                 onBack = backClicked,
-                onSearchClick = {}
+                onSearchClick = {
+                    onMapSearchClicked()
+                }
             )
         }
     ) { padding ->
