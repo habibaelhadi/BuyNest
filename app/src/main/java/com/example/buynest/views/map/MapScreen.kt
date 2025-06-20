@@ -6,11 +6,17 @@ import android.util.Log
 import androidx.compose.foundation.background
 import com.example.buynest.R
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -43,10 +49,14 @@ fun MapScreen(backClicked: () -> Unit) {
     var selectedPoint by remember { mutableStateOf<GeoPoint?>(null) }
     var address by remember { mutableStateOf<String>("") }
     var showSheet by remember { mutableStateOf(false) }
+    var currentStep by remember { mutableStateOf(1) }
+
 
     var name by remember { mutableStateOf(TextFieldValue()) }
     var phone by remember { mutableStateOf(TextFieldValue()) }
     var addressType by remember { mutableStateOf("Home") }
+    var landmark by remember { mutableStateOf(TextFieldValue()) }
+
 
     LaunchedEffect(selectedPoint) {
         selectedPoint?.let {
@@ -60,6 +70,7 @@ fun MapScreen(backClicked: () -> Unit) {
                 }
             }
             showSheet = true
+            currentStep = 1
         }
     }
 
@@ -85,67 +96,135 @@ fun MapScreen(backClicked: () -> Unit) {
                 onDismissRequest = { showSheet = false },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(Modifier.padding(16.dp)) {
-                    Text("Selected Address:", style = MaterialTheme.typography.titleMedium)
-                    Text(
-                        address,
-                        style = MaterialTheme.typography.bodyMedium,
+                if (currentStep == 1) {
+                    Column(
                         modifier = Modifier
-                            .padding(vertical = 8.dp, horizontal = 4.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = { Text("Recipient Name Name") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = phone,
-                        onValueChange = { phone = it },
-                        label = { Text("Phone Number") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Address Type", style = MaterialTheme.typography.titleMedium)
-                    Row(
-                        Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            .padding(horizontal = 24.dp, vertical = 16.dp)
                     ) {
-                        listOf("Home", "Office", "Friend", "Other").forEach { type ->
-                            FilterChip(
-                                selected = addressType == type,
-                                onClick = { addressType = type },
-                                label = { Text(type) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MainColor,
-                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-                                    containerColor = MaterialTheme.colorScheme.surface,
-                                    labelColor = MaterialTheme.colorScheme.onSurface
-                                )
-                            )
+                        Text("Confirm your order delivery location", style = MaterialTheme.typography.titleLarge)
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .padding(12.dp)
+                        ) {
+                            Icon(Icons.Default.LocationOn, contentDescription = null, tint = MainColor)
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(address, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Button(
+                            onClick = { currentStep = 2 },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MainColor)
+                        ) {
+                            Text("Confirm and add details", fontSize = 16.sp)
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = {
-                            Log.d("OrderInfo", "Name: ${name.text}, Phone: ${phone.text}, Address: $address, Type: $addressType")
-                            showSheet = false
-                        },
+                }
+                if (currentStep == 2) {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MainColor)
+                            .padding(horizontal = 24.dp)
                     ) {
-                        Text("Save Address", fontSize = 18.sp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Address details", style = MaterialTheme.typography.titleLarge)
+                            IconButton(onClick = { showSheet = false }) {
+                                Icon(Icons.Default.Close, contentDescription = "Close")
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Select address type", style = MaterialTheme.typography.bodyMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            listOf("Home", "Office", "Friend", "Other").forEach { type ->
+                                FilterChip(
+                                    selected = addressType == type,
+                                    onClick = { addressType = type },
+                                    label = { Text(type) },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MainColor,
+                                        selectedLabelColor = Color.White,
+                                        containerColor = MaterialTheme.colorScheme.surface,
+                                        labelColor = MaterialTheme.colorScheme.onSurface
+                                    )
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = name,
+                            onValueChange = { name = it },
+                            label = { Text("Receiver's name") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = MainColor,
+                                cursorColor = MainColor,
+                                focusedLabelColor = MainColor
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = phone,
+                            onValueChange = { phone = it },
+                            label = { Text("Complete address") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = MainColor,
+                                cursorColor = MainColor,
+                                focusedLabelColor = MainColor
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = landmark,
+                            onValueChange = { landmark = it },
+                            label = { Text("Nearby Landmark (optional)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = MainColor,
+                                cursorColor = MainColor,
+                                focusedLabelColor = MainColor
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = {
+                                Log.d("OrderInfo", "Name: ${name.text}, Phone: ${phone.text}, Address: $address, Type: $addressType")
+                                showSheet = false
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MainColor),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Save address", fontSize = 16.sp)
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
