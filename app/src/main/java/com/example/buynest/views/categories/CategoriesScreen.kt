@@ -1,6 +1,7 @@
 package com.example.buynest.views.categories
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,9 +24,12 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.buynest.ProductsByCollectionIDQuery
 import com.example.buynest.R
 import com.example.buynest.ui.theme.*
 import com.example.buynest.views.brandProducts.ProductGrid
+import com.example.buynest.views.component.CategoryItem
+import com.example.buynest.views.component.ProductItem
 import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.component.SideNavigation
 
@@ -65,14 +72,27 @@ fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:()->Unit) {
                     color = MainColor
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                ProductGrid("Categories", onProductClicked)
+                CategoryProducts( onProductClicked)
             }
         }
     }
 }
 
 
-
+@Composable
+fun CategoryProducts(
+    onProductClicked: () -> Unit,
+) {
+    LazyColumn (
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ){
+        items(4){
+            CategoryItem()
+        }
+    }
+}
 
 
 

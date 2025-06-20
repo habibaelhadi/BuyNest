@@ -102,7 +102,7 @@ fun HomeScreen(onCategoryClick: (String,String) -> Unit ,onCardClicked:()->Unit)
             }
             is ResponseState.Success<*> -> {
                 val (brandList, productList) = result.data as Pair<List<BrandsAndProductsQuery.Node3>, List<BrandsAndProductsQuery.Node>>
-                TopBrandsSection(items = brandList.drop(1), onCategoryClick = onCategoryClick)
+                TopBrandsSection(items = brandList.dropLast(1), onCategoryClick = onCategoryClick)
                 Spacer(modifier = Modifier.height(24.dp))
                 ForYouSection(items = productList.drop(10))
             }

@@ -57,7 +57,7 @@ fun ProductItem(onProductClicked: () -> Unit, bradProduct: ProductsByCollectionI
 
         Column(
             modifier = Modifier.background(white)
-                .height(260.dp)
+                .height(240.dp)
         ){
             Box(
                 modifier = Modifier
@@ -98,30 +98,20 @@ fun ProductItem(onProductClicked: () -> Unit, bradProduct: ProductsByCollectionI
                 text = productName.toString(),
                 style = MaterialTheme.typography.titleMedium,
                 color = MainColor,
+                maxLines = 2,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = productPrice,
-                style = MaterialTheme.typography.titleSmall,
-                color = MainColor,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
+
             Row (
                 Modifier.padding(bottom = 16.dp, end = 8.dp)
             ){
                 Text(
-                    text = compareAtPrice.toString(),
+                    text = productPrice,
                     style = MaterialTheme.typography.titleSmall,
                     color = MainColor,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
-                Icon(
-                    imageVector = Icons.Filled.Star,
-                    contentDescription = null,
-                    tint = Yellow,
-                    modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(
                     onClick = {},
