@@ -24,7 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.R
 import com.example.buynest.repository.favoriteRepo.FavoriteRepoImpl
 import com.example.buynest.ui.theme.*
-import com.example.buynest.viewmodel.FavouritesViewModel
+import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.views.brandProducts.ProductGrid
 import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.component.SideNavigation

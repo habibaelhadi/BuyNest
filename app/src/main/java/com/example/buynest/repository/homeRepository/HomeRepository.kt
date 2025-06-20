@@ -1,4 +1,4 @@
-package com.example.buynest.model.remote.repository
+package com.example.buynest.repository.homeRepository
 
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.ProductsByCollectionIDQuery

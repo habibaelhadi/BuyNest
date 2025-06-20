@@ -23,7 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.R
-import com.example.buynest.model.remote.repository.HomeRepository
+import com.example.buynest.repository.homeRepository.HomeRepository
 import com.example.buynest.model.uistate.ResponseState
 import com.example.buynest.viewmodel.home.HomeFactory
 import com.example.buynest.viewmodel.home.HomeViewModel

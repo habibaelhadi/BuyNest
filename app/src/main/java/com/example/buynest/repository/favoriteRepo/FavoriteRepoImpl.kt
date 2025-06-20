@@ -1,20 +1,35 @@
 package com.example.buynest.repository.favoriteRepo
 
+
+import com.example.buynest.ProductsByCollectionIDQuery
+import com.example.buynest.ProductsDetailsByIDsQuery
+import com.example.buynest.model.remote.graphql.ApolloClient
 import com.example.buynest.repository.authenticationrepo.firebase.FirebaseResponse
 import com.example.buynest.repository.favoriteRepo.favFirebase.FavFirebase
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class FavoriteRepoImpl: FavoriteRepo {
     override suspend fun addToFavorite(productId: String): Result<Unit> =
         suspendCoroutine { continuation ->
+            var isResumed = false
+
+            val safeResume: (Result<Unit>) -> Unit = { result ->
+                if (!isResumed) {
+                    isResumed = true
+                    continuation.resume(result)
+                }
+            }
             FavFirebase.setFirebaseResponse(object : FirebaseResponse {
                 override fun <T> onResponseSuccess(message: T) {
-                    continuation.resume(Result.success(Unit))
+                    safeResume(Result.success(Unit))
                 }
 
                 override fun <T> onResponseFailure(message: T) {
-                    continuation.resume(Result.failure(Exception(message.toString())))
+                    safeResume(Result.failure(Exception(message.toString())))
                 }
             })
 
@@ -24,13 +39,21 @@ class FavoriteRepoImpl: FavoriteRepo {
 
     override suspend fun removeFromFavorite(productId: String): Result<Unit> =
         suspendCoroutine { continuation ->
+            var isResumed = false
+
+            val safeResume: (Result<Unit>) -> Unit = { result ->
+                if (!isResumed) {
+                    isResumed = true
+                    continuation.resume(result)
+                }
+            }
             FavFirebase.setFirebaseResponse(object : FirebaseResponse {
                 override fun <T> onResponseSuccess(message: T) {
-                    continuation.resume(Result.success(Unit))
+                    safeResume(Result.success(Unit))
                 }
 
                 override fun <T> onResponseFailure(message: T) {
-                    continuation.resume(Result.failure(Exception(message.toString())))
+                    safeResume(Result.failure(Exception(message.toString())))
                 }
             })
 
@@ -59,4 +82,13 @@ class FavoriteRepoImpl: FavoriteRepo {
             })
             FavFirebase.getAllFavorites()
         }
+
+   override fun getProductsByIds(productId: List<String>): Flow<ProductsDetailsByIDsQuery.Data?> = flow {
+        val response = ApolloClient.apolloClient
+            .query(ProductsDetailsByIDsQuery(productId))
+            .execute()
+        emit(response.data)
+    }.catch {
+        emit(null)
+    }
 }

@@ -1,6 +1,5 @@
 package com.example.buynest.views.brandProducts
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,11 +30,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.ProductsByCollectionIDQuery
 import com.example.buynest.R
-import com.example.buynest.model.remote.repository.HomeRepository
+import com.example.buynest.repository.homeRepository.HomeRepository
 import com.example.buynest.model.uistate.ResponseState
 import com.example.buynest.repository.favoriteRepo.FavoriteRepoImpl
 import com.example.buynest.ui.theme.*
-import com.example.buynest.viewmodel.FavouritesViewModel
+import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.viewmodel.brandproducts.BrandDetailsViewModel
 import com.example.buynest.viewmodel.brandproducts.BrandProductsFactory
 import com.example.buynest.views.component.CategoryItem
