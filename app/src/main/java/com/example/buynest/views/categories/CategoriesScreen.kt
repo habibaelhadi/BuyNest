@@ -31,13 +31,17 @@ import com.example.buynest.repository.categoryrepo.CategoryRepoImpl
 import com.example.buynest.ui.theme.*
 import com.example.buynest.viewmodel.categoryViewModel.CategoryFactory
 import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
+import com.example.buynest.viewmodel.shared.SharedViewModel
 import com.example.buynest.views.component.CategoryItem
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.component.SideNavigation
 
 @Composable
-fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:(productId:String)->Unit) {
+fun CategoriesScreen(onCartClicked:()->Unit,
+                     onProductClicked:(productId:String)->Unit,
+                     sharedViewModel: SharedViewModel
+) {
     var selectedCategory by remember { mutableStateOf<String?>("Kid") }
     var selectedSubcategory by remember { mutableStateOf<String?>(null) }
     val phenomenaBold = FontFamily(

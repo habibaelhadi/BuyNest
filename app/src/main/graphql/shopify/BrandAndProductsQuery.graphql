@@ -43,7 +43,7 @@ query BrandsAndProducts {
         }
     }
 
-    collections(first: 13) {
+    collections(first: 16) {
         nodes {
             id
             title
