@@ -48,7 +48,9 @@ import com.example.buynest.ui.theme.white
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 
 @Composable
-fun ProductItem(onProductClicked: () -> Unit, bradProduct: ProductsByCollectionIDQuery.Node?,favViewModel: FavouritesViewModel){
+fun ProductItem(onProductClicked: (productId: String) -> Unit, bradProduct: ProductsByCollectionIDQuery.Node?,favViewModel: FavouritesViewModel){
+    val productId = bradProduct?.id.toString()
+    val numericId = productId.substringAfterLast("/")
     Card (
         modifier = Modifier
             .width(200.dp)
@@ -56,7 +58,7 @@ fun ProductItem(onProductClicked: () -> Unit, bradProduct: ProductsByCollectionI
         border = BorderStroke(1.dp, MainColor.copy(0.5f)),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(4.dp),
-        onClick = onProductClicked
+        onClick = {onProductClicked(numericId)}
     ){
         val productImageUrl = bradProduct?.featuredImage?.url.toString()
         val productPrice = bradProduct?.variants?.edges?.firstOrNull()?.node?.price?.amount.toString()

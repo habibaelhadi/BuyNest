@@ -43,7 +43,8 @@ import com.example.buynest.views.component.SearchBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrandDetailsScreen(brandID:String,categoryName: String,onCartClicked:()->Unit,backClicked:()->Unit,onProductClicked:()->Unit) {
+fun BrandDetailsScreen(brandID:String,categoryName: String,onCartClicked:()->Unit,
+                       backClicked:()->Unit,onProductClicked:(productId:String)->Unit) {
     val phenomenaFontFamily = FontFamily(
         Font(R.font.phenomena_bold)
     )
@@ -103,7 +104,7 @@ fun BrandDetailsScreen(brandID:String,categoryName: String,onCartClicked:()->Uni
             is ResponseState.Success<*> -> {
                 val data = result.data as? ProductsByCollectionIDQuery.Data
                 val productList = data?.collection?.products?.edges?.map { it.node }
-                ProductGrid( onProductClicked, productList,favViewModel)
+                ProductGrid(categoryName, onProductClicked, productList,favViewModel)
             }
         }
     }
@@ -112,7 +113,8 @@ fun BrandDetailsScreen(brandID:String,categoryName: String,onCartClicked:()->Uni
 
 @Composable
 fun ProductGrid(
-    onProductClicked: () -> Unit,
+    screenName: String,
+    onProductClicked: (productId: String) -> Unit,
     bradProduct: List<ProductsByCollectionIDQuery.Node>? = null,
     favViewModel: FavouritesViewModel
 ) {

@@ -35,11 +35,9 @@ import com.example.buynest.views.component.CategoryItem
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.component.SideNavigation
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:()->Unit) {
+fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:(productId:String)->Unit) {
     var selectedCategory by remember { mutableStateOf<String?>("Kid") }
     var selectedSubcategory by remember { mutableStateOf<String?>(null) }
     val phenomenaBold = FontFamily(
@@ -114,7 +112,7 @@ fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:()->Unit) {
 
 @Composable
 fun CategoryProducts(
-    onProductClicked: () -> Unit,
+    onProductClicked: (productId: String) -> Unit,
     categoryProductList: List<ProductsByHandleQuery.Edge>?
 ) {
     LazyColumn (
@@ -124,7 +122,8 @@ fun CategoryProducts(
     ){
         items(categoryProductList?.size?:0){item ->
             CategoryItem(
-                product = categoryProductList!![item].node
+                product = categoryProductList!![item].node,
+                onProductClicked = onProductClicked
             )
         }
     }

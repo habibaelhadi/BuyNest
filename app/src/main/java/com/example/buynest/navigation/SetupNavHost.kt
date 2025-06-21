@@ -22,7 +22,7 @@ import com.example.buynest.views.map.MapScreen
 import com.example.buynest.views.map.MapSearchScreen
 import com.example.buynest.views.orderdetails.OrderDetailsScreen
 import com.example.buynest.views.orders.OrdersHistoryScreen
-import com.example.buynest.views.productInfo.ProductInfo
+import com.example.buynest.views.productInfo.ProductInfoScreen
 import com.example.buynest.views.profile.ProfileScreen
 import com.example.buynest.views.settings.SettingsScreen
 
@@ -61,8 +61,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
                     backClicked = {
                         mainNavController.popBackStack()
                     },
-                    onProductClicked = {
-                        mainNavController.navigate(RoutesScreens.ProductInfo.route)
+                    onProductClicked = { productId ->
+                        mainNavController.navigate(RoutesScreens.ProductInfo.route
+                            .replace("{productId}", productId))
                     }
                 )
             }
@@ -78,8 +79,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
             CategoriesScreen(onCartClicked = {
                 mainNavController.navigate(RoutesScreens.Cart.route)
             },
-                onProductClicked = {
-                    mainNavController.navigate(RoutesScreens.ProductInfo.route)
+                onProductClicked = { productId ->
+                    mainNavController.navigate(RoutesScreens.ProductInfo.route
+                        .replace("{productId}", productId))
                 }
             )
         }
@@ -162,14 +164,18 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 }
             )
         }
-        composable(RoutesScreens.ProductInfo.route) {
-            ProductInfo(
+        composable(
+            route = RoutesScreens.ProductInfo.route,
+            ){ backStackEntry ->
+            val productId = backStackEntry.arguments?.getString("productId")
+            ProductInfoScreen(
                 backClicked = {
                     mainNavController.popBackStack()
                 },
                 navigateToCart = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
-                }
+                },
+                productId = productId ?: ""
             )
         }
         composable(RoutesScreens.Map.route) {

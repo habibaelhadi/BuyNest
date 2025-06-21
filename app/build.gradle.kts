@@ -134,4 +134,9 @@ apollo {
         schemaFile.set(file("src/main/graphql/shopify/schema.graphqls"))
         srcDir("src/main/graphql/shopify")
     }
+    service("shopify-admin") {
+        packageName.set("com.example.buynest.admin")
+        schemaFile.set(file("src/main/graphql/shopify-admin/schema.graphqls"))
+        srcDir("src/main/graphql/shopify-admin/queries")
+    }
 }
