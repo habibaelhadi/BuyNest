@@ -49,6 +49,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.R
 import com.example.buynest.repository.authenticationrepo.AuthenticationRepoImpl
+import com.example.buynest.repository.authenticationrepo.firebase.FirebaseRepository
+import com.example.buynest.repository.authenticationrepo.firebase.FirebaseRepositoryImpl
+import com.example.buynest.repository.authenticationrepo.firebase.datasource.FirebaseDataSourceImpl
+import com.example.buynest.repository.authenticationrepo.shopify.ShopifyAuthRepositoryImpl
+import com.example.buynest.repository.authenticationrepo.shopify.datasource.ShopifyAuthRemoteDataSource
+import com.example.buynest.repository.authenticationrepo.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.utils.SharedPrefHelper
@@ -70,7 +76,16 @@ fun LoginScreen(
     val activity = LocalActivity.current
     val context = LocalContext.current
     val viewModel: AuthenticationViewModel = viewModel(
-        factory = AuthenticationViewModel.AuthenticationViewModelFactory(AuthenticationRepoImpl())
+        factory = AuthenticationViewModel.AuthenticationViewModelFactory(
+            AuthenticationRepoImpl(
+                FirebaseRepositoryImpl(
+                    FirebaseDataSourceImpl()
+                ),
+                ShopifyAuthRepositoryImpl(
+                    ShopifyAuthRemoteDataSourceImpl()
+                )
+            )
+        )
     )
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()

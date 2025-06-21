@@ -6,8 +6,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.repository.authenticationrepo.AuthenticationRepo
-import com.example.buynest.repository.authenticationrepo.firebase.datasource.Firebase
+import com.example.buynest.repository.authenticationrepo.firebase.datasource.FirebaseDataSourceImpl
 import com.example.buynest.utils.strategies.AuthenticationStrategy
 import com.example.buynest.utils.strategies.GoogleAuthenticationStrategy
 import com.example.buynest.utils.validators.GoogleValidator
@@ -84,11 +85,12 @@ class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewMo
 
     private fun signInWithGoogle(idToken: String, context: Context) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
-        Firebase.Companion.auth.signInWithCredential(credential)
+        val auth = FirebaseAuthObject.getAuth()
+        auth.signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 viewModelScope.launch {
                     if (task.isSuccessful) {
-                        Firebase.Companion.saveGoogleUserToFirestore(context = context)
+                        authRepo.saveGoogleUserToFireStore(context = context)
                         mutableMessage.emit("Success")
                     } else {
                         mutableMessage.emit(task.exception?.message ?: "Google Sign-In failed")

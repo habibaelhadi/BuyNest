@@ -1,10 +1,10 @@
-package com.example.buynest.repository.authenticationrepo.firebase
+package com.example.buynest.repository.authenticationrepo.firebase.datasource
 
 import android.content.Context
 import android.content.Intent
 import com.example.buynest.model.state.FirebaseResponse
 
-interface FirebaseRepository {
+interface IFirebaseDataSource {
     fun setFirebaseResponse(firebaseResponse: FirebaseResponse?)
     fun signup(name: String, phone: String, email: String, password: String)
     fun login(email: String, password: String)

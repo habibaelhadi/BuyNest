@@ -35,6 +35,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.R
 import com.example.buynest.repository.authenticationrepo.AuthenticationRepoImpl
+import com.example.buynest.repository.authenticationrepo.firebase.FirebaseRepositoryImpl
+import com.example.buynest.repository.authenticationrepo.firebase.datasource.FirebaseDataSourceImpl
+import com.example.buynest.repository.authenticationrepo.shopify.ShopifyAuthRepositoryImpl
+import com.example.buynest.repository.authenticationrepo.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
@@ -46,7 +50,16 @@ fun ForgotPasswordScreen(
     onBackToLogin: () -> Unit
 ) {
     val viewModel: AuthenticationViewModel = viewModel(
-        factory = AuthenticationViewModel.AuthenticationViewModelFactory(AuthenticationRepoImpl())
+        factory = AuthenticationViewModel.AuthenticationViewModelFactory(
+            AuthenticationRepoImpl(
+                FirebaseRepositoryImpl(
+                    FirebaseDataSourceImpl()
+                ),
+                ShopifyAuthRepositoryImpl(
+                    ShopifyAuthRemoteDataSourceImpl()
+                )
+            )
+        )
     )
     var email by remember { mutableStateOf("") }
     val snackbarMessage = remember { mutableStateOf<String?>(null) }
