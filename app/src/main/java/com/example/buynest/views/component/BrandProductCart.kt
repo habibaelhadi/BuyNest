@@ -48,7 +48,9 @@ import com.example.buynest.ui.theme.white
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 
 @Composable
-fun ProductItem(onProductClicked: () -> Unit, bradProduct: ProductsByCollectionIDQuery.Node?,favViewModel: FavouritesViewModel){
+fun ProductItem(onProductClicked: (productId: String) -> Unit, bradProduct: ProductsByCollectionIDQuery.Node?,favViewModel: FavouritesViewModel){
+    val productId = bradProduct?.id.toString()
+    val numericId = productId.substringAfterLast("/")
     Card (
         modifier = Modifier
             .width(200.dp)
@@ -56,7 +58,7 @@ fun ProductItem(onProductClicked: () -> Unit, bradProduct: ProductsByCollectionI
         border = BorderStroke(1.dp, MainColor.copy(0.5f)),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(4.dp),
-        onClick = onProductClicked
+        onClick = {onProductClicked(numericId)}
     ){
         val productImageUrl = bradProduct?.featuredImage?.url.toString()
         val productPrice = bradProduct?.variants?.edges?.firstOrNull()?.node?.price?.amount.toString()
@@ -64,7 +66,6 @@ fun ProductItem(onProductClicked: () -> Unit, bradProduct: ProductsByCollectionI
         val cleanedTitle = bradProduct?.title?.replace(Regex("\\(.*?\\)"), "")?.trim()
         val parts = cleanedTitle?.split("|")?.map { it.trim() }
         val productName = if (parts != null && parts.size >= 2) parts[1] else "there is no name"
-        val productId = bradProduct?.id.toString()
         val favoriteProducts by favViewModel.favorite.collectAsState()
         val isFav = favoriteProducts.contains(productId)
         var itemToDelete by remember { mutableStateOf<ProductsDetailsByIDsQuery.Node?>(null) }

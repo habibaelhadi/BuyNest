@@ -2,6 +2,7 @@ package com.example.buynest.views.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,6 +28,7 @@ fun QuantitySelector(quantity: Int, onChange: (Int) -> Unit) {
             .clip(RoundedCornerShape(32.dp))
             .background(MainColor)
             .padding(horizontal = 4.dp)
+            .height(35.dp)
     ) {
         IconButton(onClick = { if (quantity > 1) onChange(quantity - 1) }) {
             Icon(imageVector = Icons.Default.Remove, contentDescription = "Decrease", tint = Color.White)
