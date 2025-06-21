@@ -1,5 +1,7 @@
 package com.example.buynest.views.productInfo
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -18,7 +20,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,16 +27,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddShoppingCart
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -49,84 +51,144 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
-import com.example.buynest.R
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
+import com.example.buynest.ProductDetailsByIDQuery
+import com.example.buynest.ProductsDetailsByIDsQuery
+import com.example.buynest.model.uistate.ResponseState
+import com.example.buynest.repository.favoriteRepo.FavoriteRepoImpl
+import com.example.buynest.repository.productDetails.ProductDetailsRepositoryImpl
 import com.example.buynest.ui.theme.LightGray
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.utils.toColorList
+import com.example.buynest.viewmodel.favorites.FavouritesViewModel
+import com.example.buynest.viewmodel.productInfo.ProductDetailsViewModel
 import com.example.buynest.views.component.BottomSection
 import com.example.buynest.views.component.ExpandableText
+import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.QuantitySelector
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.calculateCurrentOffsetForPage
 import com.google.accompanist.pager.rememberPagerState
 import kotlin.math.abs
 
-data class Product(
-    val id: Int,
-    val name: String,
-    val price: Int,
-    val color: List<String>,
-    val size: List<Int>,
-    val imageRes: List<Int>,
-    val quantity: Int,
-    val desc: String
-)
-
 @Composable
-fun ProductInfo(
+fun ProductInfoScreen(
+    productId: String,
     backClicked :()->Unit,
     navigateToCart :()->Unit
 ){
-    var product by remember { mutableStateOf(Product(
-        id = 1,
-        name = "Nike Air Jordan",
-        price = 3500,
-        color = listOf("Orange", "Blue", "Green"),
-        size = listOf(40, 42, 44),
-        imageRes = listOf(R.drawable.product,R.drawable.product,R.drawable.product,R.drawable.product),
-        quantity = 1,
-        desc = "Nike is a multinational corporation that designs, develops, and sells athletic footwear ,apparel, and accessories Nike is a multinational corporation that designs, develops, and sells athletic footwear ,apparel, and accessories,Nike is a multinational corporation that designs, develops, and sells athletic footwear ,apparel, and accessories Nike is a multinational corporation that designs, develops, and sells athletic footwear ,apparel, and accessories"
-    ))}
-    val totalPrice = product.price * product.quantity
-    val scrollState = rememberScrollState()
+    val viewModel: ProductDetailsViewModel = viewModel(
+        factory = ProductDetailsViewModel.ProductInfoFactory(ProductDetailsRepositoryImpl())
+    )
+
+    val response by viewModel.productDetails.collectAsStateWithLifecycle()
+    var totalPrice by remember { mutableIntStateOf(0) }
+
+    val favViewModel: FavouritesViewModel = viewModel(
+        factory = FavouritesViewModel.FavouritesFactory(FavoriteRepoImpl())
+    )
+
+    LaunchedEffect(Unit) {
+        val actualId = "gid://shopify/Product/$productId"
+        viewModel.getProductDetails(actualId)
+        favViewModel.getAllFavorites()
+    }
+
+
     Scaffold (
         topBar = { ProductInfoTopBar(backClicked, navigateToCart) },
         bottomBar = { BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart"){
             //TODO: Add to cart
         }}
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            Column(
-                modifier = Modifier.verticalScroll(scrollState)
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                ProductImages(images = product.imageRes)
-                Spacer(modifier = Modifier.height(16.dp))
-                ProductDetails(
-                    title = product.name,
-                    price = product.price,
-                    rating = 4.5,
-                    quantity = product.quantity,
-                    description = product.desc,
-                    sizes = product.size.takeIf { it.isNotEmpty() },
-                    colors = product.color.toColorList(),
-                    onQuantityChange = { id, newQty -> product = product.copy(quantity = newQty) }
+        when (val result = response) {
+            is ResponseState.Error -> {
+                Text(text = result.message)
+            }
+            ResponseState.Loading ->  {
+                Indicator()
+            }
+            is ResponseState.Success<*> -> {
+                val successData = result as ResponseState.Success<ProductDetailsByIDQuery.Data>
+                val product = successData.data.product
+                ProductInfo(
+                    innerPadding = innerPadding,
+                    product = product,
+                    onTotalChange = { updatedTotal -> totalPrice = updatedTotal },
+                    favViewModel = favViewModel
                 )
-
             }
         }
     }
 }
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
-fun ProductImages(images: List<Int>){
+fun ProductInfo(
+    innerPadding: PaddingValues,
+    product: ProductDetailsByIDQuery.Product?,
+    onTotalChange: (Int) -> Unit,
+    favViewModel: FavouritesViewModel
+) {
+    val scrollState = rememberScrollState()
+    val media = product?.media?.edges
+    val images = media?.map { it.node.previewImage?.url.toString() } ?: emptyList()
+    val price = product?.variants?.edges?.get(0)?.node?.price?.amount.toString()
+    val size = product?.options?.get(0)?.values
+    val color = product?.options?.get(1)?.values
+    val colorList = color?.toColorList()
+    var quantity by remember { mutableIntStateOf(1) }
+    val id = product?.id.toString()
+    val productName = product?.title.toString()
+    LaunchedEffect(key1 = quantity, key2 = price) {
+        val total = price.toDouble() * quantity
+        Log.d("UI", "Sending total: $total")
+        onTotalChange(total.toInt())
+    }
+
+    Box(modifier = Modifier.padding(innerPadding)) {
+        Column(
+            modifier = Modifier.verticalScroll(scrollState)
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
+            ProductImages(images = images,favViewModel,id,productName)
+            Spacer(modifier = Modifier.height(16.dp))
+            if (product != null) {
+                ProductDetails(
+                    title = product.title,
+                    price = price.toDouble(),
+                    quantity = quantity,
+                    description = product.description,
+                    sizes = size,
+                    colors = colorList,
+                    onQuantityChange = { _, newQty -> quantity = newQty },
+                    onColorSelected = { /* Handle color selection */ },
+                    onSizeSelected = { /* Handle size selection */ }
+                )
+            }
+
+        }
+    }
+}
+
+@Composable
+fun ProductImages(
+    images: List<String>,
+    favViewModel: FavouritesViewModel,
+    productId: String,
+    productName: String
+){
+    val favoriteProducts by favViewModel.favorite.collectAsState()
+    val isFav = favoriteProducts.contains(productId)
+    var itemToDelete by remember { mutableStateOf<ProductsDetailsByIDsQuery.Node?>(null) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
     val pagerState = rememberPagerState(images.size)
     Column(
         modifier = Modifier
@@ -162,7 +224,7 @@ fun ProductImages(images: List<Int>){
                         .clip(RoundedCornerShape(20.dp))
                 ) {
                     Image(
-                        painter = painterResource(id = images[page]),
+                        painter = rememberAsyncImagePainter(images[page]),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -172,7 +234,25 @@ fun ProductImages(images: List<Int>){
                     )
 
                     IconButton(
-                        onClick = { /* handle fav toggle */ },
+                        onClick = {
+                            if (isFav) {
+                            itemToDelete = ProductsDetailsByIDsQuery.Node(
+                                __typename = productName,
+                                onProduct = ProductsDetailsByIDsQuery.OnProduct(
+                                    id = productId,
+                                    title = productName,
+                                    vendor = "", productType = "", description = "",
+                                    featuredImage = null,
+                                    variants = ProductsDetailsByIDsQuery.Variants(emptyList()),
+                                    media = ProductsDetailsByIDsQuery.Media(emptyList()),
+                                    options = emptyList()
+                                )
+                            )
+                            showConfirmDialog = true
+                        } else {
+                            favViewModel.addToFavorite(productId)
+                        }
+                                  },
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .padding(12.dp)
@@ -180,7 +260,7 @@ fun ProductImages(images: List<Int>){
                             .size(36.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.FavoriteBorder,
+                            imageVector = if (isFav) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                             contentDescription = "Favorite",
                             tint = MainColor
                         )
@@ -211,23 +291,50 @@ fun ProductImages(images: List<Int>){
             }
         }
     }
+
+    if (showConfirmDialog && itemToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("Confirm Deletion") },
+            text = { Text("Are you sure you want to delete '${itemToDelete?.__typename}' from favourites?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    itemToDelete?.onProduct?.id?.let { id ->
+                        favViewModel.removeFromFavorite(id)
+                        favViewModel.getAllFavorites()
+                    }
+                    showConfirmDialog = false
+                    itemToDelete = null
+                }) {
+                    Text("Delete", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showConfirmDialog = false
+                    itemToDelete = null
+                }) {
+                    Text("Cancel", color = Color.Gray)
+                }
+            }
+        )
+    }
 }
 
 @Composable
 fun ProductDetails(
     title: String,
-    price: Int,
-    rating: Double,
+    price: Double,
     quantity: Int,
     description: String,
-    sizes: List<Int>?,
+    sizes: List<String>?,
     colors: List<Color>?,
     onQuantityChange: (Int, Int) -> Unit,
     onColorSelected: (Color) -> Unit = {},
-    onSizeSelected: (Int) -> Unit = {}
+    onSizeSelected: (Int) -> Unit = {},
 ) {
     val selectedColor = remember { mutableStateOf(colors?.firstOrNull() ?: Color.Unspecified) }
-    val selectedSize = remember { mutableIntStateOf(sizes?.firstOrNull() ?: 0) }
+    val selectedSize = remember { mutableStateOf(sizes?.get(0) ?: "") }
 
     Column(
         modifier = Modifier
@@ -244,13 +351,6 @@ fun ProductDetails(
                 color = MainColor,
                 modifier = Modifier.weight(1f)
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "LE $price",
-                fontSize = 18.sp,
-                color = MainColor,
-                fontWeight = FontWeight.Bold
-            )
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -258,17 +358,11 @@ fun ProductDetails(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.Star,
-                contentDescription = null,
-                tint = Color.Yellow,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = "$rating",
+                text = "LE $price",
                 fontSize = 18.sp,
-                color = Color.Gray,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.weight(1f))
             QuantitySelector(quantity) { newQuantity -> onQuantityChange(1, newQuantity) }
@@ -287,7 +381,7 @@ fun ProductDetails(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        sizes?.takeIf { it.isNotEmpty() }?.let {
+        sizes?.takeIf { it.isNotEmpty() && it.firstOrNull() != "OS" }?.let {
             Text(
                 text = "Size",
                 fontSize = 16.sp,
@@ -305,12 +399,12 @@ fun ProductDetails(
                             .background(if (isSelected) MainColor else LightGray)
                             .clickable {
                                 selectedSize.value = size
-                                onSizeSelected(size)
+                                onSizeSelected(size.toInt())
                             },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = size.toString(),
+                            text = size,
                             color = if (isSelected) Color.White else Color.Black,
                             fontSize = 14.sp
                         )

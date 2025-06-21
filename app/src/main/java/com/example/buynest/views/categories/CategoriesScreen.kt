@@ -39,7 +39,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:()->Unit) {
+fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:(productId:String)->Unit) {
     var selectedCategory by remember { mutableStateOf<String?>("Kid") }
     var selectedSubcategory by remember { mutableStateOf<String?>(null) }
     val phenomenaBold = FontFamily(
