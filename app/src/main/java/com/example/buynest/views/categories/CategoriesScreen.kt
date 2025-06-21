@@ -35,8 +35,6 @@ import com.example.buynest.views.component.CategoryItem
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.component.SideNavigation
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun CategoriesScreen(onCartClicked:()->Unit,onProductClicked:()->Unit) {

@@ -77,6 +77,7 @@ fun MapScreen(
     }
 
     Scaffold(
+        modifier = Modifier.statusBarsPadding(),
         topBar = {
             MapTopBar(
                 onBack = backClicked,
@@ -86,7 +87,10 @@ fun MapScreen(
             )
         }
     ) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
+        Box(
+            modifier = Modifier
+                .padding(padding)
+        ) {
             OsmMapView(
                 modifier = Modifier.fillMaxSize(),
                 onLocationSelected = { point ->
