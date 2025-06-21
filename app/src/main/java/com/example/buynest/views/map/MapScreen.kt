@@ -8,7 +8,6 @@ import com.example.buynest.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
@@ -78,6 +77,7 @@ fun MapScreen(
     }
 
     Scaffold(
+        modifier = Modifier.statusBarsPadding(),
         topBar = {
             MapTopBar(
                 onBack = backClicked,
@@ -87,7 +87,10 @@ fun MapScreen(
             )
         }
     ) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
+        Box(
+            modifier = Modifier
+                .padding(padding)
+        ) {
             OsmMapView(
                 modifier = Modifier.fillMaxSize(),
                 onLocationSelected = { point ->
