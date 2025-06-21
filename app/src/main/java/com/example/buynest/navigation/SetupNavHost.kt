@@ -5,10 +5,12 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.buynest.utils.SharedPrefHelper
+import com.example.buynest.viewmodel.shared.SharedViewModel
 import com.example.buynest.views.address.AddressScreen
 import com.example.buynest.views.authentication.forgotpassword.ForgotPasswordScreen
 import com.example.buynest.views.authentication.login.LoginScreen
@@ -32,6 +34,8 @@ fun SetupNavHost(mainNavController: NavHostController) {
     val context = LocalContext.current
     val isLoggedIn = SharedPrefHelper.getLogIn(context)
     val startDestination = if (isLoggedIn) RoutesScreens.Home.route else RoutesScreens.Login.route
+    val sharedViewModel: SharedViewModel = viewModel()
+
     NavHost(
         navController = mainNavController, startDestination = startDestination
     ) {
@@ -47,6 +51,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 onCardClicked = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
                 }
+                , sharedViewModel
             )
         }
 
@@ -81,6 +86,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 onProductClicked = {
                     mainNavController.navigate(RoutesScreens.ProductInfo.route)
                 }
+                , sharedViewModel
             )
         }
         composable(RoutesScreens.Profile.route) {

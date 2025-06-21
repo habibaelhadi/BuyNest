@@ -27,6 +27,7 @@ import com.example.buynest.repository.homeRepository.HomeRepository
 import com.example.buynest.model.uistate.ResponseState
 import com.example.buynest.viewmodel.home.HomeFactory
 import com.example.buynest.viewmodel.home.HomeViewModel
+import com.example.buynest.viewmodel.shared.SharedViewModel
 import com.example.buynest.views.component.AdsSection
 import com.example.buynest.views.component.ForYouSection
 import com.example.buynest.views.component.Indicator
@@ -66,7 +67,10 @@ val phenomenaBold = FontFamily(
     Font(R.font.phenomena_bold)
 )
 @Composable
-fun HomeScreen(onCategoryClick: (String,String) -> Unit ,onCardClicked:()->Unit) {
+fun HomeScreen(onCategoryClick: (String,String) -> Unit ,
+               onCardClicked:()->Unit,
+               sharedViewModel: SharedViewModel
+) {
     val activity = LocalActivity.current
     val homeViewModel: HomeViewModel = viewModel(
         factory = HomeFactory(HomeRepository())
@@ -102,7 +106,8 @@ fun HomeScreen(onCategoryClick: (String,String) -> Unit ,onCardClicked:()->Unit)
             }
             is ResponseState.Success<*> -> {
                 val (brandList, productList) = result.data as Pair<List<BrandsAndProductsQuery.Node3>, List<BrandsAndProductsQuery.Node>>
-                TopBrandsSection(items = brandList.dropLast(1), onCategoryClick = onCategoryClick)
+                TopBrandsSection(items = brandList.dropLast(4), onCategoryClick = onCategoryClick)
+                sharedViewModel.setCategories(brandList.subList(12,16))
                 Spacer(modifier = Modifier.height(24.dp))
                 ForYouSection(items = productList.drop(10))
             }
