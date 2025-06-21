@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.buynest.repository.authenticationrepo.AuthenticationRepo
-import com.example.buynest.repository.authenticationrepo.firebase.Firebase
+import com.example.buynest.repository.authenticationrepo.firebase.datasource.Firebase
 import com.example.buynest.utils.strategies.AuthenticationStrategy
 import com.example.buynest.utils.strategies.GoogleAuthenticationStrategy
 import com.example.buynest.utils.validators.GoogleValidator

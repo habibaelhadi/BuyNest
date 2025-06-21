@@ -3,7 +3,7 @@ package com.example.buynest.repository.authenticationrepo
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
-import com.example.buynest.repository.authenticationrepo.firebase.Firebase
+import com.example.buynest.repository.authenticationrepo.firebase.datasource.Firebase
 import com.example.buynest.repository.authenticationrepo.firebase.FirebaseResponse
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
