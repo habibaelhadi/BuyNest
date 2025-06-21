@@ -125,6 +125,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     //coil for image
     implementation(libs.coil.compose)
+    // EncryptedSharedPreferences
+    implementation ("androidx.security:security-crypto:1.1.0-alpha03")
     // OpenStreetMap
     implementation("org.osmdroid:osmdroid-android:6.1.16")
     // Google Places API

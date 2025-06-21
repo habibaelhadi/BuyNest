@@ -162,7 +162,7 @@ fun MapScreen(
                         Text("Select address type", style = MaterialTheme.typography.bodyMedium)
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             listOf("Home", "Office", "Friend", "Other").forEach { type ->
                                 FilterChip(
                                     selected = addressType == type,
