@@ -1,0 +1,123 @@
+package com.example.buynest.viewmodel.authentication
+
+import android.content.Context
+import android.content.Intent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.example.buynest.repository.FirebaseAuthObject
+import com.example.buynest.repository.authenticationrepo.AuthenticationRepo
+import com.example.buynest.repository.authenticationrepo.firebase.datasource.FirebaseDataSourceImpl
+import com.example.buynest.utils.strategies.AuthenticationStrategy
+import com.example.buynest.utils.strategies.GoogleAuthenticationStrategy
+import com.example.buynest.utils.validators.GoogleValidator
+import com.example.buynest.utils.validators.LoginValidator
+import com.example.buynest.utils.validators.SignUpValidator
+import com.example.buynest.utils.validators.ValidationHandler
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
+
+class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewModel() {
+
+    private lateinit var googleLauncher: ActivityResultLauncher<Intent>
+    private var validationChain: ValidationHandler = GoogleValidator().apply {
+        setNext(LoginValidator().apply {
+            setNext(SignUpValidator())
+        })
+    }
+    private val mutableMessage = MutableSharedFlow<String>()
+    val message = mutableMessage.asSharedFlow()
+
+    private lateinit var googleStrategy: GoogleAuthenticationStrategy
+
+    fun resetPassword(email: String) {
+        viewModelScope.launch {
+            if (email.isEmpty()) {
+                mutableMessage.emit("Email cannot be empty")
+                return@launch
+            }
+            val result = authRepo.sendResetPasswordEmail(email)
+            if (result.isSuccess){
+                mutableMessage.emit("Success")
+            }else{
+               mutableMessage.emit(result.exceptionOrNull()?.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun setGoogleStrategy(strategy: GoogleAuthenticationStrategy): String? {
+        return GoogleValidator().validate(strategy).also {
+            if (it == null) googleStrategy = strategy
+        }
+    }
+
+    fun getGoogleSignInIntent(context: Context): Intent? {
+        return authRepo.getGoogleSignInIntent(context)
+    }
+
+    fun setGoogleLauncher(launcher: ActivityResultLauncher<Intent>) {
+        googleLauncher = launcher
+    }
+
+    fun handleGoogleSignInResult(requestCode: Int, data: Intent?, context: Context) {
+        if (requestCode != 123) return
+        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            if (account != null && account.idToken != null) {
+                signInWithGoogle(account.idToken!!,context)
+            } else {
+                viewModelScope.launch {
+                    mutableMessage.emit("Google Sign-In failed: ID token is null")
+                }
+            }
+        } catch (e: ApiException) {
+            viewModelScope.launch {
+                mutableMessage.emit("Google Sign-In failed: ${e.message}")
+            }
+        }
+    }
+
+    private fun signInWithGoogle(idToken: String, context: Context) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        val auth = FirebaseAuthObject.getAuth()
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                viewModelScope.launch {
+                    if (task.isSuccessful) {
+                        authRepo.saveGoogleUserToFireStore(context = context)
+                        mutableMessage.emit("Success")
+                    } else {
+                        mutableMessage.emit(task.exception?.message ?: "Google Sign-In failed")
+                    }
+                }
+            }
+    }
+
+    fun authenticate(strategy: AuthenticationStrategy){
+        viewModelScope.launch {
+            val validationResult = validationChain.handle(strategy)
+            if (validationResult != null) {
+                mutableMessage.emit(validationResult)
+                return@launch
+            }
+            val result = strategy.authenticate(authRepo)
+            if (result.isSuccess) {
+                mutableMessage.emit("Success")
+            }else{
+                mutableMessage.emit(result.exceptionOrNull()?.message ?: "Unknown error")
+            }
+        }
+    }
+
+    class AuthenticationViewModelFactory(private val repo: AuthenticationRepo): ViewModelProvider.Factory{
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return AuthenticationViewModel(repo) as T
+        }
+    }
+}
