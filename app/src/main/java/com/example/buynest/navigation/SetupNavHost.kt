@@ -1,5 +1,6 @@
 package com.example.buynest.navigation
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -11,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.viewmodel.shared.SharedViewModel
+import com.example.buynest.viewmodel.sreachMap.SearchViewModel
 import com.example.buynest.views.address.AddressScreen
 import com.example.buynest.views.authentication.forgotpassword.ForgotPasswordScreen
 import com.example.buynest.views.authentication.login.LoginScreen
@@ -28,6 +30,7 @@ import com.example.buynest.views.productInfo.ProductInfoScreen
 import com.example.buynest.views.profile.ProfileScreen
 import com.example.buynest.views.settings.SettingsScreen
 
+@SuppressLint("ViewModelConstructorInComposable")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SetupNavHost(mainNavController: NavHostController) {
@@ -199,10 +202,10 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 onBack = {
                     mainNavController.popBackStack()
                 },
-                onPlaceSelected = { geoPoint, name ->
-                    Log.d("MapSearchScreen", "Selected place: $name, $geoPoint")
-                    mainNavController.popBackStack()
-                }
+                onPlaceSelected = { latLng, address ->
+                    Log.d("MapSearchScreen", "Selected location: $latLng, $address")
+                },
+                searchViewModel = SearchViewModel(context)
             )
         }
     }

@@ -79,7 +79,8 @@ fun CategoriesScreen(onCartClicked:()->Unit,
                 onSubcategorySelected = { sub ->
                     selectedSubcategory = sub
                 },
-                selectedSubcategory = selectedSubcategory
+                selectedSubcategory = selectedSubcategory,
+                sharedViewModel = sharedViewModel
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
