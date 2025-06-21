@@ -1,10 +1,9 @@
 package com.example.buynest.repository.favoriteRepo
 
 
-import com.example.buynest.ProductsByCollectionIDQuery
 import com.example.buynest.ProductsDetailsByIDsQuery
 import com.example.buynest.model.remote.graphql.ApolloClient
-import com.example.buynest.repository.authenticationrepo.firebase.FirebaseResponse
+import com.example.buynest.model.state.FirebaseResponse
 import com.example.buynest.repository.favoriteRepo.favFirebase.FavFirebase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch

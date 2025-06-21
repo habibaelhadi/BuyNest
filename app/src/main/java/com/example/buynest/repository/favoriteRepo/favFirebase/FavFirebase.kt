@@ -1,7 +1,7 @@
 package com.example.buynest.repository.favoriteRepo.favFirebase
 
 import com.example.buynest.repository.FirebaseAuthObject
-import com.example.buynest.repository.authenticationrepo.firebase.FirebaseResponse
+import com.example.buynest.model.state.FirebaseResponse
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
