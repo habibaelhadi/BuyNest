@@ -79,8 +79,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
             CategoriesScreen(onCartClicked = {
                 mainNavController.navigate(RoutesScreens.Cart.route)
             },
-                onProductClicked = {
-                    mainNavController.navigate(RoutesScreens.ProductInfo.route)
+                onProductClicked = { productId ->
+                    mainNavController.navigate(RoutesScreens.ProductInfo.route
+                        .replace("{productId}", productId))
                 }
             )
         }

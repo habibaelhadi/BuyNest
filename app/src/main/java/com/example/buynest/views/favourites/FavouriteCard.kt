@@ -3,6 +3,7 @@ package com.example.buynest.views.favourites
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -106,6 +107,7 @@ fun FavouriteCard(
                         modifier = Modifier
                             .size(10.dp)
                             .background(colorDot, shape = CircleShape)
+                            .border(1.dp,LightGray2, shape = CircleShape)
                     )
                     Text(
                         text = "  $color",

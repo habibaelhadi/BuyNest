@@ -31,17 +31,19 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductsByHandleQuery
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
-import com.example.buynest.ui.theme.lightGreen
 import com.example.buynest.ui.theme.white
 import com.example.buynest.utils.mapColorNameToColor
 
 @Composable
 fun CategoryItem(
-    product : ProductsByHandleQuery.Node
+    product: ProductsByHandleQuery.Node,
+    onProductClicked: (productId: String) -> Unit
 ) {
     val cleanedTitle = product.title.replace(Regex("\\(.*?\\)"), "").trim()
     val parts = cleanedTitle.split("|").map { it.trim() }
     val productName = if (parts.size >= 2) parts[1] else "there is no name"
+    val productId = product.id
+    val numericId = productId.substringAfterLast("/")
     val selectedOptions = product.variants.edges[0].node.selectedOptions
     val color = selectedOptions
         .map { it.value }
@@ -54,7 +56,8 @@ fun CategoryItem(
             .padding(4.dp),
         shape = RoundedCornerShape(24.dp),
         border = BorderStroke(2.dp, LightGray2),
-        colors = cardColors(containerColor = white)
+        colors = cardColors(containerColor = white),
+        onClick = {onProductClicked(numericId)}
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
