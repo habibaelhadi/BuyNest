@@ -30,6 +30,9 @@ android {
         buildConfigField("String", "STRIPE_PUBLISHABLE_KEY", properties.getProperty("STRIPE_PUBLISHABLE_KEY"))
         buildConfigField("String", "STRIPE_SECRET_KEY", properties.getProperty("STRIPE_SECRET_KEY"))
         buildConfigField("String", "CRUUENCY_API_KEY", properties.getProperty("CRUUENCY_API_KEY"))
+        buildConfigField("String", "PLACES_API_KEY", properties.getProperty("PLACES_API_KEY"))
+        resValue ("string", "maps_api_key", properties.getProperty("PLACES_API_KEY"))
+
     }
 
     buildTypes {
@@ -124,7 +127,8 @@ dependencies {
     implementation(libs.coil.compose)
     // OpenStreetMap
     implementation("org.osmdroid:osmdroid-android:6.1.16")
-
+    // Google Places API
+    implementation("com.google.android.libraries.places:places:3.4.0")
 
 }
 
