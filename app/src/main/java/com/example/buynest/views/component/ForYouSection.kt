@@ -28,10 +28,12 @@ import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.R
 import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.MainColor
-import com.example.buynest.ui.theme.white
 
 @Composable
-fun ForYouSection(items: List<BrandsAndProductsQuery.Node>) {
+fun ForYouSection(
+    items: List<BrandsAndProductsQuery.Node>,
+    onProductClicked: (productId: String) -> Unit
+) {
     val showGuestDialog = remember { mutableStateOf(false) }
     val user = FirebaseAuthObject.getAuth().currentUser
     Column(
@@ -60,6 +62,7 @@ fun ForYouSection(items: List<BrandsAndProductsQuery.Node>) {
 
                 val parts = item.title.split("|").map { it.trim() }
                 val productName = if (parts.size >= 2) parts[1] else item.title
+                val id = item.id.substringAfterLast("/")
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -69,6 +72,8 @@ fun ForYouSection(items: List<BrandsAndProductsQuery.Node>) {
                         .clickable {
                             if (user == null){
                                 showGuestDialog.value = true
+                            }else{
+                                onProductClicked(id)
                             }
                         }
                 ) {

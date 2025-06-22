@@ -60,7 +60,11 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 onCardClicked = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
                 }
-                , sharedViewModel
+                , sharedViewModel,
+                onProductClicked = { productId ->
+                    mainNavController.navigate(RoutesScreens.ProductInfo.route
+                        .replace("{productId}", productId))
+                }
             )
         }
 
@@ -86,6 +90,10 @@ fun SetupNavHost(mainNavController: NavHostController) {
             FavouriteScreen(
                 onCartClicked = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
+                },
+                navigateToProductInfo = { productId ->
+                    mainNavController.navigate(RoutesScreens.ProductInfo.route
+                        .replace("{productId}", productId))
                 }
             )
         }

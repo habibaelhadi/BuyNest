@@ -52,7 +52,10 @@ import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.orders.phenomenaFontFamily
 
 @Composable
-fun FavouriteScreen(onCartClicked:()->Unit) {
+fun FavouriteScreen(
+    onCartClicked:()->Unit,
+    navigateToProductInfo: (String) -> Unit
+) {
     val viewModel: FavouritesViewModel = viewModel(
         factory = FavouritesViewModel.FavouritesFactory(FavoriteRepoImpl())
     )
@@ -94,7 +97,7 @@ fun FavouriteScreen(onCartClicked:()->Unit) {
                         if (productList.isEmpty())
                             NoDataLottie(false)
                         else{
-                            Favourites(productList,viewModel)
+                            Favourites(productList,viewModel,navigateToProductInfo)
                         }
                     }
                 }
@@ -106,7 +109,11 @@ fun FavouriteScreen(onCartClicked:()->Unit) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Favourites(productList: List<ProductsDetailsByIDsQuery.Node?>?, viewModel: FavouritesViewModel) {
+fun Favourites(
+    productList: List<ProductsDetailsByIDsQuery.Node?>?,
+    viewModel: FavouritesViewModel,
+    navigateToProductInfo: (String) -> Unit
+) {
     var itemToDelete by remember { mutableStateOf<ProductsDetailsByIDsQuery.Node?>(null) }
     var showConfirmDialog by remember { mutableStateOf(false) }
 
@@ -122,7 +129,7 @@ fun Favourites(productList: List<ProductsDetailsByIDsQuery.Node?>?, viewModel: F
                     if (dismissValue == DismissValue.DismissedToStart || dismissValue == DismissValue.DismissedToEnd) {
                         itemToDelete = item
                         showConfirmDialog = true
-                        false // prevent automatic removal
+                        false
                     } else true
                 }
             )
@@ -174,7 +181,8 @@ fun Favourites(productList: List<ProductsDetailsByIDsQuery.Node?>?, viewModel: F
                             itemToDelete = item
                             showConfirmDialog = true
                         },
-                        viewModel
+                        viewModel,
+                        navigateToProductInfo
                     )
                 },
                 modifier = Modifier.padding(horizontal = 8.dp)
