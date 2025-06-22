@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductsByCollectionIDQuery
 import com.example.buynest.ProductsDetailsByIDsQuery
+import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.Yellow
 import com.example.buynest.ui.theme.white
@@ -51,6 +52,9 @@ import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 fun ProductItem(onProductClicked: (productId: String) -> Unit, bradProduct: ProductsByCollectionIDQuery.Node?,favViewModel: FavouritesViewModel){
     val productId = bradProduct?.id.toString()
     val numericId = productId.substringAfterLast("/")
+    val user = FirebaseAuthObject.getAuth().currentUser
+    val showGuestDialog = remember { mutableStateOf(false) }
+
     Card (
         modifier = Modifier
             .width(200.dp)
@@ -58,7 +62,13 @@ fun ProductItem(onProductClicked: (productId: String) -> Unit, bradProduct: Prod
         border = BorderStroke(1.dp, MainColor.copy(0.5f)),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(4.dp),
-        onClick = {onProductClicked(numericId)}
+        onClick = {
+            if (user == null){
+                showGuestDialog.value = true
+            }else{
+                onProductClicked(numericId)
+            }
+        }
     ){
         val productImageUrl = bradProduct?.featuredImage?.url.toString()
         val productPrice = bradProduct?.variants?.edges?.firstOrNull()?.node?.price?.amount.toString()
@@ -74,7 +84,9 @@ fun ProductItem(onProductClicked: (productId: String) -> Unit, bradProduct: Prod
         var showConfirmDialog by remember { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
-            favViewModel.getAllFavorites()
+            if (user != null){
+                favViewModel.getAllFavorites()
+            }
         }
 
         Column(
@@ -100,24 +112,27 @@ fun ProductItem(onProductClicked: (productId: String) -> Unit, bradProduct: Prod
                 ){
                     IconButton(
                         onClick = {
-                            if (isFav) {
-                                itemToDelete = ProductsDetailsByIDsQuery.Node(
-                                    __typename = "Product",
-                                    onProduct = ProductsDetailsByIDsQuery.OnProduct(
-                                        id = productId,
-                                        title = productName,
-                                        vendor = "", productType = "", description = "",
-                                        featuredImage = null,
-                                        variants = ProductsDetailsByIDsQuery.Variants(emptyList()),
-                                        media = ProductsDetailsByIDsQuery.Media(emptyList()),
-                                        options = emptyList()
+                            if(user == null){
+                                showGuestDialog.value = true
+                            }else{
+                                if (isFav) {
+                                    itemToDelete = ProductsDetailsByIDsQuery.Node(
+                                        __typename = "Product",
+                                        onProduct = ProductsDetailsByIDsQuery.OnProduct(
+                                            id = productId,
+                                            title = productName,
+                                            vendor = "", productType = "", description = "",
+                                            featuredImage = null,
+                                            variants = ProductsDetailsByIDsQuery.Variants(emptyList()),
+                                            media = ProductsDetailsByIDsQuery.Media(emptyList()),
+                                            options = emptyList()
+                                        )
                                     )
-                                )
-                                showConfirmDialog = true
-                            } else {
-                                favViewModel.addToFavorite(productId)
+                                    showConfirmDialog = true
+                                } else {
+                                    favViewModel.addToFavorite(productId)
+                                }
                             }
-
                         },
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -135,7 +150,7 @@ fun ProductItem(onProductClicked: (productId: String) -> Unit, bradProduct: Prod
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = productName.toString(),
+                text = productName,
                 style = MaterialTheme.typography.titleMedium,
                 color = MainColor,
                 maxLines = 2,
@@ -197,5 +212,13 @@ fun ProductItem(onProductClicked: (productId: String) -> Unit, bradProduct: Prod
             )
         }
     }
+
+    GuestAlertDialog(
+        showDialog = showGuestDialog.value,
+        onDismiss = { showGuestDialog.value = false },
+        onConfirm = {
+            showGuestDialog.value = false
+        }
+    )
 }
 

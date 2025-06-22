@@ -19,6 +19,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults.cardColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductsByHandleQuery
+import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
@@ -45,6 +48,8 @@ fun CategoryItem(
     val productId = product.id
     val numericId = productId.substringAfterLast("/")
     val selectedOptions = product.variants.edges[0].node.selectedOptions
+    val showGuestDialog = remember { mutableStateOf(false) }
+    val user = FirebaseAuthObject.getAuth().currentUser
     val color = selectedOptions
         .map { it.value }
         .filter { it.any { ch -> ch.isLetter() } }
@@ -57,7 +62,13 @@ fun CategoryItem(
         shape = RoundedCornerShape(24.dp),
         border = BorderStroke(2.dp, LightGray2),
         colors = cardColors(containerColor = white),
-        onClick = {onProductClicked(numericId)}
+        onClick = {
+            if (user == null){
+                showGuestDialog.value = true
+            }else{
+                onProductClicked(numericId)
+            }
+        }
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -109,4 +120,12 @@ fun CategoryItem(
 
         }
     }
+
+    GuestAlertDialog(
+        showDialog = showGuestDialog.value,
+        onDismiss = { showGuestDialog.value = false },
+        onConfirm = {
+            showGuestDialog.value = false
+        }
+    )
 }
