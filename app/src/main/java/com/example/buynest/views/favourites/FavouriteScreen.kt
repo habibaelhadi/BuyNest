@@ -39,8 +39,9 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.buynest.ProductsDetailsByIDsQuery
+import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.repository.favorite.FavoriteRepoImpl
 import com.example.buynest.R
-import com.example.buynest.model.uistate.ResponseState
 import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.repository.favoriteRepo.FavoriteRepoImpl
 import com.example.buynest.ui.theme.LightGray2
@@ -81,13 +82,13 @@ fun FavouriteScreen(onCartClicked:()->Unit) {
             NoDataLottie(true)
         }else{
             when (val result = product){
-                is ResponseState.Error -> {
+                is UiResponseState.Error -> {
                     Text(text = result.message)
                 }
-                ResponseState.Loading -> {
+                UiResponseState.Loading -> {
                     Indicator()
                 }
-                is ResponseState.Success<*> -> {
+                is UiResponseState.Success<*> -> {
                     val data = result.data as? ProductsDetailsByIDsQuery.Data
                     val productList = data?.nodes
                     if (productList != null) {

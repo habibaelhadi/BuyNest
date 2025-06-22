@@ -5,18 +5,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.buynest.model.entity.PlaceData
-import com.example.buynest.model.uistate.ResponseState
+import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.viewmodel.sreachMap.SearchViewModel
 import com.example.buynest.views.component.MapSearchBar
@@ -32,7 +30,7 @@ fun MapSearchScreen(
     searchViewModel: SearchViewModel
 ) {
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
-    val searchResults by searchViewModel.places.collectAsStateWithLifecycle(initialValue = ResponseState.Loading)
+    val searchResults by searchViewModel.places.collectAsStateWithLifecycle(initialValue = UiResponseState.Loading)
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(searchQuery.text) {
@@ -67,12 +65,12 @@ fun MapSearchScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         when (searchResults) {
-            is ResponseState.Loading -> {
+            is UiResponseState.Loading -> {
                 CircularProgressIndicator(color = MainColor)
             }
 
-            is ResponseState.Success<*> -> {
-                val results = (searchResults as ResponseState.Success<List<*>>).data.filterIsInstance<PlaceData>()
+            is UiResponseState.Success<*> -> {
+                val results = (searchResults as UiResponseState.Success<List<*>>).data.filterIsInstance<PlaceData>()
 
                 if (results.isEmpty()) {
                     Text(
@@ -103,9 +101,9 @@ fun MapSearchScreen(
                 }
             }
 
-            is ResponseState.Error -> {
+            is UiResponseState.Error -> {
                 Text(
-                    text = "Error: ${(searchResults as ResponseState.Error).message}",
+                    text = "Error: ${(searchResults as UiResponseState.Error).message}",
                     color = Color.Red,
                     modifier = Modifier.padding(16.dp)
                 )

@@ -23,10 +23,11 @@ import androidx.compose.ui.unit.sp
 import com.example.buynest.BuildConfig
 import com.example.buynest.R
 import com.example.buynest.model.entity.CartItem
-import com.example.buynest.model.remote.rest.RemoteDataSourceImpl
-import com.example.buynest.model.remote.rest.StripeClient
+import com.example.buynest.model.data.remote.rest.RemoteDataSourceImpl
+import com.example.buynest.model.data.remote.rest.StripeClient
 import com.example.buynest.repository.payment.PaymentRepositoryImpl
 import com.example.buynest.ui.theme.LightGray2
+import com.example.buynest.viewmodel.cart.CartViewModel
 import com.example.buynest.viewmodel.payment.PaymentViewModel
 import com.example.buynest.views.component.BottomSection
 import com.example.buynest.views.component.CartItemRow
@@ -40,7 +41,8 @@ import com.stripe.android.paymentsheet.rememberPaymentSheet
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CartScreen(
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    cartViewModel: CartViewModel
 ) {
     var cartItems by remember {
         mutableStateOf(

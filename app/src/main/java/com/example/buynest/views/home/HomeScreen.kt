@@ -23,8 +23,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.R
-import com.example.buynest.repository.homeRepository.HomeRepository
-import com.example.buynest.model.uistate.ResponseState
+import com.example.buynest.repository.home.HomeRepository
+import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.viewmodel.home.HomeFactory
 import com.example.buynest.viewmodel.home.HomeViewModel
 import com.example.buynest.viewmodel.shared.SharedViewModel
@@ -98,13 +98,13 @@ fun HomeScreen(onCategoryClick: (String,String) -> Unit ,
         AdsSection(offers = offers)
         Spacer(modifier = Modifier.height(24.dp))
         when (val result = brands) {
-            is ResponseState.Error -> {
+            is UiResponseState.Error -> {
                 Text(text = result.message)
             }
-            ResponseState.Loading -> {
+            UiResponseState.Loading -> {
                 Indicator()
             }
-            is ResponseState.Success<*> -> {
+            is UiResponseState.Success<*> -> {
                 val (brandList, productList) = result.data as Pair<List<BrandsAndProductsQuery.Node3>, List<BrandsAndProductsQuery.Node>>
                 TopBrandsSection(items = brandList.dropLast(4), onCategoryClick = onCategoryClick)
                 sharedViewModel.setCategories(brandList.subList(12,16))

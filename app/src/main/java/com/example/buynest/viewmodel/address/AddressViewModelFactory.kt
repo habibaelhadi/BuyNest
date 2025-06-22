@@ -2,7 +2,7 @@ package com.example.buynest.viewmodel.address
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.buynest.model.remote.graphql.ApolloClient.apolloClient
+import com.example.buynest.model.data.remote.graphql.ApolloClient.apolloClient
 import com.example.buynest.repository.address.AddressRepositoryImpl
 import com.example.buynest.repository.address.datasource.ShopifyAddressDataSourceImpl
 

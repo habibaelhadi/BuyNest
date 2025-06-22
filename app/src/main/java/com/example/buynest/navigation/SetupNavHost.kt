@@ -10,12 +10,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.buynest.model.remote.graphql.ApolloClient
-import com.example.buynest.repository.address.AddressRepositoryImpl
-import com.example.buynest.repository.address.datasource.ShopifyAddressDataSourceImpl
 import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.viewmodel.address.AddressViewModel
 import com.example.buynest.viewmodel.address.AddressViewModelFactory
+import com.example.buynest.viewmodel.cart.CartViewModel
+import com.example.buynest.viewmodel.cart.CartViewModelFactory
 import com.example.buynest.viewmodel.shared.SharedViewModel
 import com.example.buynest.viewmodel.sreachMap.SearchViewModel
 import com.example.buynest.views.address.AddressScreen
@@ -44,6 +43,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
     val startDestination = if (isLoggedIn) RoutesScreens.Home.route else RoutesScreens.Login.route
     val sharedViewModel: SharedViewModel = viewModel()
     val addressViewModel: AddressViewModel = viewModel(factory = AddressViewModelFactory())
+    val cartViewModel: CartViewModel = viewModel(factory = CartViewModelFactory())
 
     NavHost(
         navController = mainNavController, startDestination = startDestination
@@ -156,7 +156,8 @@ fun SetupNavHost(mainNavController: NavHostController) {
             CartScreen(
                 onBackClicked = {
                     mainNavController.popBackStack()
-                }
+                },
+                cartViewModel = cartViewModel,
             )
         }
         composable(RoutesScreens.ForgotPassword.route) {

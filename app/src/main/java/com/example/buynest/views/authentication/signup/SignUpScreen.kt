@@ -36,11 +36,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.R
-import com.example.buynest.repository.authenticationrepo.AuthenticationRepoImpl
-import com.example.buynest.repository.authenticationrepo.firebase.FirebaseRepositoryImpl
-import com.example.buynest.repository.authenticationrepo.firebase.datasource.FirebaseDataSourceImpl
-import com.example.buynest.repository.authenticationrepo.shopify.ShopifyAuthRepositoryImpl
-import com.example.buynest.repository.authenticationrepo.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
+import com.example.buynest.repository.authentication.AuthenticationRepoImpl
+import com.example.buynest.repository.authentication.firebase.FirebaseRepositoryImpl
+import com.example.buynest.repository.authentication.firebase.datasource.FirebaseDataSourceImpl
+import com.example.buynest.repository.authentication.shopify.ShopifyAuthRepositoryImpl
+import com.example.buynest.repository.authentication.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.utils.strategies.SignUpAuthenticationStrategy
