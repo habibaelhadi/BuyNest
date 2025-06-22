@@ -14,43 +14,24 @@ import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.unit.dp
 import com.example.buynest.model.entity.Address
 import com.example.buynest.ui.theme.MainColor
+import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_TOKEN
+import com.example.buynest.utils.SecureSharedPrefHelper
+import com.example.buynest.viewmodel.address.AddressViewModel
 import com.example.buynest.views.component.AddressItem
 
 @Composable
 fun AddressScreen(
     onBackClicked: () -> Unit,
-    onMapClicked: () -> Unit
+    onMapClicked: () -> Unit,
+    addressViewModel: AddressViewModel
 ) {
-    val addressList = remember {
-        mutableStateListOf(
-            Address(
-                "Home",
-                Icons.Default.Home,
-                "12 , Raml Station, Alexandria",
-                "+20 100 123 4567"
-            ),
-            Address(
-                "Office",
-                Icons.Default.Work,
-                "35 Fawzy Moaz Street, Smouha, Alexandria",
-                "+20 122 345 6789"
-            ),
-            Address(
-                "Ahmed’s House",
-                Icons.Default.Person,
-                "22 , Cleopatra, Alexandria",
-                "+20 111 234 5678"
-            ),
-            Address(
-                "Other Location",
-                Icons.Default.LocationOn,
-                "5 , Stanley, Alexandria",
-                "+20 109 876 5432"
-            )
-        )
-    }
+    val addressList by addressViewModel.addresses.collectAsState()
+    var selectedIndex by remember { mutableStateOf(-1) }
+    val error by addressViewModel.error.collectAsState()
 
-    var selectedIndex by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) {
+        addressViewModel.loadAddresses(SecureSharedPrefHelper.getString(KEY_CUSTOMER_TOKEN).toString())
+    }
 
     Scaffold(
         modifier = Modifier.padding(top = 60.dp),
@@ -91,7 +72,7 @@ fun AddressScreen(
             ) {
                 Button(
                     onClick = {
-                        addressList[0]
+                        onMapClicked()
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -111,19 +92,39 @@ fun AddressScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                LazyColumn {
-                    itemsIndexed(addressList) { index, address ->
-                        AddressItem(
-                            label = address.label,
-                            icon = address.icon,
-                            address = address.address,
-                            phone = address.phone,
-                            isSelected = selectedIndex == index,
-                            onSelect = { selectedIndex = index },
-                            onMapClick = {
-                                Log.d("AddressScreen", "View on map clicked for ${address.label}")
-                            }
-                        )
+                if (error != null) {
+                    Text(
+                        text = error ?: "",
+                        color = MaterialTheme.colors.error,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
+                if (addressList.isEmpty()) {
+                    Text("No addresses found", modifier = Modifier.align(Alignment.CenterHorizontally))
+                } else {
+                    LazyColumn {
+                        itemsIndexed(addressList) { index, address ->
+                            AddressItem(
+                                label = address.address1 ?: "No label",
+                                icon = when (address.address2?.lowercase()) {
+                                    "home" -> Icons.Default.Home
+                                    "office" -> Icons.Default.Work
+                                    "friend" -> Icons.Default.Person
+                                    else -> Icons.Default.LocationOn
+                                },
+                                address = address.address1 ?: "",
+                                phone = address.phone ?: "",
+                                isSelected = selectedIndex == index,
+                                onSelect = {
+                                    selectedIndex = index
+                                    // You can add logic here to set this address as default via ViewModel if you want
+                                },
+                                onMapClick = {
+                                    Log.d("AddressScreen", "View on map clicked for ${address.address1}")
+                                }
+                            )
+                        }
                     }
                 }
             }

@@ -1,4 +1,4 @@
-package com.example.buynest.model.entity
+package com.example.buynest.model.state
 
 data class ExchangeRateResponse(
     val result: String,

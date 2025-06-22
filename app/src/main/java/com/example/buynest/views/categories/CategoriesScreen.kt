@@ -131,10 +131,12 @@ fun CategoriesScreen(
                     selectedCategory = if (selectedCategory == clicked) null else clicked
                     selectedSubcategory = null
                 },
-                onSubcategorySelected = { sub -> selectedSubcategory = sub },
+                onSubcategorySelected = { sub ->
+                    selectedSubcategory = sub
+                },
                 selectedSubcategory = selectedSubcategory,
                 sharedViewModel = sharedViewModel
-            )
+                )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -170,7 +172,6 @@ fun CategoriesScreen(
                                     edge.node.productType.contains(selectedSubcategory!!, ignoreCase = true)) &&
                                     price!! <= maxPrice
                         }
-
                         CategoryProducts(onProductClicked, filteredEdges)
                     }
                 }
@@ -178,6 +179,7 @@ fun CategoriesScreen(
         }
     }
 }
+
 
 @Composable
 fun CategoryProducts(
@@ -197,3 +199,6 @@ fun CategoryProducts(
         }
     }
 }
+
+
+

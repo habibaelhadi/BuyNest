@@ -1,9 +1,10 @@
-package com.example.buynest.repository.authenticationrepo.firebase
+package com.example.buynest.repository.authenticationrepo.firebase.datasource
 
 import android.content.Context
 import android.content.Intent
 import com.example.buynest.R
 import com.example.buynest.repository.FirebaseAuthObject
+import com.example.buynest.model.state.FirebaseResponse
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -11,20 +12,17 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 
-class Firebase private constructor() {
+class FirebaseDataSourceImpl : IFirebaseDataSource {
+    private val auth: FirebaseAuth = FirebaseAuthObject.getAuth()
     private var googleSignInClient: GoogleSignInClient? = null
     private var firebaseResponse: FirebaseResponse? = null
     private var message: String? = null
 
-    init {
-        auth = FirebaseAuthObject.getAuth()
-    }
-
-    fun setFirebaseResponse(firebaseResponse: FirebaseResponse?) {
+    override fun setFirebaseResponse(firebaseResponse: FirebaseResponse?) {
         this.firebaseResponse = firebaseResponse
     }
 
-    fun connectToGoogle(context: Context) {
+    private fun connectToGoogle(context: Context) {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(context.getString(R.string.default_web_client_id))
             .requestEmail()
@@ -33,7 +31,7 @@ class Firebase private constructor() {
         googleSignInClient = GoogleSignIn.getClient(context, gso)
     }
 
-    fun signup(name: String, phone: String, email: String, password: String) {
+    override fun signup(name: String, phone: String, email: String, password: String) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -46,7 +44,6 @@ class Firebase private constructor() {
                         if (updateTask.isSuccessful) {
                             user.sendEmailVerification().addOnCompleteListener { verifyTask ->
                                 if (verifyTask.isSuccessful) {
-
                                     val userMap = hashMapOf(
                                         "name" to name,
                                         "email" to email,
@@ -81,9 +78,7 @@ class Firebase private constructor() {
             }
     }
 
-
-
-    fun login(email: String, password: String) {
+    override fun login(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -102,15 +97,16 @@ class Firebase private constructor() {
             }
     }
 
-    fun logout() {
+    override fun logout() {
         auth.signOut()
     }
 
-    fun getGoogleSignInIntent(): Intent? {
+    override fun getGoogleSignInIntent(context: Context): Intent? {
+        connectToGoogle(context)
         return googleSignInClient?.signInIntent
     }
 
-    fun sendPasswordResetEmail(email: String) {
+    override fun sendPasswordResetEmail(email: String) {
         auth.sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -121,44 +117,31 @@ class Firebase private constructor() {
             }
     }
 
-    companion object {
-        lateinit var auth: FirebaseAuth
-        private var firebase: Firebase? = null
-        val instance: Firebase
-            get() {
-                if (firebase == null) {
-                    firebase = Firebase()
+    override fun saveGoogleUserToFireStore(context: Context) {
+        val user = auth.currentUser
+        user?.let {
+            val name = it.displayName ?: "No Name"
+            val email = it.email ?: "No Email"
+            val phone = it.phoneNumber ?: "No Phone"
+
+            val userMap = hashMapOf(
+                "name" to name,
+                "email" to email,
+                "phone" to phone
+            )
+
+            FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(user.uid)
+                .set(userMap)
+                .addOnSuccessListener {
+                    firebaseResponse?.onResponseSuccess("Google user saved to Firestore")
                 }
-                return firebase!!
-            }
-
-        fun saveGoogleUserToFirestore(context: Context) {
-            val user = auth.currentUser
-            user?.let {
-                val name = it.displayName ?: "No Name"
-                val email = it.email ?: "No Email"
-                val phone = it.phoneNumber ?: "No Phone" // Usually null from Google
-
-                val userMap = hashMapOf(
-                    "name" to name,
-                    "email" to email,
-                    "phone" to phone
-                )
-
-                FirebaseFirestore.getInstance()
-                    .collection("users")
-                    .document(user.uid)
-                    .set(userMap)
-                    .addOnSuccessListener {
-                        instance.firebaseResponse?.onResponseSuccess("Google user saved to Firestore")
-                    }
-                    .addOnFailureListener { e ->
-                        instance.firebaseResponse?.onResponseFailure(e.message)
-                    }
-            } ?: run {
-                instance.firebaseResponse?.onResponseFailure("No authenticated Google user found")
-            }
+                .addOnFailureListener { e ->
+                    firebaseResponse?.onResponseFailure(e.message)
+                }
+        } ?: run {
+            firebaseResponse?.onResponseFailure("No authenticated Google user found")
         }
-
     }
 }

@@ -1,4 +1,4 @@
-package com.example.buynest.repository.authenticationrepo.firebase
+package com.example.buynest.model.state
 
 interface FirebaseResponse {
     fun <T> onResponseSuccess(message: T)

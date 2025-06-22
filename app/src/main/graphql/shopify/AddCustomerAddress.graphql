@@ -1,0 +1,15 @@
+mutation AddCustomerAddress($customerAccessToken: String!, $address: MailingAddressInput!) {
+    customerAddressCreate(customerAccessToken: $customerAccessToken, address: $address) {
+        customerAddress {
+            id
+            address1
+            address2
+            city
+            country
+        }
+        customerUserErrors {
+            field
+            message
+        }
+    }
+}
