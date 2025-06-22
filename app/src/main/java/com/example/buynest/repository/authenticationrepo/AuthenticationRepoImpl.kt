@@ -51,7 +51,6 @@ class AuthenticationRepoImpl(
     ): Result<Unit> = suspendCoroutine { continuation ->
         firebaseRepository.setFirebaseResponse(object : FirebaseResponse {
             override fun <T> onResponseSuccess(message: T) {
-                continuation.resume(Result.success(Unit))
                 CoroutineScope(Dispatchers.IO).launch {
                     val shopifyResult = shopifyRepository.register(name, email, password, phone)
                     if (shopifyResult.isSuccess) {
@@ -66,8 +65,10 @@ class AuthenticationRepoImpl(
                 continuation.resume(Result.failure(Exception(message.toString())))
             }
         })
+
         firebaseRepository.signup(name, phone, email, password)
     }
+
 
     override suspend fun logInWithGoogle(context: Context, launcher: ActivityResultLauncher<Intent>): Result<Unit> {
         val signInIntent = firebaseRepository.getGoogleSignInIntent(context)
@@ -102,20 +103,18 @@ class AuthenticationRepoImpl(
         firebaseRepository.saveGoogleUserToFireStore(context)
     }
 
-    override suspend fun logout(): Result<Unit> {
-        firebaseRepository.logout()
-        var result: Result<Unit> = Result.failure(Exception("Login failed"))
-
+    override suspend fun logout(): Result<Unit> = suspendCoroutine { continuation ->
         firebaseRepository.setFirebaseResponse(object : FirebaseResponse {
             override fun <T> onResponseSuccess(message: T) {
-                result = Result.success(Unit)
+                continuation.resume(Result.success(Unit))
             }
 
             override fun <T> onResponseFailure(message: T) {
-                result = Result.failure(Exception(message.toString()))
+                continuation.resume(Result.failure(Exception(message.toString())))
             }
-
         })
-        return result
+
+        firebaseRepository.logout()
     }
+
 }
