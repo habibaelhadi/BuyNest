@@ -118,9 +118,8 @@ fun BrandDetailsScreen(
             is UiResponseState.Error -> {
                 Text(text = result.message)
             }
-            UiResponseState.Loading -> {
 
-            ResponseState.Loading -> {
+            UiResponseState.Loading -> {
                 Indicator()
             }
             is UiResponseState.Success<*> -> {

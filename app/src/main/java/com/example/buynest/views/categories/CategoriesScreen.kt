@@ -75,7 +75,7 @@ fun CategoriesScreen(
 
         SearchBar(onCartClicked = onCartClicked)
 
-        val edges = (categoryProduct as? ResponseState.Success<*>)?.data
+        val edges = (categoryProduct as? UiResponseState.Success<*>)?.data
             ?.let { it as? ProductsByHandleQuery.Data }
             ?.collectionByHandle?.products?.edges
 

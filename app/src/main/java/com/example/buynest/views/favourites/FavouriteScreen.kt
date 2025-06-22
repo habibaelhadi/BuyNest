@@ -43,7 +43,6 @@ import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.repository.favorite.FavoriteRepoImpl
 import com.example.buynest.R
 import com.example.buynest.repository.FirebaseAuthObject
-import com.example.buynest.repository.favoriteRepo.FavoriteRepoImpl
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
