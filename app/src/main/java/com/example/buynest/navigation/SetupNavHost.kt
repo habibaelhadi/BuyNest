@@ -135,6 +135,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 gotoAddressScreen = {
                     mainNavController.navigate(RoutesScreens.Address.route)
+                },
+                gotoLoginScreen = {
+                    mainNavController.navigate(RoutesScreens.Login.route)
                 }
             )
         }

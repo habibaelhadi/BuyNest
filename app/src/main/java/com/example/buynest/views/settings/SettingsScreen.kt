@@ -31,10 +31,17 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.R
+import com.example.buynest.repository.authenticationrepo.AuthenticationRepoImpl
+import com.example.buynest.repository.authenticationrepo.firebase.FirebaseRepositoryImpl
+import com.example.buynest.repository.authenticationrepo.firebase.datasource.FirebaseDataSourceImpl
+import com.example.buynest.repository.authenticationrepo.shopify.ShopifyAuthRepositoryImpl
+import com.example.buynest.repository.authenticationrepo.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.utils.SharedPrefHelper
+import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
 import com.example.buynest.views.component.CountryOptionBottomSheet
 import com.example.buynest.views.component.CurrencyOptionBottomSheet
 import com.example.buynest.views.component.PaymentOptionBottomSheet
@@ -44,7 +51,8 @@ import com.example.buynest.views.component.SettingsCard
 fun SettingsScreen(
     gotoProfileScreen: () -> Unit,
     gotoOrdersHistoryScreen: () -> Unit,
-    gotoAddressScreen: () -> Unit
+    gotoAddressScreen: () -> Unit,
+    gotoLoginScreen: () -> Unit
 ) {
     val context = LocalContext.current
     val phenomenaBold = FontFamily(Font(R.font.phenomena_bold))
@@ -57,7 +65,27 @@ fun SettingsScreen(
     val launchEmailIntent = remember { mutableStateOf(false) }
     val showAboutDialog = remember { mutableStateOf(false) }
 
+    val authViewModel: AuthenticationViewModel = viewModel(
+        factory = AuthenticationViewModel.AuthenticationViewModelFactory(
+            AuthenticationRepoImpl(
+                FirebaseRepositoryImpl(
+                    FirebaseDataSourceImpl()
+                ),
+                ShopifyAuthRepositoryImpl(
+                    ShopifyAuthRemoteDataSourceImpl()
+                )
+            )
+        )
+    )
 
+    LaunchedEffect(Unit) {
+        authViewModel.message.collect { message ->
+            if (message == "Success") {
+                gotoLoginScreen()
+                SharedPrefHelper.setLogIn(context = context, false)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -121,7 +149,7 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { /* Log out logic */ },
+            onClick = { authViewModel.logout() },
             colors = ButtonDefaults.buttonColors(
                 containerColor = MainColor,
                 contentColor = white
