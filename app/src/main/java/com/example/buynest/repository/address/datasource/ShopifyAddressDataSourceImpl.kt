@@ -1,5 +1,6 @@
 package com.example.buynest.repository.address.datasource
 
+import android.util.Log
 import com.apollographql.apollo3.ApolloClient
 import com.example.buynest.*
 import com.example.buynest.AddCustomerAddressMutation.CustomerAddress
@@ -11,58 +12,92 @@ class ShopifyAddressDataSourceImpl(
 ) : ShopifyAddressDataSource {
 
     override suspend fun addAddress(token: String, address: MailingAddressInput): Result<AddressModel> {
+        Log.d("ShopifyAddressDS", "Adding address: $address")
+
         val response = apolloClient.mutation(
             AddCustomerAddressMutation(token, address)
         ).execute()
 
         val data = response.data?.customerAddressCreate?.customerAddress
+
         return if (data != null) {
-            Result.success(data.toAddressModel())
+            val model = data.toAddressModel()
+            Log.d("ShopifyAddressDS", "Address added successfully: $model")
+            Result.success(model)
         } else {
+            Log.e(
+                "ShopifyAddressDS",
+                "Add address failed. Data: ${response.data}, Errors: ${response.errors}"
+            )
             Result.failure(Exception(response.errors?.firstOrNull()?.message ?: "Add address failed"))
         }
     }
 
     override suspend fun getAllAddresses(token: String): Result<List<AddressModel>> {
+        Log.d("ShopifyAddressDS", "Fetching all addresses")
         val response = apolloClient.query(
             GetCustomerAddressesQuery(token)
         ).execute()
 
+        Log.d("ShopifyAddressDS", "Get all addresses response: $response")
+
         val edges = response.data?.customer?.addresses?.edges
         val list = edges?.mapNotNull { it.node?.toAddressModel() } ?: emptyList()
+        Log.d("ShopifyAddressDS", "Fetched ${list.size} addresses")
         return Result.success(list)
     }
 
     override suspend fun deleteAddress(token: String, addressId: String): Result<String> {
+        Log.d("ShopifyAddressDS", "Deleting address with ID: $addressId")
         val response = apolloClient.mutation(
             CustomerAddressDeleteMutation(token, addressId)
         ).execute()
 
+        Log.d("ShopifyAddressDS", "Delete address response: $response")
+
         val deletedId = response.data?.customerAddressDelete?.deletedCustomerAddressId
-        return if (deletedId != null) Result.success(deletedId)
-        else Result.failure(Exception(response.errors?.firstOrNull()?.message ?: "Delete failed"))
+        return if (deletedId != null) {
+            Log.d("ShopifyAddressDS", "Deleted address ID: $deletedId")
+            Result.success(deletedId)
+        } else {
+            val error = response.errors?.firstOrNull()?.message ?: "Delete failed"
+            Log.e("ShopifyAddressDS", "Delete address error: $error")
+            Result.failure(Exception(error))
+        }
     }
 
     override suspend fun setDefaultAddress(token: String, addressId: String): Result<AddressModel> {
+        Log.d("ShopifyAddressDS", "Setting default address ID: $addressId")
         val response = apolloClient.mutation(
             SetDefaultAddressMutation(token, addressId)
         ).execute()
 
+        Log.d("ShopifyAddressDS", "Set default address response: $response")
+
         val defaultAddress = response.data?.customerDefaultAddressUpdate?.customer?.defaultAddress
         return if (defaultAddress != null) {
-            Result.success(defaultAddress.toAddressModel())
+            val model = defaultAddress.toAddressModel()
+            Log.d("ShopifyAddressDS", "Set default address success: $model")
+            Result.success(model)
         } else {
-            Result.failure(Exception(response.errors?.firstOrNull()?.message ?: "Set default failed"))
+            val error = response.errors?.firstOrNull()?.message ?: "Set default failed"
+            Log.e("ShopifyAddressDS", "Set default address error: $error")
+            Result.failure(Exception(error))
         }
     }
 
     override suspend fun getDefaultAddress(token: String): Result<AddressModel?> {
+        Log.d("ShopifyAddressDS", "Fetching default address")
         val response = apolloClient.query(
             GetDefaultAddressQuery(token)
         ).execute()
 
+        Log.d("ShopifyAddressDS", "Get default address response: $response")
+
         val address = response.data?.customer?.defaultAddress
-        return Result.success(address?.toAddressModel())
+        val model = address?.toAddressModel()
+        Log.d("ShopifyAddressDS", "Default address: $model")
+        return Result.success(model)
     }
 
     private fun CustomerAddress.toAddressModel() = AddressModel(
@@ -109,4 +144,3 @@ class ShopifyAddressDataSourceImpl(
         phone = this.phone
     )
 }
-
