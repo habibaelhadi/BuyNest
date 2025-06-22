@@ -172,7 +172,6 @@ fun CategoriesScreen(
                                     edge.node.productType.contains(selectedSubcategory!!, ignoreCase = true)) &&
                                     price!! <= maxPrice
                         }
-
                         CategoryProducts(onProductClicked, filteredEdges)
                     }
                 }
@@ -180,6 +179,7 @@ fun CategoriesScreen(
         }
     }
 }
+
 
 @Composable
 fun CategoryProducts(
