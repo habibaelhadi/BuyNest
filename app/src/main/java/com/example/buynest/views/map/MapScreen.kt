@@ -8,7 +8,6 @@ import com.example.buynest.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
@@ -23,7 +22,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.apollographql.apollo3.api.Optional
+import com.example.buynest.type.MailingAddressInput
 import com.example.buynest.ui.theme.MainColor
+import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_TOKEN
+import com.example.buynest.utils.SecureSharedPrefHelper
+import com.example.buynest.viewmodel.address.AddressViewModel
 import com.example.buynest.views.component.MapTopBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -38,7 +42,8 @@ import java.util.Locale
 @Composable
 fun MapScreen(
     backClicked: () -> Unit,
-    onMapSearchClicked: () -> Unit
+    onMapSearchClicked: () -> Unit,
+    addressViewModel: AddressViewModel
 ) {
     val context = LocalContext.current
 
@@ -54,11 +59,14 @@ fun MapScreen(
     var showSheet by remember { mutableStateOf(false) }
     var currentStep by remember { mutableStateOf(1) }
 
-
     var name by remember { mutableStateOf(TextFieldValue()) }
     var phone by remember { mutableStateOf(TextFieldValue()) }
     var addressType by remember { mutableStateOf("Home") }
     var landmark by remember { mutableStateOf(TextFieldValue()) }
+
+    var nameError by remember { mutableStateOf<String?>(null) }
+    var phoneError by remember { mutableStateOf<String?>(null) }
+    var addressError by remember { mutableStateOf<String?>(null) }
 
 
     LaunchedEffect(selectedPoint) {
@@ -78,6 +86,7 @@ fun MapScreen(
     }
 
     Scaffold(
+        modifier = Modifier.statusBarsPadding(),
         topBar = {
             MapTopBar(
                 onBack = backClicked,
@@ -87,7 +96,10 @@ fun MapScreen(
             )
         }
     ) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
+        Box(
+            modifier = Modifier
+                .padding(padding)
+        ) {
             OsmMapView(
                 modifier = Modifier.fillMaxSize(),
                 onLocationSelected = { point ->
@@ -159,7 +171,7 @@ fun MapScreen(
                         Text("Select address type", style = MaterialTheme.typography.bodyMedium)
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             listOf("Home", "Office", "Friend", "Other").forEach { type ->
                                 FilterChip(
                                     selected = addressType == type,
@@ -178,7 +190,10 @@ fun MapScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         OutlinedTextField(
                             value = name,
-                            onValueChange = { name = it },
+                            onValueChange = {
+                                name = it
+                                nameError = null
+                            },
                             label = { Text("Receiver's name") },
                             modifier = Modifier.fillMaxWidth(),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -187,12 +202,17 @@ fun MapScreen(
                                 focusedLabelColor = MainColor
                             )
                         )
+                        if (nameError != null) {
+                            Text(nameError!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+                        }
 
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
                             value = phone,
-                            onValueChange = { phone = it },
-                            label = { Text("Complete address") },
+                            onValueChange = {
+                                phone = it
+                                phoneError = null
+                            },                            label = { Text("Complete address") },
                             modifier = Modifier.fillMaxWidth(),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 focusedBorderColor = MainColor,
@@ -200,6 +220,9 @@ fun MapScreen(
                                 focusedLabelColor = MainColor
                             )
                         )
+                        if (phoneError != null) {
+                            Text(phoneError!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+                        }
 
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
@@ -217,8 +240,43 @@ fun MapScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
-                                Log.d("OrderInfo", "Name: ${name.text}, Phone: ${phone.text}, Address: $address, Type: $addressType")
+                                var valid = true
+                                if (name.text.isBlank()) {
+                                    nameError = "Name cannot be empty"
+                                    valid = false
+                                }
+                                if (phone.text.isBlank()) {
+                                    phoneError = "Phone cannot be empty"
+                                    valid = false
+                                }
+                                if (address.isBlank() || address == "Address not found") {
+                                    addressError = "Invalid address selected"
+                                    valid = false
+                                } else {
+                                    addressError = null
+                                }
+
+                                if (!valid) return@Button
+
+                                val mailingAddressInput = MailingAddressInput(
+                                    address1 = Optional.Present(address),
+                                    address2 = if (landmark.text.isNotBlank()) Optional.Present(landmark.text) else Optional.Absent,
+                                    city = Optional.Present("YourCity"),
+                                    country = Optional.Present("YourCountry"),
+                                    firstName = Optional.Present(name.text),
+                                    lastName = Optional.Absent,
+                                    phone = if (phone.text.isNotBlank()) Optional.Present(phone.text) else Optional.Absent
+                                )
+
+                                addressViewModel.addAddress(
+                                    SecureSharedPrefHelper.getString(KEY_CUSTOMER_TOKEN).toString(),
+                                    mailingAddressInput
+                                )
+
                                 showSheet = false
+                                name = TextFieldValue("")
+                                phone = TextFieldValue("")
+                                landmark = TextFieldValue("")
                             },
                             modifier = Modifier
                                 .fillMaxWidth()

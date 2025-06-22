@@ -51,6 +51,7 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.buynest.navigation.RoutesScreens
 import com.example.buynest.ui.theme.white
+import com.example.buynest.utils.SecureSharedPrefHelper
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
@@ -58,6 +59,9 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        SecureSharedPrefHelper.init(this)
+
         enableEdgeToEdge()
         setContent {
             var showSplash by remember { mutableStateOf(true) }

@@ -1,5 +1,6 @@
 package com.example.buynest.navigation
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -9,8 +10,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.buynest.model.remote.graphql.ApolloClient
+import com.example.buynest.repository.address.AddressRepositoryImpl
+import com.example.buynest.repository.address.datasource.ShopifyAddressDataSourceImpl
 import com.example.buynest.utils.SharedPrefHelper
+import com.example.buynest.viewmodel.address.AddressViewModel
+import com.example.buynest.viewmodel.address.AddressViewModelFactory
 import com.example.buynest.viewmodel.shared.SharedViewModel
+import com.example.buynest.viewmodel.sreachMap.SearchViewModel
 import com.example.buynest.views.address.AddressScreen
 import com.example.buynest.views.authentication.forgotpassword.ForgotPasswordScreen
 import com.example.buynest.views.authentication.login.LoginScreen
@@ -28,6 +35,7 @@ import com.example.buynest.views.productInfo.ProductInfoScreen
 import com.example.buynest.views.profile.ProfileScreen
 import com.example.buynest.views.settings.SettingsScreen
 
+@SuppressLint("ViewModelConstructorInComposable")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SetupNavHost(mainNavController: NavHostController) {
@@ -35,6 +43,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
     val isLoggedIn = SharedPrefHelper.getLogIn(context)
     val startDestination = if (isLoggedIn) RoutesScreens.Home.route else RoutesScreens.Login.route
     val sharedViewModel: SharedViewModel = viewModel()
+    val addressViewModel: AddressViewModel = viewModel(factory = AddressViewModelFactory())
 
     NavHost(
         navController = mainNavController, startDestination = startDestination
@@ -136,7 +145,8 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 onMapClicked = {
                     mainNavController.navigate(RoutesScreens.Map.route)
-                }
+                },
+                addressViewModel = addressViewModel
             )
         }
         composable(RoutesScreens.Cart.route) {
@@ -191,7 +201,8 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 onMapSearchClicked = {
                     mainNavController.navigate(RoutesScreens.MapSearch.route)
-                }
+                },
+                addressViewModel = addressViewModel
             )
         }
         composable(RoutesScreens.MapSearch.route) {
@@ -199,10 +210,10 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 onBack = {
                     mainNavController.popBackStack()
                 },
-                onPlaceSelected = { geoPoint, name ->
-                    Log.d("MapSearchScreen", "Selected place: $name, $geoPoint")
-                    mainNavController.popBackStack()
-                }
+                onPlaceSelected = { latLng, address ->
+                    Log.d("MapSearchScreen", "Selected location: $latLng, $address")
+                },
+                searchViewModel = SearchViewModel(context)
             )
         }
     }

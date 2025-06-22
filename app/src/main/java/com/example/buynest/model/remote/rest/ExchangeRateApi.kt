@@ -1,6 +1,6 @@
 package com.example.buynest.model.remote.rest
 
-import com.example.buynest.model.entity.ExchangeRateResponse
+import com.example.buynest.model.state.ExchangeRateResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 

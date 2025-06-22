@@ -1,12 +1,16 @@
 package com.example.buynest.repository.authenticationrepo.shopify.datasource
 
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import com.apollographql.apollo3.api.Optional
 import com.example.buynest.CreateCustomerMutation
 import com.example.buynest.LoginCustomerMutation
 import com.example.buynest.model.remote.graphql.ApolloClient.apolloClient
 import com.example.buynest.type.CustomerAccessTokenCreateInput
 import com.example.buynest.type.CustomerCreateInput
+import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_ID
+import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_TOKEN
+import com.example.buynest.utils.SecureSharedPrefHelper
 
 class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
     override suspend fun signUpCustomer(
@@ -41,6 +45,8 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
 
             if (errors.isEmpty() && customer != null) {
                 Log.i("TAG", "signUpCustomer: ${customer.id}")
+                SecureSharedPrefHelper.putString(KEY_CUSTOMER_ID, customer.id)
+                Log.i("TAG", "Secure Shared: ${SecureSharedPrefHelper.getString(KEY_CUSTOMER_ID)}")
                 Result.success(customer)
             } else {
                 Log.i("TAG", "else signUpCustomer: $errors")
@@ -70,6 +76,8 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
 
             if (errors.isEmpty() && token != null) {
                 Log.i("TAG", "loginCustomer: $token")
+                SecureSharedPrefHelper.putString(KEY_CUSTOMER_TOKEN, token.accessToken)
+                Log.i("TAG", "Secure Shared: ${SecureSharedPrefHelper.getString(KEY_CUSTOMER_TOKEN)}")
                 Result.success(token)
             } else {
                 Log.i("TAG", "else loginCustomer: $errors")
