@@ -69,7 +69,8 @@ val phenomenaBold = FontFamily(
 @Composable
 fun HomeScreen(onCategoryClick: (String,String) -> Unit ,
                onCardClicked:()->Unit,
-               sharedViewModel: SharedViewModel
+               sharedViewModel: SharedViewModel,
+               onProductClicked: (productId: String) -> Unit
 ) {
     val activity = LocalActivity.current
     val homeViewModel: HomeViewModel = viewModel(
@@ -109,7 +110,7 @@ fun HomeScreen(onCategoryClick: (String,String) -> Unit ,
                 TopBrandsSection(items = brandList.dropLast(4), onCategoryClick = onCategoryClick)
                 sharedViewModel.setCategories(brandList.subList(12,16))
                 Spacer(modifier = Modifier.height(24.dp))
-                ForYouSection(items = productList.drop(10))
+                ForYouSection(items = productList.drop(10),onProductClicked)
             }
         }
     }
