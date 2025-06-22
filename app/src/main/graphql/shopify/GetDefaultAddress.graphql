@@ -1,0 +1,13 @@
+query GetDefaultAddress($customerAccessToken: String!) {
+    customer(customerAccessToken: $customerAccessToken) {
+        defaultAddress {
+            id
+            firstName
+            address1
+            address2
+            city
+            country
+            phone
+        }
+    }
+}
