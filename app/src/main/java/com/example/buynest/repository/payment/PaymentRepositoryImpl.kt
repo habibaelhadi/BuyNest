@@ -1,6 +1,6 @@
 package com.example.buynest.repository.payment
 
-import com.example.buynest.model.remote.rest.IRemoteDataSource
+import com.example.buynest.model.data.remote.rest.IRemoteDataSource
 import com.google.gson.JsonObject
 import retrofit2.Response
 

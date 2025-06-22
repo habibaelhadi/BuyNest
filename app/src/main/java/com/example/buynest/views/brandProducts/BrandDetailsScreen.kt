@@ -30,9 +30,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.ProductsByCollectionIDQuery
 import com.example.buynest.R
-import com.example.buynest.repository.homeRepository.HomeRepository
-import com.example.buynest.model.uistate.ResponseState
-import com.example.buynest.repository.favoriteRepo.FavoriteRepoImpl
+import com.example.buynest.repository.home.HomeRepository
+import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.repository.favorite.FavoriteRepoImpl
 import com.example.buynest.ui.theme.*
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.viewmodel.brandproducts.BrandDetailsViewModel
@@ -95,13 +95,13 @@ fun BrandDetailsScreen(brandID:String,categoryName: String,onCartClicked:()->Uni
         )
         Spacer(modifier = Modifier.height(24.dp))
         when (val result = brandProducts) {
-            is ResponseState.Error -> {
+            is UiResponseState.Error -> {
                 Text(text = result.message)
             }
-            ResponseState.Loading -> {
+            UiResponseState.Loading -> {
                 Indicator()
             }
-            is ResponseState.Success<*> -> {
+            is UiResponseState.Success<*> -> {
                 val data = result.data as? ProductsByCollectionIDQuery.Data
                 val productList = data?.collection?.products?.edges?.map { it.node }
                 ProductGrid(categoryName, onProductClicked, productList,favViewModel)

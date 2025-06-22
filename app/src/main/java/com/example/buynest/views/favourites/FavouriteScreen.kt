@@ -33,8 +33,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.ProductsDetailsByIDsQuery
-import com.example.buynest.model.uistate.ResponseState
-import com.example.buynest.repository.favoriteRepo.FavoriteRepoImpl
+import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.repository.favorite.FavoriteRepoImpl
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.white
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
@@ -66,13 +66,13 @@ fun FavouriteScreen(onCartClicked:()->Unit) {
         )
         Spacer(modifier = Modifier.height(24.dp))
         when (val result = product){
-            is ResponseState.Error -> {
+            is UiResponseState.Error -> {
                 Text(text = result.message)
             }
-            ResponseState.Loading -> {
+            UiResponseState.Loading -> {
                 Indicator()
             }
-            is ResponseState.Success<*> -> {
+            is UiResponseState.Success<*> -> {
                 val data = result.data as? ProductsDetailsByIDsQuery.Data
                 val productList = data?.nodes
                 Favourites(productList,viewModel)

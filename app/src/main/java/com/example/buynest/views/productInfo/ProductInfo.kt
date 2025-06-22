@@ -61,8 +61,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductDetailsByIDQuery
 import com.example.buynest.ProductsDetailsByIDsQuery
-import com.example.buynest.model.uistate.ResponseState
-import com.example.buynest.repository.favoriteRepo.FavoriteRepoImpl
+import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.repository.favorite.FavoriteRepoImpl
 import com.example.buynest.repository.productDetails.ProductDetailsRepositoryImpl
 import com.example.buynest.ui.theme.LightGray
 import com.example.buynest.ui.theme.MainColor
@@ -109,14 +109,14 @@ fun ProductInfoScreen(
         }}
     ) { innerPadding ->
         when (val result = response) {
-            is ResponseState.Error -> {
+            is UiResponseState.Error -> {
                 Text(text = result.message)
             }
-            ResponseState.Loading ->  {
+            UiResponseState.Loading ->  {
                 Indicator()
             }
-            is ResponseState.Success<*> -> {
-                val successData = result as ResponseState.Success<ProductDetailsByIDQuery.Data>
+            is UiResponseState.Success<*> -> {
+                val successData = result as UiResponseState.Success<ProductDetailsByIDQuery.Data>
                 val product = successData.data.product
                 ProductInfo(
                     innerPadding = innerPadding,

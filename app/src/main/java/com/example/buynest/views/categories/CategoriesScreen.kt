@@ -26,8 +26,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.ProductsByHandleQuery
 import com.example.buynest.R
-import com.example.buynest.model.uistate.ResponseState
-import com.example.buynest.repository.categoryrepo.CategoryRepoImpl
+import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.repository.category.CategoryRepoImpl
 import com.example.buynest.ui.theme.*
 import com.example.buynest.viewmodel.categoryViewModel.CategoryFactory
 import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
@@ -92,13 +92,13 @@ fun CategoriesScreen(onCartClicked:()->Unit,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 when (val result = categoryProduct) {
-                    is ResponseState.Error ->{
+                    is UiResponseState.Error ->{
                         Text(text = result.message)
                     }
-                    ResponseState.Loading -> {
+                    UiResponseState.Loading -> {
                         Indicator()
                     }
-                    is ResponseState.Success<*> -> {
+                    is UiResponseState.Success<*> -> {
                         val data = result.data as ProductsByHandleQuery.Data
                         val edges = data.collectionByHandle?.products?.edges
                         val filteredEdges = if (selectedSubcategory != null) {

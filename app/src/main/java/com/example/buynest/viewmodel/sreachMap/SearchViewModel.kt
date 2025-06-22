@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.buynest.BuildConfig.PLACES_API_KEY
 import com.example.buynest.model.entity.PlaceData
-import com.example.buynest.model.uistate.ResponseState
+import com.example.buynest.model.state.UiResponseState
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.*
 import com.google.android.libraries.places.api.net.*
@@ -28,8 +28,8 @@ class SearchViewModel(context: Context) : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _places = MutableSharedFlow<ResponseState>(replay = 1)
-    val places: SharedFlow<ResponseState> = _places.asSharedFlow()
+    private val _places = MutableSharedFlow<UiResponseState>(replay = 1)
+    val places: SharedFlow<UiResponseState> = _places.asSharedFlow()
 
     private val _message = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val message: SharedFlow<String> = _message.asSharedFlow()
@@ -48,7 +48,7 @@ class SearchViewModel(context: Context) : ViewModel() {
             .debounce(500)
             .onEach { query ->
                 if (query.isBlank()) {
-                    _places.emit(ResponseState.Success(emptyList<PlaceData>()))
+                    _places.emit(UiResponseState.Success(emptyList<PlaceData>()))
                 } else {
                     fetchPlacePredictions(query)
                 }
@@ -57,7 +57,7 @@ class SearchViewModel(context: Context) : ViewModel() {
     }
 
     private fun fetchPlacePredictions(query: String) {
-        viewModelScope.launch { _places.emit(ResponseState.Loading) }
+        viewModelScope.launch { _places.emit(UiResponseState.Loading) }
 
         val request = FindAutocompletePredictionsRequest.builder()
             .setQuery(query)
@@ -74,7 +74,7 @@ class SearchViewModel(context: Context) : ViewModel() {
                         address = prediction.getFullText(null).toString()
                     )
                 }
-                viewModelScope.launch { _places.emit(ResponseState.Success(predictions)) }
+                viewModelScope.launch { _places.emit(UiResponseState.Success(predictions)) }
             }
             .addOnFailureListener { exception ->
                 handleFailure("Error fetching predictions", exception)
@@ -99,7 +99,7 @@ class SearchViewModel(context: Context) : ViewModel() {
     private fun handleFailure(message: String, exception: Exception) {
         Log.e("SearchViewModel", "$message: ${exception.localizedMessage}")
         viewModelScope.launch {
-            _places.emit(ResponseState.Error(message = exception.localizedMessage ?: "Unknown error"))
+            _places.emit(UiResponseState.Error(message = exception.localizedMessage ?: "Unknown error"))
             _message.emit("$message: ${exception.localizedMessage ?: "Unknown error"}")
         }
     }

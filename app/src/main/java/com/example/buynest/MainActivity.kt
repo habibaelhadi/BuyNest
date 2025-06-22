@@ -62,7 +62,6 @@ class MainActivity : ComponentActivity() {
 
         SecureSharedPrefHelper.init(this)
 
-        enableEdgeToEdge()
         setContent {
             var showSplash by remember { mutableStateOf(true) }
             Surface(

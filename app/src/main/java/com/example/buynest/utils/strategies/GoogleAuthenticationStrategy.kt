@@ -3,7 +3,7 @@ package com.example.buynest.utils.strategies
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
-import com.example.buynest.repository.authenticationrepo.AuthenticationRepo
+import com.example.buynest.repository.authentication.AuthenticationRepo
 
 class GoogleAuthenticationStrategy(
      val context: Context,
