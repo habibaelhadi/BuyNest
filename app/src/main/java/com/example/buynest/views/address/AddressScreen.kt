@@ -14,6 +14,9 @@ import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.unit.dp
 import com.example.buynest.model.entity.Address
 import com.example.buynest.ui.theme.MainColor
+import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_FRIEND
+import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_HOME
+import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_OFFICE
 import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_TOKEN
 import com.example.buynest.utils.SecureSharedPrefHelper
 import com.example.buynest.viewmodel.address.AddressViewModel
@@ -105,16 +108,21 @@ fun AddressScreen(
                 } else {
                     LazyColumn {
                         itemsIndexed(addressList) { index, address ->
+                            val labelType = address.address2?.split("-")?.firstOrNull()?.trim()?.lowercase() ?: "other"
+                            val landmark = address.address2?.split("-")?.lastOrNull()?.trim()
+                            val label = labelType.replaceFirstChar { it.uppercase() }
                             AddressItem(
-                                label = address.address1 ?: "No label",
-                                icon = when (address.address2?.lowercase()) {
-                                    "home" -> Icons.Default.Home
-                                    "office" -> Icons.Default.Work
-                                    "friend" -> Icons.Default.Person
+                                label = label,
+                                icon = when (label) {
+                                    ADDRESS_TYPE_HOME -> Icons.Default.Home
+                                    ADDRESS_TYPE_OFFICE -> Icons.Default.Work
+                                    ADDRESS_TYPE_FRIEND -> Icons.Default.Person
                                     else -> Icons.Default.LocationOn
                                 },
                                 address = address.address1 ?: "",
                                 phone = address.phone ?: "",
+                                receiverName = address.firstName ?: "",
+                                landmark = landmark,
                                 isSelected = selectedIndex == index,
                                 onSelect = {
                                     selectedIndex = index

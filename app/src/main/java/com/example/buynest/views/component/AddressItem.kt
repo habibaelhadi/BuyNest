@@ -34,6 +34,8 @@ fun AddressItem(
     icon: ImageVector,
     address: String,
     phone: String,
+    receiverName: String,
+    landmark: String?,
     isSelected: Boolean = false,
     onSelect: () -> Unit,
     onMapClick: () -> Unit
@@ -61,15 +63,26 @@ fun AddressItem(
                     colors = CheckboxDefaults.colors(checkedColor = MainColor)
                 )
             }
+            Spacer(modifier = Modifier.height(6.dp))
 
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = address, style = MaterialTheme.typography.body2)
-            Text(text = phone, style = MaterialTheme.typography.body2)
+            Text(text = "Receiver: $receiverName", style = MaterialTheme.typography.body2)
+            Spacer(modifier = Modifier.height(6.dp))
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = "Phone: $phone", style = MaterialTheme.typography.body2)
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(text = "Address: $address", style = MaterialTheme.typography.body2)
+            Spacer(modifier = Modifier.height(6.dp))
+
+            landmark?.takeIf { it.isNotBlank() }?.let {
+                Text(text = "Landmark: $it", style = MaterialTheme.typography.body2)
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "View on map",
                 color = MainColor,
+                fontWeight = MaterialTheme.typography.body2.fontWeight,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.clickable { onMapClick() }
             )

@@ -10,4 +10,8 @@ object AppConstants {
     const val STRIPE_URL = ""
     const val CRUUENCY_URL = ""
 
+    const val ADDRESS_TYPE_HOME = "Home"
+    const val ADDRESS_TYPE_OFFICE = "Office"
+    const val ADDRESS_TYPE_FRIEND = "Friend"
+    const val ADDRESS_TYPE_OTHER = "Other"
 }

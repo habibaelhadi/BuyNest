@@ -25,6 +25,10 @@ import androidx.core.content.ContextCompat
 import com.apollographql.apollo3.api.Optional
 import com.example.buynest.type.MailingAddressInput
 import com.example.buynest.ui.theme.MainColor
+import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_FRIEND
+import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_HOME
+import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_OFFICE
+import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_OTHER
 import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_TOKEN
 import com.example.buynest.utils.SecureSharedPrefHelper
 import com.example.buynest.viewmodel.address.AddressViewModel
@@ -172,7 +176,12 @@ fun MapScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            listOf("Home", "Office", "Friend", "Other").forEach { type ->
+                            listOf(
+                                ADDRESS_TYPE_HOME,
+                                ADDRESS_TYPE_OFFICE,
+                                ADDRESS_TYPE_FRIEND,
+                                ADDRESS_TYPE_OTHER
+                            ).forEach { type ->
                                 FilterChip(
                                     selected = addressType == type,
                                     onClick = { addressType = type },
@@ -212,7 +221,8 @@ fun MapScreen(
                             onValueChange = {
                                 phone = it
                                 phoneError = null
-                            },                            label = { Text("Complete address") },
+                            },
+                            label = { Text("Receiver's phone") },
                             modifier = Modifier.fillMaxWidth(),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 focusedBorderColor = MainColor,
@@ -258,14 +268,31 @@ fun MapScreen(
 
                                 if (!valid) return@Button
 
+                                val formattedPhone = phone.text.takeIf { it.isNotBlank() }?.let {
+                                    if (!it.startsWith("+")) "+2$it" else it
+                                }
+
+                                val city = addressViewModel.extractFromAddress(address) { parts ->
+                                    parts.getOrNull(parts.size - 2) ?: "Unknown City"
+                                }
+
+                                val country = addressViewModel.extractFromAddress(address) { parts ->
+                                    parts.lastOrNull() ?: "Unknown Country"
+                                }
+
+                                val address2Combined = when {
+                                    landmark.text.isNotBlank() -> "$addressType - ${landmark.text}"
+                                    else -> addressType
+                                }
+
                                 val mailingAddressInput = MailingAddressInput(
                                     address1 = Optional.Present(address),
-                                    address2 = if (landmark.text.isNotBlank()) Optional.Present(landmark.text) else Optional.Absent,
-                                    city = Optional.Present("YourCity"),
-                                    country = Optional.Present("YourCountry"),
+                                    address2 = Optional.Present(address2Combined),
+                                    city = Optional.Present(city),
+                                    country = Optional.Present(country),
                                     firstName = Optional.Present(name.text),
                                     lastName = Optional.Absent,
-                                    phone = if (phone.text.isNotBlank()) Optional.Present(phone.text) else Optional.Absent
+                                    phone = formattedPhone?.let { Optional.Present(it) } ?: Optional.Absent
                                 )
 
                                 addressViewModel.addAddress(
