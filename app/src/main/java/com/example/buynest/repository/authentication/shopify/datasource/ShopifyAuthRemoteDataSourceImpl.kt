@@ -1,15 +1,26 @@
 package com.example.buynest.repository.authentication.shopify.datasource
 
 import android.util.Log
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.apollographql.apollo3.api.Optional
 import com.example.buynest.CreateCustomerMutation
 import com.example.buynest.LoginCustomerMutation
 import com.example.buynest.model.data.remote.graphql.ApolloClient.apolloClient
+import com.example.buynest.model.data.remote.rest.RemoteDataSourceImpl
+import com.example.buynest.model.data.remote.rest.StripeClient
+import com.example.buynest.repository.cart.CartRepository
+import com.example.buynest.repository.cart.CartRepositoryImpl
+import com.example.buynest.repository.cart.datasource.CartDataSourceImpl
 import com.example.buynest.type.CustomerAccessTokenCreateInput
 import com.example.buynest.type.CustomerCreateInput
+import com.example.buynest.utils.AppConstants.KEY_CART_ID
+import com.example.buynest.utils.AppConstants.KEY_CHECKOUT_URL
 import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_ID
 import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_TOKEN
 import com.example.buynest.utils.SecureSharedPrefHelper
+import com.example.buynest.viewmodel.cart.CartManager
+import com.example.buynest.viewmodel.cart.CartViewModel
+import com.example.buynest.viewmodel.cart.CartViewModelFactory
 
 class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
     override suspend fun signUpCustomer(
@@ -43,9 +54,27 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
             val errors = response.data?.customerCreate?.userErrors.orEmpty()
 
             if (errors.isEmpty() && customer != null) {
-                Log.i("TAG", "signUpCustomer: ${customer.id}")
                 SecureSharedPrefHelper.putString(KEY_CUSTOMER_ID, customer.id)
+
                 Log.i("TAG", "Secure Shared: ${SecureSharedPrefHelper.getString(KEY_CUSTOMER_ID)}")
+
+                CartManager.setup(CartRepositoryImpl(cartDataSource = CartDataSourceImpl(apolloClient)))
+                val cartResponse = CartManager.createCart()
+                val cartData = cartResponse.data?.cartCreate?.cart
+                val cartId = cartData?.id
+                val checkoutUrl = cartData?.checkoutUrl
+
+                if (cartId != null && checkoutUrl != null) {
+                    SecureSharedPrefHelper.putString(KEY_CART_ID, cartId)
+                    SecureSharedPrefHelper.putString(KEY_CHECKOUT_URL, checkoutUrl.toString())
+
+                    Log.i("TAG", "Secure Shared: ${SecureSharedPrefHelper.getString(KEY_CART_ID)}")
+                    Log.i("TAG", "Secure Shared: ${SecureSharedPrefHelper.getString(KEY_CHECKOUT_URL)}")
+
+                    val token = SecureSharedPrefHelper.getString(KEY_CUSTOMER_TOKEN).orEmpty()
+                    CartManager.linkCartToCustomer(cartId, token)
+                }
+
                 Result.success(customer)
             } else {
                 Log.i("TAG", "else signUpCustomer: $errors")
