@@ -31,6 +31,7 @@ android {
         buildConfigField("String", "STRIPE_SECRET_KEY", properties.getProperty("STRIPE_SECRET_KEY"))
         buildConfigField("String", "CRUUENCY_API_KEY", properties.getProperty("CRUUENCY_API_KEY"))
         buildConfigField("String", "PLACES_API_KEY", properties.getProperty("PLACES_API_KEY"))
+        buildConfigField("String", "Admin_ACCESS_TOKEN", properties.getProperty("Admin_ACCESS_TOKEN"))
         resValue ("string", "maps_api_key", properties.getProperty("PLACES_API_KEY"))
 
     }

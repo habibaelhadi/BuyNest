@@ -1,0 +1,25 @@
+mutation CreateDraftOrder(
+    $email: String!,
+    $shippingAddress: MailingAddressInput!,
+    $lineItems: [DraftOrderLineItemInput!]!,
+    $note: String
+) {
+    draftOrderCreate(input: {
+        email: $email,
+        shippingAddress: $shippingAddress,
+        lineItems: $lineItems,
+        note: $note,
+        tags: ["Stripe Draft"]
+    }) {
+        draftOrder {
+            id
+            name
+            createdAt
+            invoiceUrl
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}

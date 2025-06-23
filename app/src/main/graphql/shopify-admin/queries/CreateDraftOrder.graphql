@@ -1,0 +1,13 @@
+mutation {
+    draftOrderComplete(id: "gid://shopify/DraftOrder/1234567890") {
+        draftOrder {
+            id
+            name
+            status
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}
