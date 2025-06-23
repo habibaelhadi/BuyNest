@@ -32,6 +32,7 @@ import com.example.buynest.views.orderdetails.OrderDetailsScreen
 import com.example.buynest.views.orders.OrdersHistoryScreen
 import com.example.buynest.views.productInfo.ProductInfoScreen
 import com.example.buynest.views.profile.ProfileScreen
+import com.example.buynest.views.search.SearchScreen
 import com.example.buynest.views.settings.SettingsScreen
 
 @SuppressLint("ViewModelConstructorInComposable")
@@ -117,7 +118,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 onSearchClicked = {
                     mainNavController.navigate(RoutesScreens.Search.route)
                 }
-                , sharedViewModel
+                , sharedViewModel = sharedViewModel
             )
         }
         composable(RoutesScreens.Profile.route) {

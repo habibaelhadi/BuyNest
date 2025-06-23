@@ -78,6 +78,7 @@ fun ProductItem(
         var itemToDelete by remember { mutableStateOf<ProductsDetailsByIDsQuery.Node?>(null) }
         var showConfirmDialog by remember { mutableStateOf(false) }
         val user = FirebaseAuthObject.getAuth().currentUser
+        val showGuestDialog = remember { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
             if (user != null) {
@@ -109,24 +110,28 @@ fun ProductItem(
                 ) {
                     IconButton(
                         onClick = {
-                            if (isFav) {
-                                itemToDelete = ProductsDetailsByIDsQuery.Node(
-                                    __typename = "Product",
-                                    onProduct = ProductsDetailsByIDsQuery.OnProduct(
-                                        id = productId,
-                                        title = productName,
-                                        vendor = "",
-                                        productType = "",
-                                        description = "",
-                                        featuredImage = null,
-                                        variants = ProductsDetailsByIDsQuery.Variants(emptyList()),
-                                        media = ProductsDetailsByIDsQuery.Media(emptyList()),
-                                        options = emptyList()
+                            if(user == null){
+                                showGuestDialog.value = true
+                            }else{
+                                if (isFav) {
+                                    itemToDelete = ProductsDetailsByIDsQuery.Node(
+                                        __typename = "Product",
+                                        onProduct = ProductsDetailsByIDsQuery.OnProduct(
+                                            id = productId,
+                                            title = productName,
+                                            vendor = "",
+                                            productType = "",
+                                            description = "",
+                                            featuredImage = null,
+                                            variants = ProductsDetailsByIDsQuery.Variants(emptyList()),
+                                            media = ProductsDetailsByIDsQuery.Media(emptyList()),
+                                            options = emptyList()
+                                        )
                                     )
-                                )
-                                showConfirmDialog = true
-                            } else {
-                                favViewModel.addToFavorite(productId)
+                                    showConfirmDialog = true
+                                } else {
+                                    favViewModel.addToFavorite(productId)
+                                }
                             }
                         },
                         modifier = Modifier
@@ -202,7 +207,13 @@ fun ProductItem(
                     }
                 })
         }
+        GuestAlertDialog(
+            showDialog = showGuestDialog.value,
+            onDismiss = { showGuestDialog.value = false },
+            onConfirm = {
+                showGuestDialog.value = false
+            }
+        )
     }
-
 }
 
