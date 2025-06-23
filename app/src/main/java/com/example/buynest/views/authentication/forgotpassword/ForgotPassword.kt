@@ -2,7 +2,6 @@ package com.example.buynest.views.authentication.forgotpassword
 
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,9 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -37,10 +34,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.R
-import com.example.buynest.repos.authenticationrepo.AuthenticationRepoImpl
+import com.example.buynest.repository.authentication.AuthenticationRepoImpl
+import com.example.buynest.repository.authentication.firebase.FirebaseRepositoryImpl
+import com.example.buynest.repository.authentication.firebase.datasource.FirebaseDataSourceImpl
+import com.example.buynest.repository.authentication.shopify.ShopifyAuthRepositoryImpl
+import com.example.buynest.repository.authentication.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
-import com.example.buynest.viewmodels.authentication.AuthenticationViewModel
+import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
 import com.example.buynest.views.authentication.CustomTextField
 import com.example.buynest.views.customsnackbar.CustomSnackbar
 
@@ -49,7 +50,16 @@ fun ForgotPasswordScreen(
     onBackToLogin: () -> Unit
 ) {
     val viewModel: AuthenticationViewModel = viewModel(
-        factory = AuthenticationViewModel.AuthenticationViewModelFactory(AuthenticationRepoImpl())
+        factory = AuthenticationViewModel.AuthenticationViewModelFactory(
+            AuthenticationRepoImpl(
+                FirebaseRepositoryImpl(
+                    FirebaseDataSourceImpl()
+                ),
+                ShopifyAuthRepositoryImpl(
+                    ShopifyAuthRemoteDataSourceImpl()
+                )
+            )
+        )
     )
     var email by remember { mutableStateOf("") }
     val snackbarMessage = remember { mutableStateOf<String?>(null) }

@@ -2,6 +2,7 @@ package com.example.buynest.views.component
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -21,11 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,13 +35,31 @@ import com.example.buynest.ui.theme.MainColor
 @Composable
 fun ProfileImagePicker() {
     val context = LocalContext.current
+    val prefs = context.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
     var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+    LaunchedEffect(Unit) {
+        val fileName = prefs.getString("profile_image", null)
+        fileName?.let {
+            val file = context.getFileStreamPath(it)
+            if (file.exists()) {
+                imageBitmap = BitmapFactory.decodeFile(file.absolutePath)
+            }
+        }
+    }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            imageBitmap = loadBitmapFromUri(context, it)
+            val bitmap = loadBitmapFromUri(context, it)
+            bitmap?.let {
+                imageBitmap = it
+                val savedFileName = saveBitmapToInternalStorage(context, it)
+                savedFileName?.let { name ->
+                    prefs.edit().putString("profile_image", name).apply()
+                }
+            }
         }
     }
 
@@ -91,7 +106,7 @@ fun ProfileImagePicker() {
         ) {
             Icon(
                 imageVector = Icons.Default.Edit,
-                contentDescription = "Camera Icon",
+                contentDescription = "Edit Icon",
                 tint = MainColor,
                 modifier = Modifier.size(20.dp)
             )
@@ -108,6 +123,19 @@ fun loadBitmapFromUri(context: Context, uri: Uri): Bitmap? {
             val source = ImageDecoder.createSource(context.contentResolver, uri)
             ImageDecoder.decodeBitmap(source)
         }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
+fun saveBitmapToInternalStorage(context: Context, bitmap: Bitmap): String? {
+    return try {
+        val filename = "profile_image.png"
+        context.openFileOutput(filename, Context.MODE_PRIVATE).use { stream ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        }
+        filename
     } catch (e: Exception) {
         e.printStackTrace()
         null

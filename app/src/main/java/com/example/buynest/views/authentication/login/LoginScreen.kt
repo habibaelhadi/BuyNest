@@ -31,7 +31,6 @@ import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -48,16 +47,18 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import com.example.buynest.R
-import com.example.buynest.navigation.RoutesScreens
-import com.example.buynest.repos.authenticationrepo.AuthenticationRepoImpl
+import com.example.buynest.repository.authentication.AuthenticationRepoImpl
+import com.example.buynest.repository.authentication.firebase.FirebaseRepositoryImpl
+import com.example.buynest.repository.authentication.firebase.datasource.FirebaseDataSourceImpl
+import com.example.buynest.repository.authentication.shopify.ShopifyAuthRepositoryImpl
+import com.example.buynest.repository.authentication.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
-import com.example.buynest.utils.sharedPreferences.SharedPreferencesImpl
+import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.utils.strategies.GoogleAuthenticationStrategy
 import com.example.buynest.utils.strategies.LoginAuthenticationStrategy
-import com.example.buynest.viewmodels.authentication.AuthenticationViewModel
+import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
 import com.example.buynest.views.authentication.CustomTextField
 import com.example.buynest.views.customsnackbar.CustomSnackbar
 
@@ -73,7 +74,16 @@ fun LoginScreen(
     val activity = LocalActivity.current
     val context = LocalContext.current
     val viewModel: AuthenticationViewModel = viewModel(
-        factory = AuthenticationViewModel.AuthenticationViewModelFactory(AuthenticationRepoImpl())
+        factory = AuthenticationViewModel.AuthenticationViewModelFactory(
+            AuthenticationRepoImpl(
+                FirebaseRepositoryImpl(
+                    FirebaseDataSourceImpl()
+                ),
+                ShopifyAuthRepositoryImpl(
+                    ShopifyAuthRemoteDataSourceImpl()
+                )
+            )
+        )
     )
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -91,8 +101,8 @@ fun LoginScreen(
     LaunchedEffect(snackbarMessage.value) {
         if (snackbarMessage.value == "Success") {
             navigateToHome()
-            SharedPreferencesImpl.setLogIn(context = context, true)
-            SharedPreferencesImpl.setAuthenticationMode(context,"emailPassword")
+            SharedPrefHelper.setLogIn(context = context, true)
+            SharedPrefHelper.setAuthenticationMode(context,"emailPassword")
         }
     }
 
@@ -271,7 +281,7 @@ fun LoginScreen(
                             val validation = viewModel.setGoogleStrategy(strategy)
 
                             if (validation == null) {
-                                SharedPreferencesImpl.setAuthenticationMode(context, "google")
+                                SharedPrefHelper.setAuthenticationMode(context, "google")
                                 viewModel.getGoogleSignInIntent(context)?.let { intent ->
                                     googleSignInLauncher.launch(intent)
                                 }
@@ -296,7 +306,7 @@ fun LoginScreen(
                     IconButton(
                         onClick = {
                             navigateToHome()
-                            SharedPreferencesImpl.setAuthenticationMode(context,"guest")
+                            SharedPrefHelper.setAuthenticationMode(context,"guest")
                         },
                         modifier = Modifier
                             .size(48.dp)

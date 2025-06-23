@@ -1,14 +1,22 @@
 package com.example.buynest.navigation
 
+import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.buynest.utils.sharedPreferences.SharedPreferencesImpl
+import com.example.buynest.utils.SharedPrefHelper
+import com.example.buynest.viewmodel.address.AddressViewModel
+import com.example.buynest.viewmodel.address.AddressViewModelFactory
+import com.example.buynest.viewmodel.cart.CartViewModel
+import com.example.buynest.viewmodel.cart.CartViewModelFactory
+import com.example.buynest.viewmodel.shared.SharedViewModel
+import com.example.buynest.viewmodel.sreachMap.SearchViewModel
 import com.example.buynest.views.address.AddressScreen
 import com.example.buynest.views.authentication.forgotpassword.ForgotPasswordScreen
 import com.example.buynest.views.authentication.login.LoginScreen
@@ -18,26 +26,36 @@ import com.example.buynest.views.brandProducts.BrandDetailsScreen
 import com.example.buynest.views.cart.CartScreen
 import com.example.buynest.views.favourites.FavouriteScreen
 import com.example.buynest.views.home.HomeScreen
+import com.example.buynest.views.map.MapScreen
+import com.example.buynest.views.map.MapSearchScreen
 import com.example.buynest.views.orderdetails.OrderDetailsScreen
 import com.example.buynest.views.orders.OrdersHistoryScreen
-import com.example.buynest.views.productInfo.ProductInfo
+import com.example.buynest.views.productInfo.ProductInfoScreen
 import com.example.buynest.views.profile.ProfileScreen
-import com.example.buynest.views.search.SearchScreen
 import com.example.buynest.views.settings.SettingsScreen
 
+@SuppressLint("ViewModelConstructorInComposable")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SetupNavHost(mainNavController: NavHostController) {
     val context = LocalContext.current
-    val isLoggedIn = SharedPreferencesImpl.getLogIn(context)
+    val isLoggedIn = SharedPrefHelper.getLogIn(context)
     val startDestination = if (isLoggedIn) RoutesScreens.Home.route else RoutesScreens.Login.route
+    val sharedViewModel: SharedViewModel = viewModel()
+    val addressViewModel: AddressViewModel = viewModel(factory = AddressViewModelFactory())
+    val cartViewModel: CartViewModel = viewModel(factory = CartViewModelFactory())
+
     NavHost(
         navController = mainNavController, startDestination = startDestination
     ) {
         composable(RoutesScreens.Home.route) {
             HomeScreen(
-                onCategoryClick = { categoryName ->
-                    mainNavController.navigate(RoutesScreens.BrandDetails.route.replace("{categoryName}", categoryName))
+                onCategoryClick = { categoryName,brandId ->
+                    mainNavController.navigate(
+                        RoutesScreens.BrandDetails.route
+                            .replace("{categoryName}", categoryName)
+                            .replace("{brandID}", brandId)
+                    )
                 },
                 onCardClicked = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
@@ -45,21 +63,28 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 onSearchClicked = {
                     mainNavController.navigate(RoutesScreens.Search.route)
                 }
+                , sharedViewModel,
+                onProductClicked = { productId ->
+                    mainNavController.navigate(RoutesScreens.ProductInfo.route
+                        .replace("{productId}", productId))
+                }
             )
         }
 
         composable(RoutesScreens.BrandDetails.route) { backStackEntry ->
             val categoryName = backStackEntry.arguments?.getString("categoryName")
+            val brandId = backStackEntry.arguments?.getString("brandID").toString()
             if (categoryName != null) {
-                BrandDetailsScreen(categoryName,
+                BrandDetailsScreen(brandID = brandId ,categoryName = categoryName,
                     onCartClicked = {
                         mainNavController.navigate(RoutesScreens.Cart.route)
                     },
                     backClicked = {
                         mainNavController.popBackStack()
                     },
-                    onProductClicked = {
-                        mainNavController.navigate(RoutesScreens.ProductInfo.route)
+                    onProductClicked = { productId ->
+                        mainNavController.navigate(RoutesScreens.ProductInfo.route
+                            .replace("{productId}", productId))
                     },
                     onSearchClicked = {
                         mainNavController.navigate(RoutesScreens.Search.route)
@@ -74,6 +99,10 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 onSearchClicked = {
                     mainNavController.navigate(RoutesScreens.Search.route)
+                },
+                navigateToProductInfo = { productId ->
+                    mainNavController.navigate(RoutesScreens.ProductInfo.route
+                        .replace("{productId}", productId))
                 }
             )
         }
@@ -81,12 +110,14 @@ fun SetupNavHost(mainNavController: NavHostController) {
             CategoriesScreen(onCartClicked = {
                 mainNavController.navigate(RoutesScreens.Cart.route)
             },
-                onProductClicked = {
-                    mainNavController.navigate(RoutesScreens.ProductInfo.route)
+                onProductClicked = { productId ->
+                    mainNavController.navigate(RoutesScreens.ProductInfo.route
+                        .replace("{productId}", productId))
                 },
                 onSearchClicked = {
                     mainNavController.navigate(RoutesScreens.Search.route)
                 }
+                , sharedViewModel
             )
         }
         composable(RoutesScreens.Profile.route) {
@@ -124,6 +155,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 gotoAddressScreen = {
                     mainNavController.navigate(RoutesScreens.Address.route)
+                },
+                gotoLoginScreen = {
+                    mainNavController.navigate(RoutesScreens.Login.route)
                 }
             )
         }
@@ -131,14 +165,19 @@ fun SetupNavHost(mainNavController: NavHostController) {
             AddressScreen(
                 onBackClicked = {
                     mainNavController.popBackStack()
-                }
+                },
+                onMapClicked = {
+                    mainNavController.navigate(RoutesScreens.Map.route)
+                },
+                addressViewModel = addressViewModel
             )
         }
         composable(RoutesScreens.Cart.route) {
             CartScreen(
                 onBackClicked = {
                     mainNavController.popBackStack()
-                }
+                },
+                cartViewModel = cartViewModel,
             )
         }
         composable(RoutesScreens.ForgotPassword.route) {
@@ -165,14 +204,40 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 }
             )
         }
-        composable(RoutesScreens.ProductInfo.route) {
-            ProductInfo(
+        composable(
+            route = RoutesScreens.ProductInfo.route,
+            ){ backStackEntry ->
+            val productId = backStackEntry.arguments?.getString("productId")
+            ProductInfoScreen(
                 backClicked = {
                     mainNavController.popBackStack()
                 },
                 navigateToCart = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
-                }
+                },
+                productId = productId ?: ""
+            )
+        }
+        composable(RoutesScreens.Map.route) {
+            MapScreen(
+                backClicked = {
+                    mainNavController.popBackStack()
+                },
+                onMapSearchClicked = {
+                    mainNavController.navigate(RoutesScreens.MapSearch.route)
+                },
+                addressViewModel = addressViewModel
+            )
+        }
+        composable(RoutesScreens.MapSearch.route) {
+            MapSearchScreen(
+                onBack = {
+                    mainNavController.popBackStack()
+                },
+                onPlaceSelected = { latLng, address ->
+                    Log.d("MapSearchScreen", "Selected location: $latLng, $address")
+                },
+                searchViewModel = SearchViewModel(context)
             )
         }
         composable(RoutesScreens.Search.route) {

@@ -19,6 +19,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,9 +35,13 @@ fun AddressItem(
     icon: ImageVector,
     address: String,
     phone: String,
+    receiverName: String,
+    landmark: String?,
     isSelected: Boolean = false,
     onSelect: () -> Unit,
-    onMapClick: () -> Unit
+    onMapClick: () -> Unit,
+    onSetDefault: () -> Unit,
+    onEdit: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -57,19 +62,33 @@ fun AddressItem(
                 )
                 Checkbox(
                     checked = isSelected,
-                    onCheckedChange = { onSelect() },
+                    onCheckedChange = {
+                        onSelect()
+                        onSetDefault()
+                    },
                     colors = CheckboxDefaults.colors(checkedColor = MainColor)
                 )
             }
+            Spacer(modifier = Modifier.height(6.dp))
 
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = address, style = MaterialTheme.typography.body2)
-            Text(text = phone, style = MaterialTheme.typography.body2)
+            Text(text = "Receiver: $receiverName", style = MaterialTheme.typography.body2)
+            Spacer(modifier = Modifier.height(6.dp))
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = "Phone: $phone", style = MaterialTheme.typography.body2)
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(text = "Address: $address", style = MaterialTheme.typography.body2)
+            Spacer(modifier = Modifier.height(6.dp))
+
+            landmark?.takeIf { it.isNotBlank() }?.let {
+                Text(text = "Landmark: $it", style = MaterialTheme.typography.body2)
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "View on map",
                 color = MainColor,
+                fontWeight = MaterialTheme.typography.body2.fontWeight,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.clickable { onMapClick() }
             )
@@ -79,8 +98,8 @@ fun AddressItem(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                IconButton(onClick = {}) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "More")
+                IconButton(onClick = { onEdit() }) {
+                    Icon(Icons.Default.Settings, contentDescription = "edit")
                 }
             }
         }

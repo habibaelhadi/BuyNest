@@ -43,6 +43,7 @@ import com.example.buynest.navigation.SetupNavHost
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -51,14 +52,18 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.buynest.navigation.RoutesScreens
 import com.example.buynest.ui.theme.white
+import com.example.buynest.utils.SecureSharedPrefHelper
 import kotlinx.coroutines.delay
 
+val routIndex = MutableLiveData<Int>(0)
 class MainActivity : ComponentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        SecureSharedPrefHelper.init(this)
+
         setContent {
             var showSplash by remember { mutableStateOf(true) }
             Surface(
@@ -175,12 +180,15 @@ class MainActivity : ComponentActivity() {
                             destinationId = screen.id
                         )
                     }
+
                     layoutDirection = View.LAYOUT_DIRECTION_LTR
                     setMenuItems(cbnMenuItems.toTypedArray(), 0)
                     setOnMenuItemClickListener { cbnMenuItem, i ->
+                        routIndex.value = i
                         navController.popBackStack()
                         navController.navigate(ScreenMenuItem.menuItems[i].screen.route)
                     }
+                    setMenuItems(cbnMenuItems.toTypedArray(), routIndex.value)
                 }
             }
         )

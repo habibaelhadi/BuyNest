@@ -25,18 +25,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.ui.theme.LightGray
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
+import com.example.buynest.viewmodel.shared.SharedViewModel
+import androidx.compose.runtime.getValue
 
 @Composable
 fun SideNavigation(
     selectedItem: String?,
     onItemSelected: (String) -> Unit,
     onSubcategorySelected: (String) -> Unit,
-    selectedSubcategory: String?
-) {
-    val categories = listOf("Kids", "Women", "Men", "Home")
+    selectedSubcategory: String?,
+    sharedViewModel: SharedViewModel,
+
+    ) {
+    val categories by sharedViewModel.category.collectAsStateWithLifecycle()
+
     val subcategories = listOf("Accessories", "T-Shirts", "Shoes")
 
     LazyColumn(
@@ -51,7 +58,7 @@ fun SideNavigation(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(categories) { category ->
-            val isSelected = category == selectedItem
+            val isSelected = category.title == selectedItem
 
             Column(
                 modifier = Modifier
@@ -63,7 +70,7 @@ fun SideNavigation(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onItemSelected(category) }
+                        .clickable { onItemSelected(category.title) }
                         .padding(vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -78,7 +85,7 @@ fun SideNavigation(
                     )
                     Spacer(modifier = Modifier.width(14.dp))
                     Text(
-                        text = category,
+                        text = category.title,
                         color = MainColor,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                         fontSize = 15.sp
@@ -101,7 +108,7 @@ fun SideNavigation(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = sub,
-                                color = if (selectedSubcategory == sub) Color(0xFF002366) else Color.DarkGray,
+                                color = if (selectedSubcategory == sub) MainColor else Color.DarkGray,
                                 fontSize = 14.sp,
                                 fontWeight = if (selectedSubcategory == sub) FontWeight.Bold else FontWeight.Normal
                             )

@@ -1,0 +1,32 @@
+query ProductsByCollectionID($id: ID!) {
+    collection(id: $id) {
+        id
+        title
+        products(first: 50) {
+            edges {
+                node {
+                    id
+                    title
+                    vendor
+                    featuredImage {
+                        url
+                    }
+                    variants(first: 1) {
+                        edges {
+                            node {
+                                price {
+                                    amount
+                                    currencyCode
+                                }
+                                compareAtPrice {
+                                    amount
+                                    currencyCode
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

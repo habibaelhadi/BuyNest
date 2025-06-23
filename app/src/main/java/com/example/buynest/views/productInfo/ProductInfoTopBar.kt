@@ -12,12 +12,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.MainColor
+import com.example.buynest.views.component.GuestAlertDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,6 +29,8 @@ fun ProductInfoTopBar(
     backClicked :()->Unit,
     navigateToCart :()->Unit
 ){
+    val showGuestDialog = remember { mutableStateOf(false) }
+    val user = FirebaseAuthObject.getAuth().currentUser
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -46,7 +52,13 @@ fun ProductInfoTopBar(
             }
         },
         actions = {
-            IconButton(onClick = { navigateToCart() }) {
+            IconButton(onClick = {
+                if (user == null){
+                    showGuestDialog.value = true
+                }else{
+                    navigateToCart()
+                }
+            }) {
                 Icon(
                     Icons.Default.ShoppingCart,
                     contentDescription = null,
@@ -56,5 +68,12 @@ fun ProductInfoTopBar(
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
+    )
+    GuestAlertDialog(
+        showDialog = showGuestDialog.value,
+        onDismiss = { showGuestDialog.value = false },
+        onConfirm = {
+            showGuestDialog.value = false
+        }
     )
 }

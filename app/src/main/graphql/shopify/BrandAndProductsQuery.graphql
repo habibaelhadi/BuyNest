@@ -1,0 +1,55 @@
+query BrandsAndProducts {
+    products(first: 100) {
+        edges {
+            node {
+                id
+                title
+                vendor
+                productType
+                description
+                featuredImage {
+                    url
+                }
+                variants(first: 5) {
+                    edges {
+                        node {
+                            id
+                            price {
+                                amount
+                                currencyCode
+                            }
+                            selectedOptions {
+                                name
+                                value
+                            }
+                        }
+                    }
+                }
+                media(first: 5) {
+                    edges {
+                        node {
+                            mediaContentType
+                            alt
+                            previewImage {
+                                url
+                            }
+                        }
+                    }
+                }
+                options(first: 2) {
+                    values
+                }
+            }
+        }
+    }
+
+    collections(first: 16) {
+        nodes {
+            id
+            title
+            image {
+                url
+            }
+        }
+    }
+}

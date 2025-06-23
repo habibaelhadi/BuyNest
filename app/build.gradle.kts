@@ -27,6 +27,12 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "SHOPIFY_ACCESS_TOKEN", properties.getProperty("SHOPIFY_ACCESS_TOKEN"))
+        buildConfigField("String", "STRIPE_PUBLISHABLE_KEY", properties.getProperty("STRIPE_PUBLISHABLE_KEY"))
+        buildConfigField("String", "STRIPE_SECRET_KEY", properties.getProperty("STRIPE_SECRET_KEY"))
+        buildConfigField("String", "CRUUENCY_API_KEY", properties.getProperty("CRUUENCY_API_KEY"))
+        buildConfigField("String", "PLACES_API_KEY", properties.getProperty("PLACES_API_KEY"))
+        resValue ("string", "maps_api_key", properties.getProperty("PLACES_API_KEY"))
+
     }
 
     buildTypes {
@@ -106,6 +112,25 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     // Apollo-GraphQL
     implementation("com.apollographql.apollo3:apollo-runtime:3.8.6")
+    // Stripe SDK
+    implementation("com.stripe:stripe-android:21.17.0")
+    implementation("com.stripe:paymentsheet:21.17.0")
+    // Retrofit + Gson
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    // OkHttp (with logging)
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    // Kotlin Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    //coil for image
+    implementation(libs.coil.compose)
+    // EncryptedSharedPreferences
+    implementation ("androidx.security:security-crypto:1.1.0-alpha03")
+    // OpenStreetMap
+    implementation("org.osmdroid:osmdroid-android:6.1.16")
+    // Google Places API
+    implementation("com.google.android.libraries.places:places:3.4.0")
 
 }
 
@@ -114,5 +139,10 @@ apollo {
         packageName.set("com.example.buynest")
         schemaFile.set(file("src/main/graphql/shopify/schema.graphqls"))
         srcDir("src/main/graphql/shopify")
+    }
+    service("shopify-admin") {
+        packageName.set("com.example.buynest.admin")
+        schemaFile.set(file("src/main/graphql/shopify-admin/schema.graphqls"))
+        srcDir("src/main/graphql/shopify-admin/queries")
     }
 }

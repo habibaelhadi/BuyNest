@@ -14,120 +14,158 @@ import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.unit.dp
 import com.example.buynest.model.entity.Address
 import com.example.buynest.ui.theme.MainColor
+import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_FRIEND
+import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_HOME
+import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_OFFICE
+import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_TOKEN
+import com.example.buynest.utils.SecureSharedPrefHelper
+import com.example.buynest.viewmodel.address.AddressViewModel
 import com.example.buynest.views.component.AddressItem
+import com.example.buynest.views.component.EditAddressSheet
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AddressScreen(
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    onMapClicked: () -> Unit,
+    addressViewModel: AddressViewModel
 ) {
-    val addressList = remember {
-        mutableStateListOf(
-            Address(
-                "Home",
-                Icons.Default.Home,
-                "12 , Raml Station, Alexandria",
-                "+20 100 123 4567"
-            ),
-            Address(
-                "Office",
-                Icons.Default.Work,
-                "35 Fawzy Moaz Street, Smouha, Alexandria",
-                "+20 122 345 6789"
-            ),
-            Address(
-                "Ahmed’s House",
-                Icons.Default.Person,
-                "22 , Cleopatra, Alexandria",
-                "+20 111 234 5678"
-            ),
-            Address(
-                "Other Location",
-                Icons.Default.LocationOn,
-                "5 , Stanley, Alexandria",
-                "+20 109 876 5432"
-            )
-        )
+    val addressList by addressViewModel.addresses.collectAsState()
+    val error by addressViewModel.error.collectAsState()
+    val editingAddress by addressViewModel.editingAddress.collectAsState()
+
+    var selectedIndex by remember { mutableStateOf(-1) }
+    val bottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+    val coroutineScope = rememberCoroutineScope()
+
+    val token = SecureSharedPrefHelper.getString(KEY_CUSTOMER_TOKEN).toString()
+
+    LaunchedEffect(Unit) {
+        addressViewModel.loadAddresses(token)
+        addressViewModel.loadDefaultAddress(token)
     }
 
-    var selectedIndex by remember { mutableStateOf(0) }
-
-    Scaffold(
-        modifier = Modifier.padding(top = 60.dp),
-        topBar = {
-            TopAppBar(
-                backgroundColor = White,
-                elevation = 0.dp
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 4.dp)
+    ModalBottomSheetLayout(
+        sheetState = bottomSheetState,
+        sheetContent = {
+            editingAddress?.let { addr ->
+                EditAddressSheet(
+                    initialAddress = addr,
+                    onDismiss = {
+                        coroutineScope.launch { bottomSheetState.hide() }
+                        addressViewModel.stopEditingAddress()
+                    },
+                    onSave = { updatedInput ->
+                        addressViewModel.addAddress(token, updatedInput)
+                        coroutineScope.launch { bottomSheetState.hide() }
+                        addressViewModel.stopEditingAddress()
+                    }
+                )
+            } ?: Box(modifier = Modifier.height(1.dp))
+        }
+    ) {
+        Scaffold(
+            modifier = Modifier.padding(top = 60.dp),
+            topBar = {
+                TopAppBar(
+                    backgroundColor = White,
+                    elevation = 0.dp
                 ) {
-                    IconButton(
-                        onClick = { onBackClicked() },
-                        modifier = Modifier.align(Alignment.CenterStart)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                        IconButton(
+                            onClick = { onBackClicked() },
+                            modifier = Modifier.align(Alignment.CenterStart)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                        Text(
+                            text = "Addresses",
+                            style = MaterialTheme.typography.h6,
+                            color = MainColor,
+                            modifier = Modifier.align(Alignment.Center)
                         )
                     }
-                    Text(
-                        text = "Addresses",
-                        style = MaterialTheme.typography.h6,
-                        color = MainColor,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
                 }
-            }
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp)
-            ) {
-                Button(
-                    onClick = {
-                        addressList[0]
-                    },
+            },
+            content = { paddingValues ->
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MainColor
-                    )
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(16.dp)
                 ) {
-                    TextButton(
-                        onClick = { /* Handle navigate to map */ },
+                    Button(
+                        onClick = { onMapClicked() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = MainColor)
                     ) {
                         Icon(Icons.Default.Add, contentDescription = "Add", tint = White)
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("Add New Address", color = White)
                     }
-                }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                LazyColumn {
-                    itemsIndexed(addressList) { index, address ->
-                        AddressItem(
-                            label = address.label,
-                            icon = address.icon,
-                            address = address.address,
-                            phone = address.phone,
-                            isSelected = selectedIndex == index,
-                            onSelect = { selectedIndex = index },
-                            onMapClick = {
-                                Log.d("AddressScreen", "View on map clicked for ${address.label}")
-                            }
+                    if (error != null) {
+                        Text(
+                            text = error ?: "",
+                            color = MaterialTheme.colors.error,
+                            modifier = Modifier.padding(bottom = 8.dp)
                         )
+                    }
+
+                    if (addressList.isEmpty()) {
+                        Text("No addresses found", modifier = Modifier.align(Alignment.CenterHorizontally))
+                    } else {
+                        LazyColumn {
+                            itemsIndexed(addressList) { index, address ->
+                                val labelType = address.address2?.split("-")?.firstOrNull()?.trim()?.lowercase() ?: "other"
+                                val landmark = address.address2?.split("-")?.lastOrNull()?.trim()
+                                val label = labelType.replaceFirstChar { it.uppercase() }
+
+                                AddressItem(
+                                    label = label,
+                                    icon = when (label) {
+                                        ADDRESS_TYPE_HOME -> Icons.Default.Home
+                                        ADDRESS_TYPE_OFFICE -> Icons.Default.Work
+                                        ADDRESS_TYPE_FRIEND -> Icons.Default.Person
+                                        else -> Icons.Default.LocationOn
+                                    },
+                                    address = address.address1 ?: "",
+                                    phone = address.phone ?: "",
+                                    receiverName = address.firstName ?: "",
+                                    landmark = landmark,
+                                    isSelected = selectedIndex == index,
+                                    onSelect = {
+                                        selectedIndex = index
+                                    },
+                                    onMapClick = {
+                                        Log.d("AddressScreen", "View on map clicked for ${address.address1}")
+                                    },
+                                    onSetDefault = {
+                                        addressViewModel.setDefaultAddress(token, address.id ?: "")
+                                    },
+                                    onEdit = {
+                                        addressViewModel.startEditingAddress(address)
+                                        coroutineScope.launch { bottomSheetState.show() }
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             }
-        }
-    )
+        )
+    }
 }
-
 
