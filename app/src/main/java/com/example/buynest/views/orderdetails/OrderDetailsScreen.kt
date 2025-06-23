@@ -25,17 +25,17 @@ import com.example.buynest.views.orders.phenomenaFontFamily
 import com.example.buynest.model.entity.CartItem
 
 val cartItems = listOf(
-            CartItem(1, "Nike Air Jordan", "",3500, "Orange", 40, R.drawable.product, 1),
-            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, R.drawable.product, 2),
-            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, R.drawable.product, 2),
-            CartItem(1, "Nike Air Jordan", "",3500, "Orange", 40, R.drawable.product, 1),
-            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, R.drawable.product, 2),
-            CartItem(1, "Nike Air Jordan", "",3500, "Orange", 40, R.drawable.product, 1),
-            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, R.drawable.product, 2),
-            CartItem(1, "Nike Air Jordan", "",3500, "Orange", 40, R.drawable.product, 1),
-            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, R.drawable.product, 2),
-            CartItem(1, "Nike Air Jordan", "",3500, "Orange", 40, R.drawable.product, 1),
-            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, R.drawable.product, 2),
+            CartItem(1, "Nike Air Jordan", "",3500, "Orange", 40, "", 1),
+            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, "", 2),
+            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, "", 2),
+            CartItem(1, "Nike Air Jordan", "",3500, "Orange", 40,"", 1),
+            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, "", 2),
+            CartItem(1, "Nike Air Jordan", "",3500, "Orange", 40, "", 1),
+            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, "", 2),
+            CartItem(1, "Nike Air Jordan", "",3500, "Orange", 40, "", 1),
+            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, "", 2),
+            CartItem(1, "Nike Air Jordan", "",3500, "Orange", 40, "", 1),
+            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, "", 2),
 
         )
 

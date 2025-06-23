@@ -1,6 +1,7 @@
 package com.example.buynest.viewmodel.cart
 
 import com.apollographql.apollo3.api.ApolloResponse
+import com.example.buynest.AddItemToCartMutation
 import com.example.buynest.CreateCartMutation
 import com.example.buynest.LinkCartToCustomerMutation
 import com.example.buynest.repository.cart.CartRepository
@@ -20,7 +21,8 @@ object CartManager {
         return repository.linkCart(cartId, token)
     }
 
-    suspend fun addProductToCart(cartId: String, variantId: String, quantity: Int) {
-        repository.addItem(cartId, variantId, quantity)
+    suspend fun addItemToCart(cartId: String, variantId: String, quantity: Int): ApolloResponse<AddItemToCartMutation.Data> {
+        return repository.addItem(cartId, variantId, quantity)
     }
+
 }

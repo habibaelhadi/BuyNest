@@ -21,7 +21,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.BuildConfig
-import com.example.buynest.R
 import com.example.buynest.model.entity.CartItem
 import com.example.buynest.model.data.remote.rest.RemoteDataSourceImpl
 import com.example.buynest.model.data.remote.rest.StripeClient
@@ -80,11 +79,10 @@ fun CartScreen(
             val node = edge?.node ?: return@mapNotNull null
             val variant = node.merchandise?.onProductVariant ?: return@mapNotNull null
             val product = variant.product
-
             val price = variant.priceV2?.amount?.toString()?.toDoubleOrNull()?.toInt() ?: 0
-
             val color = variant.selectedOptions?.firstOrNull { it?.name == "Color" }?.value ?: "Default"
             val size = variant.selectedOptions?.firstOrNull { it?.name == "Size" }?.value?.toIntOrNull() ?: 0
+            val imageUrl = variant.image?.url?.toString() ?: ""
 
             CartItem(
                 id = node.id.hashCode(),
@@ -93,7 +91,7 @@ fun CartScreen(
                 price = price,
                 color = color,
                 size = size,
-                imageRes = R.drawable.product,
+                imageUrl = imageUrl,
                 quantity = node.quantity
             )
         } ?: emptyList()

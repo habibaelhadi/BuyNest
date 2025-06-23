@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductDetailsByIDQuery
@@ -76,6 +77,7 @@ import com.example.buynest.views.component.QuantitySelector
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.calculateCurrentOffsetForPage
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 @Composable
@@ -104,9 +106,20 @@ fun ProductInfoScreen(
 
     Scaffold (
         topBar = { ProductInfoTopBar(backClicked, navigateToCart) },
-        bottomBar = { BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart"){
-            //TODO: Add to cart
-        }}
+        bottomBar = {
+            if (response is UiResponseState.Success<*>) {
+                val product = (response as UiResponseState.Success<ProductDetailsByIDQuery.Data>).data.product
+                val variantId = product?.variants?.edges?.firstOrNull()?.node?.id
+
+                BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart") {
+                    variantId?.let {
+                        viewModel.viewModelScope.launch {
+                            viewModel.addToCart(it, 1)
+                        }
+                    }
+                }
+            }
+        }
     ) { innerPadding ->
         when (val result = response) {
             is UiResponseState.Error -> {

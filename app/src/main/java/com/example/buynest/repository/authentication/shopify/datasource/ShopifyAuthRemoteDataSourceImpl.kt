@@ -1,14 +1,11 @@
 package com.example.buynest.repository.authentication.shopify.datasource
 
 import android.util.Log
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.apollographql.apollo3.api.Optional
 import com.example.buynest.CreateCustomerMutation
+import com.example.buynest.CustomerAccessTokenCreateMutation
 import com.example.buynest.LoginCustomerMutation
 import com.example.buynest.model.data.remote.graphql.ApolloClient.apolloClient
-import com.example.buynest.model.data.remote.rest.RemoteDataSourceImpl
-import com.example.buynest.model.data.remote.rest.StripeClient
-import com.example.buynest.repository.cart.CartRepository
 import com.example.buynest.repository.cart.CartRepositoryImpl
 import com.example.buynest.repository.cart.datasource.CartDataSourceImpl
 import com.example.buynest.type.CustomerAccessTokenCreateInput
@@ -19,10 +16,9 @@ import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_ID
 import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_TOKEN
 import com.example.buynest.utils.SecureSharedPrefHelper
 import com.example.buynest.viewmodel.cart.CartManager
-import com.example.buynest.viewmodel.cart.CartViewModel
-import com.example.buynest.viewmodel.cart.CartViewModelFactory
 
 class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
+
     override suspend fun signUpCustomer(
         firstName: String,
         email: String,
@@ -34,10 +30,9 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
                 if (!it.startsWith("+")) "+2$it" else it
             }
 
-            Log.i("TAG", "data signUpCustomer: $formattedPhone")
-            Log.i("TAG", "data signUpCustomer: $firstName")
-            Log.i("TAG", "data signUpCustomer: $email")
-            Log.i("TAG", "data signUpCustomer: $password")
+            Log.i("TAG", "SignUp - Phone: $formattedPhone")
+            Log.i("TAG", "SignUp - Name: $firstName")
+            Log.i("TAG", "SignUp - Email: $email")
 
             val input = CustomerCreateInput(
                 firstName = Optional.presentIfNotNull(firstName),
@@ -53,35 +48,57 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
             val customer = response.data?.customerCreate?.customer
             val errors = response.data?.customerCreate?.userErrors.orEmpty()
 
-            if (errors.isEmpty() && customer != null) {
-                SecureSharedPrefHelper.putString(KEY_CUSTOMER_ID, customer.id)
-
-                Log.i("TAG", "Secure Shared: ${SecureSharedPrefHelper.getString(KEY_CUSTOMER_ID)}")
-
-                CartManager.setup(CartRepositoryImpl(cartDataSource = CartDataSourceImpl(apolloClient)))
-                val cartResponse = CartManager.createCart()
-                val cartData = cartResponse.data?.cartCreate?.cart
-                val cartId = cartData?.id
-                val checkoutUrl = cartData?.checkoutUrl
-
-                if (cartId != null && checkoutUrl != null) {
-                    SecureSharedPrefHelper.putString(KEY_CART_ID, cartId)
-                    SecureSharedPrefHelper.putString(KEY_CHECKOUT_URL, checkoutUrl.toString())
-
-                    Log.i("TAG", "Secure Shared: ${SecureSharedPrefHelper.getString(KEY_CART_ID)}")
-                    Log.i("TAG", "Secure Shared: ${SecureSharedPrefHelper.getString(KEY_CHECKOUT_URL)}")
-
-                    val token = SecureSharedPrefHelper.getString(KEY_CUSTOMER_TOKEN).orEmpty()
-                    CartManager.linkCartToCustomer(cartId, token)
-                }
-
-                Result.success(customer)
-            } else {
-                Log.i("TAG", "else signUpCustomer: $errors")
-                Result.failure(Exception(errors.firstOrNull()?.message ?: "Unknown error"))
+            if (!errors.isNullOrEmpty() || customer == null) {
+                val errorMessage = errors.firstOrNull()?.message ?: "Unknown error"
+                Log.e("TAG", "SignUp failed: $errorMessage")
+                return Result.failure(Exception(errorMessage))
             }
+
+            // Save customer ID
+            SecureSharedPrefHelper.putString(KEY_CUSTOMER_ID, customer.id)
+            Log.i("TAG", "Saved Customer ID: ${customer.id}")
+
+            // Get access token
+            val tokenResponse = apolloClient.mutation(
+                CustomerAccessTokenCreateMutation(
+                    CustomerAccessTokenCreateInput(email, password)
+                )
+            ).execute()
+
+            val accessToken = tokenResponse.data?.customerAccessTokenCreate?.customerAccessToken?.accessToken
+            val tokenErrors = tokenResponse.data?.customerAccessTokenCreate?.userErrors.orEmpty()
+
+            if (!tokenErrors.isNullOrEmpty() || accessToken == null) {
+                val tokenErrorMessage = tokenErrors.firstOrNull()?.message ?: "Token creation failed"
+                Log.e("TAG", "Access token error: $tokenErrorMessage")
+                return Result.failure(Exception(tokenErrorMessage))
+            }
+
+            SecureSharedPrefHelper.putString(KEY_CUSTOMER_TOKEN, accessToken)
+            Log.i("TAG", "Saved Customer Token: $accessToken")
+
+            // Create cart
+            CartManager.setup(CartRepositoryImpl(CartDataSourceImpl(apolloClient)))
+            val cartResponse = CartManager.createCart()
+            val cart = cartResponse.data?.cartCreate?.cart
+
+            if (cart != null) {
+                SecureSharedPrefHelper.putString(KEY_CART_ID, cart.id)
+                SecureSharedPrefHelper.putString(KEY_CHECKOUT_URL, cart.checkoutUrl.toString())
+
+                Log.i("TAG", "Saved Cart ID: ${cart.id}")
+                Log.i("TAG", "Saved Checkout URL: ${cart.checkoutUrl}")
+
+                // Link cart to customer
+                CartManager.linkCartToCustomer(cart.id, accessToken)
+                Log.i("TAG", "Linked cart to customer")
+            } else {
+                Log.w("TAG", "Cart creation returned null")
+            }
+
+            Result.success(customer)
         } catch (e: Exception) {
-            Log.i("TAG", "fail signUpCustomer: $e")
+            Log.e("TAG", "Exception during sign up: ${e.message}", e)
             Result.failure(e)
         }
     }
