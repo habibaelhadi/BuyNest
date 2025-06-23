@@ -67,6 +67,7 @@ import com.example.buynest.repository.favorite.FavoriteRepoImpl
 import com.example.buynest.repository.productDetails.ProductDetailsRepositoryImpl
 import com.example.buynest.ui.theme.LightGray
 import com.example.buynest.ui.theme.MainColor
+import com.example.buynest.utils.mapColorNameToColor
 import com.example.buynest.utils.toColorList
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.viewmodel.productInfo.ProductDetailsViewModel
@@ -93,7 +94,6 @@ fun ProductInfoScreen(
     val response by viewModel.productDetails.collectAsStateWithLifecycle()
     var totalPrice by remember { mutableIntStateOf(0) }
 
-    var quantity by remember { mutableIntStateOf(1) }
     var selectedSize by remember { mutableStateOf<String?>(null) }
     var selectedColor by remember { mutableStateOf<String?>(null) }
 
@@ -113,16 +113,17 @@ fun ProductInfoScreen(
         bottomBar = {
             if (response is UiResponseState.Success<*>) {
                 val product = (response as UiResponseState.Success<ProductDetailsByIDQuery.Data>).data.product
-                val variantId = product?.variants?.edges?.firstOrNull()?.node?.id
+
+                val variantId = viewModel.getVariantIdForOptions(
+                    product = product,
+                    selectedSize = selectedSize,
+                    selectedColor = selectedColor
+                )
 
                 BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart") {
                     variantId?.let {
-                        val selectedOptions = listOfNotNull(
-                            selectedSize?.let { "Size" to it },
-                            selectedColor?.let { "Color" to it }
-                        )
                         viewModel.viewModelScope.launch {
-                            viewModel.addToCart(it, quantity, selectedOptions)
+                            viewModel.addToCart(it, 1, selectedSize, selectedColor.toString())
                         }
                     }
                 }
@@ -142,12 +143,10 @@ fun ProductInfoScreen(
                 ProductInfo(
                     innerPadding = innerPadding,
                     product = product,
-                    quantity = quantity,
                     onTotalChange = { updatedTotal -> totalPrice = updatedTotal },
-                    onQuantityChange = { quantity = it },
+                    favViewModel = favViewModel,
                     onSizeSelected = { selectedSize = it },
-                    onColorSelected = { selectedColor = it },
-                    favViewModel = favViewModel
+                    onColorSelected = { selectedColor = it }
                 )
             }
         }
@@ -159,12 +158,10 @@ fun ProductInfoScreen(
 fun ProductInfo(
     innerPadding: PaddingValues,
     product: ProductDetailsByIDQuery.Product?,
-    quantity: Int,
-    onQuantityChange: (Int) -> Unit,
     onTotalChange: (Int) -> Unit,
+    favViewModel: FavouritesViewModel,
     onSizeSelected: (String) -> Unit,
-    onColorSelected: (Color) -> Unit,
-    favViewModel: FavouritesViewModel
+    onColorSelected: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
     val media = product?.media?.edges
@@ -198,8 +195,8 @@ fun ProductInfo(
                     sizes = size,
                     colors = colorList,
                     onQuantityChange = { _, newQty -> quantity = newQty },
-                    onColorSelected = { /* Handle color selection */ },
-                    onSizeSelected = { /* Handle size selection */ }
+                    onSizeSelected = { onSizeSelected },
+                    onColorSelected = { color -> onColorSelected(mapColorNameToColor(color.toString()).toString()) }
                 )
             }
 
@@ -428,7 +425,7 @@ fun ProductDetails(
                             .background(if (isSelected) MainColor else LightGray)
                             .clickable {
                                 selectedSize.value = size
-                                onSizeSelected(size.toInt())
+                                onSizeSelected(size.toIntOrNull() ?: -1)
                             },
                         contentAlignment = Alignment.Center
                     ) {

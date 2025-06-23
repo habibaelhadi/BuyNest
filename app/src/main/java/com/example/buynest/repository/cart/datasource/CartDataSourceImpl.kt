@@ -1,5 +1,6 @@
 package com.example.buynest.repository.cart.datasource
 
+import android.util.Log
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.api.Optional
@@ -33,23 +34,34 @@ class CartDataSourceImpl(
         cartId: String,
         variantId: String,
         quantity: Int,
-        selectedOptions: List<Pair<String, String>>
+        selectedSize: String?,
+        selectedColor: String?
     ): ApolloResponse<*> {
+        Log.d("CartOperation", "Fetching cart for ID: $cartId")
+
         val cartResult = apolloClient.query(GetCartQuery(cartId)).execute()
+
+        Log.d("CartOperation", "Looking for matching line with size=$selectedSize and color=$selectedColor")
 
         val matchingLine = cartResult.data?.cart?.lines?.edges
             ?.mapNotNull { it?.node }
-            ?.find { line ->
+            ?.onEach { line ->
                 val variant = line.merchandise.onProductVariant
-                variant?.id == variantId &&
-                        variant.selectedOptions
-                            .map { it.name to it.value }
-                            .toSet() == selectedOptions.toSet()
+                val options = variant?.selectedOptions?.associate { it.name.lowercase() to it.value }
+
+                Log.d("CartDebug", "Found line: variantId=${variant?.id}, options=$options, quantity=${line.quantity}")
+            }
+            ?.find { line ->
+                val variant = line.merchandise.onProductVariant ?: return@find false
+                val options = variant.selectedOptions.associate { it.name.lowercase() to it.value }
+
+                options["size"] == selectedSize && options["color"] == selectedColor
             }
 
         return if (matchingLine != null) {
-            // Same variant and options → update quantity
             val updatedQuantity = matchingLine.quantity + quantity
+            Log.i("CartUpdate", "Updating quantity for matching line: id=${matchingLine.id}, newQty=$updatedQuantity")
+
             val updateInput = CartLineUpdateInput(
                 id = matchingLine.id,
                 quantity = Optional.Present(updatedQuantity)
@@ -62,7 +74,8 @@ class CartDataSourceImpl(
                 )
             ).execute()
         } else {
-            // New size or color → add as new variant
+            Log.i("CartAdd", "No matching line found. Adding new variantId=$variantId with qty=$quantity")
+
             val lineInput = CartLineInput(
                 merchandiseId = variantId,
                 quantity = Optional.Present(quantity)
@@ -76,8 +89,6 @@ class CartDataSourceImpl(
             ).execute()
         }
     }
-
-
 
 
     override suspend fun removeItem(cartId: String, lineId: String): ApolloResponse<RemoveItemFromCartMutation.Data> {

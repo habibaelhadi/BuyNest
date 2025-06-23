@@ -20,8 +20,8 @@ class CartRepositoryImpl(
     override suspend fun getCart(cartId: String): ApolloResponse<GetCartQuery.Data> =
         cartDataSource.getCart(cartId)
 
-    override suspend fun addOrUpdateItem(cartId: String, variantId: String, quantity: Int, selectedOptions: List<Pair<String, String>>): ApolloResponse<*> =
-        cartDataSource.addOrUpdateItem(cartId, variantId, quantity, selectedOptions)
+    override suspend fun addOrUpdateCartItem(cartId: String, variantId: String, quantity: Int, selectedSize: String?, selectedColor: String?): ApolloResponse<*> =
+        cartDataSource.addOrUpdateItem(cartId, variantId, quantity, selectedSize, selectedColor)
 
     override suspend fun removeItem(cartId: String, lineId: String): ApolloResponse<RemoveItemFromCartMutation.Data> =
         cartDataSource.removeItem(cartId, lineId)

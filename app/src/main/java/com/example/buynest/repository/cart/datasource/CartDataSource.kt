@@ -11,7 +11,7 @@ interface CartDataSource {
     suspend fun createCart(): ApolloResponse<CreateCartMutation.Data>
     suspend fun linkToCustomer(cartId: String, token: String): ApolloResponse<LinkCartToCustomerMutation.Data>
     suspend fun getCart(cartId: String): ApolloResponse<GetCartQuery.Data>
-    suspend fun addOrUpdateItem(cartId: String, variantId: String, quantity: Int, selectedOptions: List<Pair<String, String>>): ApolloResponse<*>
+    suspend fun addOrUpdateItem(cartId: String, variantId: String, quantity: Int, selectedSize: String?, selectedColor: String?): ApolloResponse<*>
     suspend fun removeItem(cartId: String, lineId: String): ApolloResponse<RemoveItemFromCartMutation.Data>
    // suspend fun updateQuantity(cartId: String, lineId: String, quantity: Int): ApolloResponse<UpdateCartItemQuantityMutation.Data>
 }

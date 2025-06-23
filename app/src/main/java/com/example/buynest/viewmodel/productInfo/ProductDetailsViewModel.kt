@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.buynest.ProductDetailsByIDQuery
 import com.example.buynest.model.data.remote.graphql.ApolloClient.apolloClient
 import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.repository.cart.CartRepositoryImpl
@@ -38,11 +39,11 @@ class ProductDetailsViewModel(val repository: ProductDetailsRepository): ViewMod
         }
     }
 
-    suspend fun addToCart(variantId: String, quantity: Int, selectedOptions: List<Pair<String, String>>) {
+    suspend fun addToCart(variantId: String, quantity: Int, selectedSize: String?, selectedColor: String) {
         val cartId = SecureSharedPrefHelper.getString(KEY_CART_ID)
         if (cartId != null) {
             CartManager.setup(CartRepositoryImpl(cartDataSource = CartDataSourceImpl(apolloClient)))
-            val response = CartManager.addItemToCart(cartId, variantId, quantity, selectedOptions)
+            val response = CartManager.addItemToCart(cartId, variantId, quantity, selectedSize, selectedColor)
             if (response.hasErrors()) {
                 Log.e("CartError", "Failed to add item from product details: ${response.errors}")
             } else {
@@ -51,6 +52,19 @@ class ProductDetailsViewModel(val repository: ProductDetailsRepository): ViewMod
         } else {
             Log.w("CartWarning", "No cart ID found. You may want to call createCart() first.")
         }
+    }
+
+    fun getVariantIdForOptions(
+        product: ProductDetailsByIDQuery.Product?,
+        selectedSize: String?,
+        selectedColor: String?
+    ): String? {
+        return product?.variants?.edges?.firstOrNull { edge ->
+            val options = edge.node.selectedOptions
+            val sizeMatch = selectedSize == null || options.any { it.name.equals("Size", ignoreCase = true) && it.value == selectedSize }
+            val colorMatch = selectedColor == null || options.any { it.name.equals("Color", ignoreCase = true) && it.value == selectedColor }
+            sizeMatch && colorMatch
+        }?.node?.id
     }
 
     class ProductInfoFactory(private val repository: ProductDetailsRepository): ViewModelProvider.Factory {
