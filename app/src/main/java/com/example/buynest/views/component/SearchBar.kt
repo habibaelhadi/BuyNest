@@ -18,17 +18,22 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.Gray
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.views.home.phenomenaBold
 
 @Composable
 fun SearchBar(onCartClicked:()->Unit) {
+    val showGuestDialog = remember { mutableStateOf(false) }
+    val user = FirebaseAuthObject.getAuth().currentUser
     Column {
         Spacer(modifier = Modifier.height(20.dp))
         Text("BuyNest", fontSize = 20.sp,
@@ -55,7 +60,14 @@ fun SearchBar(onCartClicked:()->Unit) {
             )
             Spacer(modifier = Modifier.width(20.dp))
             IconButton(
-                onClick = onCartClicked,
+                onClick =
+                {
+                    if (user == null){
+                        showGuestDialog.value = true
+                    }else{
+                        onCartClicked()
+                    }
+                },
                 modifier = Modifier.weight(3F)
             ) {
                 Icon(
@@ -66,4 +78,12 @@ fun SearchBar(onCartClicked:()->Unit) {
             }
         }
     }
+
+    GuestAlertDialog(
+        showDialog = showGuestDialog.value,
+        onDismiss = { showGuestDialog.value = false },
+        onConfirm = {
+            showGuestDialog.value = false
+        }
+    )
 }

@@ -19,6 +19,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +39,9 @@ fun AddressItem(
     landmark: String?,
     isSelected: Boolean = false,
     onSelect: () -> Unit,
-    onMapClick: () -> Unit
+    onMapClick: () -> Unit,
+    onSetDefault: () -> Unit,
+    onEdit: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -59,7 +62,10 @@ fun AddressItem(
                 )
                 Checkbox(
                     checked = isSelected,
-                    onCheckedChange = { onSelect() },
+                    onCheckedChange = {
+                        onSelect()
+                        onSetDefault()
+                    },
                     colors = CheckboxDefaults.colors(checkedColor = MainColor)
                 )
             }
@@ -92,8 +98,8 @@ fun AddressItem(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                IconButton(onClick = {}) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "More")
+                IconButton(onClick = { onEdit() }) {
+                    Icon(Icons.Default.Settings, contentDescription = "edit")
                 }
             }
         }

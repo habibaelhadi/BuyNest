@@ -31,12 +31,21 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.R
+import com.example.buynest.repository.FirebaseAuthObject
+import com.example.buynest.repository.authentication.AuthenticationRepoImpl
+import com.example.buynest.repository.authentication.firebase.FirebaseRepositoryImpl
+import com.example.buynest.repository.authentication.firebase.datasource.FirebaseDataSourceImpl
+import com.example.buynest.repository.authentication.shopify.ShopifyAuthRepositoryImpl
+import com.example.buynest.repository.authentication.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.utils.SharedPrefHelper
+import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
 import com.example.buynest.views.component.CountryOptionBottomSheet
 import com.example.buynest.views.component.CurrencyOptionBottomSheet
+import com.example.buynest.views.component.GuestAlertDialog
 import com.example.buynest.views.component.PaymentOptionBottomSheet
 import com.example.buynest.views.component.SettingsCard
 
@@ -44,7 +53,8 @@ import com.example.buynest.views.component.SettingsCard
 fun SettingsScreen(
     gotoProfileScreen: () -> Unit,
     gotoOrdersHistoryScreen: () -> Unit,
-    gotoAddressScreen: () -> Unit
+    gotoAddressScreen: () -> Unit,
+    gotoLoginScreen: () -> Unit
 ) {
     val context = LocalContext.current
     val phenomenaBold = FontFamily(Font(R.font.phenomena_bold))
@@ -56,8 +66,30 @@ fun SettingsScreen(
     val selectedCurrency = remember { mutableStateOf(SharedPrefHelper.getCurrency(context)) }
     val launchEmailIntent = remember { mutableStateOf(false) }
     val showAboutDialog = remember { mutableStateOf(false) }
+    val user = FirebaseAuthObject.getAuth().currentUser
+    val buttonText = if (user == null) "Login" else "Log out"
+    val showGuestDialog = remember { mutableStateOf(false) }
+    val authViewModel: AuthenticationViewModel = viewModel(
+        factory = AuthenticationViewModel.AuthenticationViewModelFactory(
+            AuthenticationRepoImpl(
+                FirebaseRepositoryImpl(
+                    FirebaseDataSourceImpl()
+                ),
+                ShopifyAuthRepositoryImpl(
+                    ShopifyAuthRemoteDataSourceImpl()
+                )
+            )
+        )
+    )
 
-
+    LaunchedEffect(Unit) {
+        authViewModel.message.collect { message ->
+                if (message == "Success") {
+                    gotoLoginScreen()
+                    SharedPrefHelper.setLogIn(context = context, false)
+                }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -80,27 +112,51 @@ fun SettingsScreen(
 
         SettingsCard("Youssef Fayad", icon = Icons.Default.Person, bold = true,
             onClick = {
-                gotoProfileScreen()
+                if (user == null){
+                    showGuestDialog.value = true
+                }else{
+                    gotoProfileScreen()
+                }
             })
         Spacer(modifier = Modifier.height(12.dp))
 
         SettingsCard("Address Book", Icons.Default.Home,
             onClick = {
-            gotoAddressScreen()
+                if (user == null){
+                    showGuestDialog.value = true
+                }else{
+                    gotoAddressScreen()
+                }
         })
 
         SettingsCard("Orders History", Icons.Default.History,
             onClick = {
-                gotoOrdersHistoryScreen()
+                if (user == null){
+                    showGuestDialog.value = true
+                }else{
+                    gotoOrdersHistoryScreen()
+                }
             })
 
         SettingsCard("Payment Option", Icons.Default.Payment,
-            onClick = { showSheet.value = true }
+            onClick = {
+                if (user == null){
+                    showGuestDialog.value = true
+                }else{
+                    showSheet.value = true
+                }
+            }
         )
         Spacer(modifier = Modifier.height(12.dp))
 
         SettingsCard("Country/Region", Icons.Default.Public,
-            onClick = { showCountrySheet.value = true }
+            onClick = {
+                if (user == null){
+                    showGuestDialog.value = true
+                }else{
+                    showCountrySheet.value = true
+                }
+            }
         )
         SettingsCard("Currency", Icons.Default.AttachMoney,
             onClick = { showCurrencySheet.value = true }
@@ -113,15 +169,19 @@ fun SettingsScreen(
         }
 
         SettingsCard("About", Icons.Default.Info,
-            onClick = {
-                showAboutDialog.value = true
-            }
+            onClick = { showAboutDialog.value = true }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { /* Log out logic */ },
+            onClick = {
+                if (user == null){
+                    gotoLoginScreen()
+                }else{
+                    authViewModel.logout()
+                }
+            },
             colors = ButtonDefaults.buttonColors(
                 containerColor = MainColor,
                 contentColor = white
@@ -129,7 +189,7 @@ fun SettingsScreen(
             shape = RoundedCornerShape(6.dp),
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Text(text = "Log Out")
+            Text(text = buttonText)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -201,7 +261,13 @@ fun SettingsScreen(
                 }
             )
         }
-
-
     }
+
+    GuestAlertDialog(
+        showDialog = showGuestDialog.value,
+        onDismiss = { showGuestDialog.value = false },
+        onConfirm = {
+            showGuestDialog.value = false
+        }
+    )
 }

@@ -99,6 +99,7 @@ class FirebaseDataSourceImpl : IFirebaseDataSource {
 
     override fun logout() {
         auth.signOut()
+        firebaseResponse?.onResponseSuccess("Logged out")
     }
 
     override fun getGoogleSignInIntent(context: Context): Intent? {
