@@ -67,11 +67,11 @@ class FavouritesViewModel(val repo: FavoriteRepo): ViewModel() {
         }
     }
 
-    suspend fun addToCart(variantId: String, quantity: Int) {
+    suspend fun addToCart(variantId: String, quantity: Int, selectedOptions: List<Pair<String, String>>) {
         val cartId = SecureSharedPrefHelper.getString(KEY_CART_ID)
         if (cartId != null) {
             CartManager.setup(CartRepositoryImpl(cartDataSource = CartDataSourceImpl(apolloClient)))
-            val response = CartManager.addItemToCart(cartId, variantId, quantity)
+            val response = CartManager.addItemToCart(cartId, variantId, quantity, selectedOptions)
             if (response.hasErrors()) {
                 Log.e("CartError", "Failed to add item: ${response.errors}")
             } else {

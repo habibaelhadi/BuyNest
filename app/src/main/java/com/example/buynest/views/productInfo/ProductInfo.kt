@@ -93,6 +93,10 @@ fun ProductInfoScreen(
     val response by viewModel.productDetails.collectAsStateWithLifecycle()
     var totalPrice by remember { mutableIntStateOf(0) }
 
+    var quantity by remember { mutableIntStateOf(1) }
+    var selectedSize by remember { mutableStateOf<String?>(null) }
+    var selectedColor by remember { mutableStateOf<String?>(null) }
+
     val favViewModel: FavouritesViewModel = viewModel(
         factory = FavouritesViewModel.FavouritesFactory(FavoriteRepoImpl())
     )
@@ -113,8 +117,12 @@ fun ProductInfoScreen(
 
                 BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart") {
                     variantId?.let {
+                        val selectedOptions = listOfNotNull(
+                            selectedSize?.let { "Size" to it },
+                            selectedColor?.let { "Color" to it }
+                        )
                         viewModel.viewModelScope.launch {
-                            viewModel.addToCart(it, 1)
+                            viewModel.addToCart(it, quantity, selectedOptions)
                         }
                     }
                 }
@@ -134,7 +142,11 @@ fun ProductInfoScreen(
                 ProductInfo(
                     innerPadding = innerPadding,
                     product = product,
+                    quantity = quantity,
                     onTotalChange = { updatedTotal -> totalPrice = updatedTotal },
+                    onQuantityChange = { quantity = it },
+                    onSizeSelected = { selectedSize = it },
+                    onColorSelected = { selectedColor = it },
                     favViewModel = favViewModel
                 )
             }
@@ -147,7 +159,11 @@ fun ProductInfoScreen(
 fun ProductInfo(
     innerPadding: PaddingValues,
     product: ProductDetailsByIDQuery.Product?,
+    quantity: Int,
+    onQuantityChange: (Int) -> Unit,
     onTotalChange: (Int) -> Unit,
+    onSizeSelected: (String) -> Unit,
+    onColorSelected: (Color) -> Unit,
     favViewModel: FavouritesViewModel
 ) {
     val scrollState = rememberScrollState()

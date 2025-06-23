@@ -39,7 +39,7 @@ fun CartItemRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onItemClick(item) },
-    shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(16.dp),
         border = BorderStroke(1.dp, LightGray2)
     ) {
         Row(
@@ -50,7 +50,7 @@ fun CartItemRow(
                 painter = rememberAsyncImagePainter(item.imageUrl),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(100.dp)
                     .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
@@ -65,9 +65,18 @@ fun CartItemRow(
                     color = MainColor
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "EGP ${item.price}",
+                    fontWeight = FontWeight.Bold,
+                    color = MainColor
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Box(
                         modifier = Modifier
                             .size(10.dp)
@@ -80,30 +89,26 @@ fun CartItemRow(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    text = "EGP ${item.price}",
-                    fontWeight = FontWeight.Bold,
-                    color = MainColor
-                )
-            }
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                IconButton(
-                    onClick = { onDelete(item.id) },
-                    modifier = Modifier.align(Alignment.End)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.DeleteOutline,
-                        contentDescription = null,
-                        tint = MainColor
+                    QuantitySelector(
+                        quantity = item.quantity,
+                        onChange = { newQty -> onQuantityChange(item.id, newQty) }
                     )
+
+                    IconButton(onClick = { onDelete(item.id) }) {
+                        Icon(
+                            imageVector = Icons.Default.DeleteOutline,
+                            contentDescription = null,
+                            tint = MainColor
+                        )
+                    }
                 }
-                QuantitySelector(
-                    quantity = item.quantity,
-                    onChange = { newQty -> onQuantityChange(item.id, newQty) }
-                )
             }
         }
     }

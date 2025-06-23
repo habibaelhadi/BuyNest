@@ -21,8 +21,8 @@ object CartManager {
         return repository.linkCart(cartId, token)
     }
 
-    suspend fun addItemToCart(cartId: String, variantId: String, quantity: Int): ApolloResponse<AddItemToCartMutation.Data> {
-        return repository.addItem(cartId, variantId, quantity)
+    suspend fun addItemToCart(cartId: String, variantId: String, quantity: Int, selectedOptions: List<Pair<String, String>>): ApolloResponse<*> {
+        return repository.addOrUpdateItem(cartId, variantId, quantity, selectedOptions)
     }
 
 }
