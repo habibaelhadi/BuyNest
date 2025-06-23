@@ -1,5 +1,5 @@
-mutation {
-    draftOrderComplete(id: "gid://shopify/DraftOrder/1234567890") {
+mutation CompleteDraftOrder($id: ID!) {
+    draftOrderComplete(id: $id, paymentPending: false) {
         draftOrder {
             id
             name
