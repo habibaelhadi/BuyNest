@@ -1,6 +1,9 @@
 package com.example.buynest.utils
 
 import androidx.compose.ui.graphics.Color
+import com.example.buynest.BrandsAndProductsQuery
+import com.example.buynest.ProductsByHandleQuery
+import com.example.buynest.model.entity.UiProduct
 
 fun List<String>.toColorList(): List<Color> {
     return this.map { colorName ->
@@ -36,4 +39,20 @@ fun mapColorNameToColor(name: String?): Color {
         "brown" -> Color(0xFFA52A2A)
         else -> Color.LightGray // fallback
     }
+}
+
+fun mapFromBrandProduct(node: BrandsAndProductsQuery.Node): UiProduct {
+    return UiProduct(
+        id = node.id,
+        title = node.title,
+        imageUrl = node.featuredImage?.url ?: ""
+    )
+}
+
+fun mapFromCategoryProduct(node: ProductsByHandleQuery.Node): UiProduct {
+    return UiProduct(
+        id = node.id,
+        title = node.title,
+        imageUrl = node.featuredImage?.url ?: ""
+    )
 }

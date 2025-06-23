@@ -61,17 +61,14 @@ import com.example.buynest.viewmodel.home.HomeViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.ProductsByHandleQuery
+import com.example.buynest.model.entity.UiProduct
 import com.example.buynest.repository.category.CategoryRepoImpl
+import com.example.buynest.utils.mapFromBrandProduct
+import com.example.buynest.utils.mapFromCategoryProduct
 import com.example.buynest.viewmodel.brandproducts.BrandDetailsViewModel
 import com.example.buynest.viewmodel.brandproducts.BrandProductsFactory
 import com.example.buynest.viewmodel.categoryViewModel.CategoryFactory
 import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
-
-data class UiProduct(
-    val id: String,
-    val title: String,
-    val imageUrl:  Any?,
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,9 +82,6 @@ fun SearchScreen(
     )
     val categoryViewModel: CategoryViewModel = viewModel(
         factory = CategoryFactory(CategoryRepoImpl())
-    )
-    val brandProductsViewModel: BrandDetailsViewModel = viewModel(
-        factory = BrandProductsFactory(HomeRepository())
     )
     val brands by homeViewModel.brand.collectAsStateWithLifecycle()
     val categoryProductsState by categoryViewModel.categoryProducts.collectAsStateWithLifecycle()
@@ -311,21 +305,4 @@ fun AllProductsSection(
             ProductCard(product)
         }
     }
-}
-
-
-fun mapFromBrandProduct(node: BrandsAndProductsQuery.Node): UiProduct {
-    return UiProduct(
-        id = node.id,
-        title = node.title,
-        imageUrl = node.featuredImage?.url ?: ""
-    )
-}
-
-fun mapFromCategoryProduct(node: ProductsByHandleQuery.Node): UiProduct {
-    return UiProduct(
-        id = node.id,
-        title = node.title,
-        imageUrl = node.featuredImage?.url ?: ""
-    )
 }
