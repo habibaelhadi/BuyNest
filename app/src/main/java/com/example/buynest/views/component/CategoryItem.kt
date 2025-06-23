@@ -48,8 +48,6 @@ fun CategoryItem(
     val productId = product.id
     val numericId = productId.substringAfterLast("/")
     val selectedOptions = product.variants.edges[0].node.selectedOptions
-    val showGuestDialog = remember { mutableStateOf(false) }
-    val user = FirebaseAuthObject.getAuth().currentUser
     val color = selectedOptions
         .map { it.value }
         .filter { it.any { ch -> ch.isLetter() } }
@@ -63,11 +61,7 @@ fun CategoryItem(
         border = BorderStroke(2.dp, LightGray2),
         colors = cardColors(containerColor = white),
         onClick = {
-            if (user == null){
-                showGuestDialog.value = true
-            }else{
                 onProductClicked(numericId)
-            }
         }
     ) {
         Row(
@@ -120,12 +114,4 @@ fun CategoryItem(
 
         }
     }
-
-    GuestAlertDialog(
-        showDialog = showGuestDialog.value,
-        onDismiss = { showGuestDialog.value = false },
-        onConfirm = {
-            showGuestDialog.value = false
-        }
-    )
 }

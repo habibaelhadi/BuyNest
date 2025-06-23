@@ -34,8 +34,6 @@ fun ForYouSection(
     items: List<BrandsAndProductsQuery.Node>,
     onProductClicked: (productId: String) -> Unit
 ) {
-    val showGuestDialog = remember { mutableStateOf(false) }
-    val user = FirebaseAuthObject.getAuth().currentUser
     Column(
         modifier = Modifier.padding(horizontal = 8.dp)
     ) {
@@ -70,11 +68,7 @@ fun ForYouSection(
                         .padding(end = 16.dp)
                         .width(180.dp)
                         .clickable {
-                            if (user == null){
-                                showGuestDialog.value = true
-                            }else{
                                 onProductClicked(id)
-                            }
                         }
                 ) {
                     Image(
@@ -129,11 +123,4 @@ fun ForYouSection(
             }
         }
     }
-    GuestAlertDialog(
-        showDialog = showGuestDialog.value,
-        onDismiss = { showGuestDialog.value = false },
-        onConfirm = {
-            showGuestDialog.value = false
-        }
-    )
 }
