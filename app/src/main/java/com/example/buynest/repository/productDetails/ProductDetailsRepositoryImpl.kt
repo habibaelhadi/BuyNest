@@ -1,7 +1,7 @@
 package com.example.buynest.repository.productDetails
 
 import com.example.buynest.ProductDetailsByIDQuery
-import com.example.buynest.model.remote.graphql.ApolloClient
+import com.example.buynest.model.data.remote.graphql.ApolloClient
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow

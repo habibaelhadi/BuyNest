@@ -1,0 +1,39 @@
+query GetCart($cartId: ID!) {
+    cart(id: $cartId) {
+        id
+        checkoutUrl
+        buyerIdentity {
+            customer {
+                id
+                email
+            }
+        }
+        lines(first: 10) {
+            edges {
+                node {
+                    id
+                    quantity
+                    merchandise {
+                        ... on ProductVariant {
+                            id
+                            title
+                            priceV2 {
+                                amount
+                            }
+                            selectedOptions {
+                                name
+                                value
+                            }
+                            image {
+                                url
+                            }
+                            product {
+                                title
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

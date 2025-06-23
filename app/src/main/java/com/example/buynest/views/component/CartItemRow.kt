@@ -19,13 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import coil.compose.rememberAsyncImagePainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.model.entity.CartItem
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
+import com.example.buynest.utils.mapColorNameToColor
 
 @Composable
 fun CartItemRow(
@@ -46,7 +47,7 @@ fun CartItemRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(id = item.imageRes),
+                painter = rememberAsyncImagePainter(item.imageUrl),
                 contentDescription = null,
                 modifier = Modifier
                     .size(80.dp)
@@ -70,7 +71,7 @@ fun CartItemRow(
                     Box(
                         modifier = Modifier
                             .size(10.dp)
-                            .background(Color.Red, shape = CircleShape)
+                            .background(mapColorNameToColor(item.color), shape = CircleShape)
                     )
                     Text(
                         text = "  ${item.color} | Size: ${item.size}",

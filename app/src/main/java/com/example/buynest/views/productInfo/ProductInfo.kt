@@ -57,12 +57,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductDetailsByIDQuery
 import com.example.buynest.ProductsDetailsByIDsQuery
-import com.example.buynest.model.uistate.ResponseState
-import com.example.buynest.repository.favoriteRepo.FavoriteRepoImpl
+import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.repository.FirebaseAuthObject
+import com.example.buynest.repository.favorite.FavoriteRepoImpl
 import com.example.buynest.repository.productDetails.ProductDetailsRepositoryImpl
 import com.example.buynest.ui.theme.LightGray
 import com.example.buynest.ui.theme.MainColor
@@ -71,11 +73,13 @@ import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.viewmodel.productInfo.ProductDetailsViewModel
 import com.example.buynest.views.component.BottomSection
 import com.example.buynest.views.component.ExpandableText
+import com.example.buynest.views.component.GuestAlertDialog
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.QuantitySelector
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.calculateCurrentOffsetForPage
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 @Composable
@@ -95,28 +99,44 @@ fun ProductInfoScreen(
         factory = FavouritesViewModel.FavouritesFactory(FavoriteRepoImpl())
     )
 
+    val showGuestDialog = remember { mutableStateOf(false) }
+    val user = FirebaseAuthObject.getAuth().currentUser
+
     LaunchedEffect(Unit) {
+        if (user != null){
+            favViewModel.getAllFavorites()
+        }
         val actualId = "gid://shopify/Product/$productId"
         viewModel.getProductDetails(actualId)
-        favViewModel.getAllFavorites()
     }
 
 
     Scaffold (
         topBar = { ProductInfoTopBar(backClicked, navigateToCart) },
-        bottomBar = { BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart"){
-            //TODO: Add to cart
-        }}
+        bottomBar = {
+            if (response is UiResponseState.Success<*>) {
+                val product = (response as UiResponseState.Success<ProductDetailsByIDQuery.Data>).data.product
+                val variantId = product?.variants?.edges?.firstOrNull()?.node?.id
+
+                BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart") {
+                    variantId?.let {
+                        viewModel.viewModelScope.launch {
+                            viewModel.addToCart(it, 1)
+                        }
+                    }
+                }
+            }
+        }
     ) { innerPadding ->
         when (val result = response) {
-            is ResponseState.Error -> {
+            is UiResponseState.Error -> {
                 Text(text = result.message)
             }
-            ResponseState.Loading ->  {
+            UiResponseState.Loading ->  {
                 Indicator()
             }
-            is ResponseState.Success<*> -> {
-                val successData = result as ResponseState.Success<ProductDetailsByIDQuery.Data>
+            is UiResponseState.Success<*> -> {
+                val successData = result as UiResponseState.Success<ProductDetailsByIDQuery.Data>
                 val product = successData.data.product
                 ProductInfo(
                     innerPadding = innerPadding,
@@ -190,6 +210,8 @@ fun ProductImages(
     var itemToDelete by remember { mutableStateOf<ProductsDetailsByIDsQuery.Node?>(null) }
     var showConfirmDialog by remember { mutableStateOf(false) }
     val pagerState = rememberPagerState(images.size)
+    val showGuestDialog = remember { mutableStateOf(false) }
+    val user = FirebaseAuthObject.getAuth().currentUser
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -234,25 +256,30 @@ fun ProductImages(
                     )
 
                     IconButton(
-                        onClick = {
-                            if (isFav) {
-                            itemToDelete = ProductsDetailsByIDsQuery.Node(
-                                __typename = productName,
-                                onProduct = ProductsDetailsByIDsQuery.OnProduct(
-                                    id = productId,
-                                    title = productName,
-                                    vendor = "", productType = "", description = "",
-                                    featuredImage = null,
-                                    variants = ProductsDetailsByIDsQuery.Variants(emptyList()),
-                                    media = ProductsDetailsByIDsQuery.Media(emptyList()),
-                                    options = emptyList()
-                                )
-                            )
-                            showConfirmDialog = true
-                        } else {
-                            favViewModel.addToFavorite(productId)
-                        }
-                                  },
+                        onClick =
+                        {
+                            if (user == null) {
+                                showGuestDialog.value = true
+                            }else{
+                                if (isFav) {
+                                    itemToDelete = ProductsDetailsByIDsQuery.Node(
+                                        __typename = productName,
+                                        onProduct = ProductsDetailsByIDsQuery.OnProduct(
+                                            id = productId,
+                                            title = productName,
+                                            vendor = "", productType = "", description = "",
+                                            featuredImage = null,
+                                            variants = ProductsDetailsByIDsQuery.Variants(emptyList()),
+                                            media = ProductsDetailsByIDsQuery.Media(emptyList()),
+                                            options = emptyList()
+                                        )
+                                    )
+                                    showConfirmDialog = true
+                                } else {
+                                    favViewModel.addToFavorite(productId)
+                                }
+                            }
+                        },
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .padding(12.dp)
@@ -319,6 +346,14 @@ fun ProductImages(
             }
         )
     }
+
+    GuestAlertDialog(
+        showDialog = showGuestDialog.value,
+        onDismiss = { showGuestDialog.value = false },
+        onConfirm = {
+            showGuestDialog.value = false
+        }
+    )
 }
 
 @Composable

@@ -20,6 +20,9 @@ class AddressViewModel(
     private val _defaultAddress = MutableStateFlow<AddressModel?>(null)
     val defaultAddress: StateFlow<AddressModel?> = _defaultAddress
 
+    private val _editingAddress = MutableStateFlow<AddressModel?>(null)
+    val editingAddress: StateFlow<AddressModel?> = _editingAddress
+
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
@@ -111,6 +114,14 @@ class AddressViewModel(
                 }
             )
         }
+    }
+
+    fun startEditingAddress(address: AddressModel) {
+        _editingAddress.value = address
+    }
+
+    fun stopEditingAddress() {
+        _editingAddress.value = null
     }
 
     fun extractFromAddress(

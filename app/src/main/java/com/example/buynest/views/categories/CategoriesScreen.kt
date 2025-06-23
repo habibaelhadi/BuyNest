@@ -18,9 +18,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.ProductsByHandleQuery
 import com.example.buynest.R
-import com.example.buynest.model.uistate.ResponseState
-import com.example.buynest.repository.categoryrepo.CategoryRepoImpl
-import com.example.buynest.ui.theme.MainColor
+import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.repository.category.CategoryRepoImpl
+import com.example.buynest.ui.theme.*
 import com.example.buynest.viewmodel.categoryViewModel.CategoryFactory
 import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
 import com.example.buynest.viewmodel.shared.SharedViewModel
@@ -75,7 +75,7 @@ fun CategoriesScreen(
 
         SearchBar(onCartClicked = onCartClicked)
 
-        val edges = (categoryProduct as? ResponseState.Success<*>)?.data
+        val edges = (categoryProduct as? UiResponseState.Success<*>)?.data
             ?.let { it as? ProductsByHandleQuery.Data }
             ?.collectionByHandle?.products?.edges
 
@@ -148,15 +148,13 @@ fun CategoriesScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 when (val result = categoryProduct) {
-                    is ResponseState.Error -> {
+                    is UiResponseState.Error ->{
                         Text(text = result.message)
                     }
-
-                    ResponseState.Loading -> {
+                    UiResponseState.Loading -> {
                         Indicator()
                     }
-
-                    is ResponseState.Success<*> -> {
+                    is UiResponseState.Success<*> -> {
                         val data = result.data as ProductsByHandleQuery.Data
                         val productEdges = data.collectionByHandle?.products?.edges
 

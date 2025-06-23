@@ -19,6 +19,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults.cardColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductsByHandleQuery
+import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
@@ -57,7 +60,9 @@ fun CategoryItem(
         shape = RoundedCornerShape(24.dp),
         border = BorderStroke(2.dp, LightGray2),
         colors = cardColors(containerColor = white),
-        onClick = {onProductClicked(numericId)}
+        onClick = {
+                onProductClicked(numericId)
+        }
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
