@@ -39,6 +39,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductsDetailsByIDsQuery
 import com.example.buynest.repository.FirebaseAuthObject
@@ -48,6 +49,7 @@ import com.example.buynest.ui.theme.white
 import com.example.buynest.utils.mapColorNameToColor
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.views.component.GuestAlertDialog
+import kotlinx.coroutines.launch
 
 @Composable
 fun FavouriteCard(
@@ -162,7 +164,13 @@ fun FavouriteCard(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Button(
-                    onClick = {},
+                    onClick = {
+                        item.onProduct?.variants?.edges?.firstOrNull()?.node?.id?.let { variantId ->
+                            viewModel.viewModelScope.launch {
+                                viewModel.addToCart(variantId, 1)
+                            }
+                        }
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MainColor,
                         contentColor = white

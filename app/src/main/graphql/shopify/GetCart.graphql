@@ -17,6 +17,16 @@ query GetCart($cartId: ID!) {
                         ... on ProductVariant {
                             id
                             title
+                            priceV2 {
+                                amount
+                            }
+                            selectedOptions {
+                                name
+                                value
+                            }
+                            image {
+                                url
+                            }
                             product {
                                 title
                             }

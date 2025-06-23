@@ -32,17 +32,17 @@ class CartViewModel(
     private val _linkCartResponse = MutableStateFlow<ApolloResponse<LinkCartToCustomerMutation.Data>?>(null)
     val linkCartResponse: StateFlow<ApolloResponse<LinkCartToCustomerMutation.Data>?> = _linkCartResponse
 
-    fun createCart() {
-        viewModelScope.launch {
-            _createCartResponse.value = repository.createCart()
-        }
-    }
+//    fun createCart() {
+//        viewModelScope.launch {
+//            _createCartResponse.value = repository.createCart()
+//        }
+//    }
 
-    fun linkCartToCustomer(cartId: String, token: String) {
-        viewModelScope.launch {
-            _linkCartResponse.value = repository.linkCart(cartId, token)
-        }
-    }
+//    fun linkCartToCustomer(cartId: String, token: String) {
+//        viewModelScope.launch {
+//            _linkCartResponse.value = repository.linkCart(cartId, token)
+//        }
+//    }
 
     fun getCart(cartId: String) {
         viewModelScope.launch {
@@ -50,11 +50,11 @@ class CartViewModel(
         }
     }
 
-    fun addItemToCart(cartId: String, variantId: String, quantity: Int) {
-        viewModelScope.launch {
-            _addItemResponse.value = repository.addItem(cartId, variantId, quantity)
-        }
-    }
+//    fun addItemToCart(cartId: String, variantId: String, quantity: Int) {
+//        viewModelScope.launch {
+//            _addItemResponse.value = repository.addItem(cartId, variantId, quantity)
+//        }
+//    }
 
     fun removeItemFromCart(cartId: String, lineId: String) {
         viewModelScope.launch {
