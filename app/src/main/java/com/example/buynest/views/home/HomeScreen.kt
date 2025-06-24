@@ -69,6 +69,7 @@ val phenomenaBold = FontFamily(
 @Composable
 fun HomeScreen(onCategoryClick: (String,String) -> Unit ,
                onCardClicked:()->Unit,
+               onSearchClicked:()->Unit,
                sharedViewModel: SharedViewModel,
                onProductClicked: (productId: String) -> Unit
 ) {
@@ -93,7 +94,8 @@ fun HomeScreen(onCategoryClick: (String,String) -> Unit ,
             activity?.finishAffinity()
         }
         SearchBar(
-            onCartClicked = onCardClicked
+            onCartClicked = onCardClicked,
+            onSearchClicked = onSearchClicked
         )
         Spacer(modifier = Modifier.height(24.dp))
         AdsSection(offers = offers)

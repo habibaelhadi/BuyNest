@@ -132,7 +132,10 @@ dependencies {
     implementation("org.osmdroid:osmdroid-android:6.1.16")
     // Google Places API
     implementation("com.google.android.libraries.places:places:3.4.0")
-
+    //flow layout
+    implementation (libs.accompanist.flowlayout)
+    //Zoomable
+    implementation("me.saket.telephoto:zoomable-image-coil:0.16.0")
 }
 
 apollo {

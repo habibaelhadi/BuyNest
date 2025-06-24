@@ -55,7 +55,8 @@ fun BrandDetailsScreen(
     categoryName: String,
     onCartClicked: () -> Unit,
     backClicked: () -> Unit,
-    onProductClicked: (productId: String) -> Unit
+    onProductClicked: (productId: String) -> Unit,
+    onSearchClicked:()->Unit
 ) {
     val phenomenaFontFamily = FontFamily(Font(R.font.phenomena_bold))
 
@@ -110,7 +111,7 @@ fun BrandDetailsScreen(
             }
         )
 
-        SearchBar(onCartClicked = onCartClicked)
+        SearchBar(onCartClicked = onCartClicked, onSearchClicked = onSearchClicked)
 
         Spacer(modifier = Modifier.height(24.dp))
 

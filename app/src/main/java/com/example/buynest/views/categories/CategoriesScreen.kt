@@ -33,7 +33,8 @@ import com.example.buynest.views.component.SideNavigation
 fun CategoriesScreen(
     onCartClicked: () -> Unit,
     onProductClicked: (productId: String) -> Unit,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
+    onSearchClicked: () -> Unit
 ) {
     var selectedCategory by remember { mutableStateOf<String?>("Kid") }
     var selectedSubcategory by remember { mutableStateOf<String?>(null) }
@@ -73,7 +74,7 @@ fun CategoriesScreen(
             }
         }
 
-        SearchBar(onCartClicked = onCartClicked)
+        SearchBar(onCartClicked = onCartClicked,onSearchClicked = onSearchClicked)
 
         val edges = (categoryProduct as? UiResponseState.Success<*>)?.data
             ?.let { it as? ProductsByHandleQuery.Data }
