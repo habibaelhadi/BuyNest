@@ -7,7 +7,7 @@ import retrofit2.Response
 class PaymentRepositoryImpl(private val remoteDataSource: IRemoteDataSource) : IPaymentRepository {
 
     override  suspend fun createPaymentIntent(
-        amount: Double,
+        amount: Int,
         currency: String,
         paymentMethod: String
     ): Response<JsonObject> {

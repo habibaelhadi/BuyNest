@@ -20,7 +20,6 @@ fun OrderModel.toDraftOrderInput(): DraftOrderInput {
         company = Optional.Absent
     )
 
-
     val lineItems = orderItems.map { item ->
         DraftOrderLineItemInput(
             quantity = item.quantity,
@@ -31,7 +30,14 @@ fun OrderModel.toDraftOrderInput(): DraftOrderInput {
     val totalBefore = orderItems.sumOf { it.price * it.quantity }
     val discount = 100
     val totalAfter = totalBefore - discount
-    val note = "TotalBefore: $totalBefore EGP | Discount: $discount EGP | TotalAfter: $totalAfter EGP"
+
+    // 🟢 Store image URLs in the note (one per item)
+    val noteBuilder = StringBuilder()
+    noteBuilder.append("TotalBefore: $totalBefore EGP | Discount: $discount EGP | TotalAfter: $totalAfter EGP\n")
+    orderItems.forEachIndexed { index, item ->
+        noteBuilder.append("Item ${index + 1}: ${item.name}, Image: ${item.imageUrl}\n")
+    }
+    val note = noteBuilder.toString().trim()
 
     return DraftOrderInput(
         email = Optional.Present(email),
@@ -45,4 +51,3 @@ fun OrderModel.toDraftOrderInput(): DraftOrderInput {
         useCustomerDefaultAddress = Optional.Absent
     )
 }
-

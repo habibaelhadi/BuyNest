@@ -36,7 +36,18 @@ class OrdersViewModel(private val repository: IOrderRepo) : ViewModel() {
     fun setSelectedOrder(order: GetOrdersByEmailQuery.Node) {
         selectedOrder.value = order
     }
+
+    fun extractImageUrlsFromNote(note: String?): List<String> {
+        if (note == null) return emptyList()
+        return note.lines()
+            .filter { it.contains("Image: ") }
+            .mapNotNull {
+                val parts = it.split("Image: ")
+                if (parts.size == 2) parts[1].trim() else null
+            }
+    }
 }
+
 
 
 class OrdersFactory(private val repo: IOrderRepo) : ViewModelProvider.Factory {

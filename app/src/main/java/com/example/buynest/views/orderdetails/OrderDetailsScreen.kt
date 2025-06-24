@@ -1,5 +1,6 @@
 package com.example.buynest.views.orderdetails
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,26 +36,32 @@ fun OrderDetailsScreen(backClicked: () -> Unit, orderViewModel: OrdersViewModel)
 
     selectedOrder?.let { order ->
         val id = order.id
-        val cartItems = order.lineItems.edges.map { edge ->
+
+        val imageUrls = orderViewModel.extractImageUrlsFromNote(order.note)
+
+        val cartItems = order.lineItems.edges.mapIndexed { index, edge ->
             val item = edge.node
             val variant = item.variant
+            val price = variant?.price.toString().toDoubleOrNull()?.toInt() ?: 0
             val options = variant?.selectedOptions ?: emptyList()
-
             val color = options.find { it.name == "Color" }?.value ?: ""
             val size = options.find { it.name == "Size" }?.value ?: ""
+
+            val image = imageUrls.getOrNull(index) ?: variant?.image?.url.toString()
 
             CartItem(
                 id = 0,
                 name = item.title,
-                imageUrl = (variant?.image?.url ?: "").toString(),
-                price = variant?.price.toString().toDouble(),
+                imageUrl = image,
+                price = price,
                 color = color,
                 size = size.toIntOrNull() ?: 0,
                 quantity = item.quantity,
-                lineId = id,
-                variantId = item.variant?.id ?: ""
+                lineId = order.id,
+                variantId = variant?.id ?: ""
             )
         }
+
 
 
         val totalAmount = order.totalPriceSet.shopMoney.amount

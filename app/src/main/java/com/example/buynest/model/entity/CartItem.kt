@@ -4,7 +4,7 @@ data class CartItem(
     val id: Int,
     val lineId: String,
     val name: String,
-    val price: Double,
+    val price: Int,
     val color: String,
     val size: Int,
     val imageUrl: String,

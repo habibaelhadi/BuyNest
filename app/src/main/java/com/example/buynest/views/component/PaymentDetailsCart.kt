@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.ui.theme.Gray
 import com.example.buynest.ui.theme.white
-import com.example.buynest.views.orderdetails.cartItems
 
 @Composable
 fun PaymentDetails(totalAmount1: Any) {

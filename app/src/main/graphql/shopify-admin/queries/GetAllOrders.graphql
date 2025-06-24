@@ -6,31 +6,38 @@ query getOrdersByEmail($email: String!) {
                 name
                 email
                 createdAt
+                note
+
                 totalPriceSet {
                     shopMoney {
                         amount
                         currencyCode
                     }
                 }
+
                 lineItems(first: 10) {
                     edges {
                         node {
                             title
                             quantity
+
                             variant {
                                 id
+                                price        # This returns a scalar (String/Float), no subfields allowed
+
                                 image {
-                                    url
+                                    url        # Image URL of the variant, can be null
                                 }
-                                price
+
                                 selectedOptions {
-                                    name
+                                    name      # Should contain "Color", "Size", etc.
                                     value
                                 }
                             }
                         }
                     }
                 }
+
                 shippingAddress {
                     name
                     address1

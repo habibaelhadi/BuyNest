@@ -41,6 +41,12 @@ mutation CreateDraftOrder($input: DraftOrderInput!) {
                                 currencyCode
                             }
                         }
+                        variant {
+                            id
+                            image{
+                                url
+                            }
+                        }
                     }
                 }
             }

@@ -27,7 +27,7 @@ import com.example.buynest.ui.theme.MainColor
 
 @Composable
 fun BottomSection(
-    totalPrice: Double,
+    totalPrice: Int,
     icon: ImageVector,
     title: String,
     onClick: () -> Unit
