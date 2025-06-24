@@ -136,6 +136,15 @@ dependencies {
     implementation (libs.accompanist.flowlayout)
     //Zoomable
     implementation("me.saket.telephoto:zoomable-image-coil:0.16.0")
+    //koin
+    val koin_android_version = "4.0.2"
+    implementation("io.insert-koin:koin-android:$koin_android_version")
+    implementation("io.insert-koin:koin-androidx-compose:$koin_android_version")
+    implementation("io.insert-koin:koin-androidx-compose-navigation:$koin_android_version")
+    implementation("io.insert-koin:koin-androidx-navigation:$koin_android_version")
+    //koin test dependencies
+    testImplementation("io.insert-koin:koin-test-junit4")
+    testImplementation("io.insert-koin:koin-android-test")
 }
 
 apollo {

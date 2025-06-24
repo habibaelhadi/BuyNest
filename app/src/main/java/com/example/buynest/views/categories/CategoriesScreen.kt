@@ -7,7 +7,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
@@ -15,26 +14,25 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.ProductsByHandleQuery
 import com.example.buynest.R
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.category.CategoryRepoImpl
 import com.example.buynest.ui.theme.*
-import com.example.buynest.viewmodel.categoryViewModel.CategoryFactory
 import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
 import com.example.buynest.viewmodel.shared.SharedViewModel
 import com.example.buynest.views.component.CategoryItem
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.component.SideNavigation
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CategoriesScreen(
     onCartClicked: () -> Unit,
     onProductClicked: (productId: String) -> Unit,
     sharedViewModel: SharedViewModel,
-    onSearchClicked: () -> Unit
+    onSearchClicked: () -> Unit,
+    categoryViewModel: CategoryViewModel = koinViewModel()
 ) {
     var selectedCategory by remember { mutableStateOf<String?>("Kid") }
     var selectedSubcategory by remember { mutableStateOf<String?>(null) }
@@ -42,9 +40,6 @@ fun CategoriesScreen(
 
     val phenomenaBold = FontFamily(Font(R.font.phenomena_bold))
 
-    val categoryViewModel: CategoryViewModel = viewModel(
-        factory = CategoryFactory(CategoryRepoImpl())
-    )
     val categoryProduct by categoryViewModel.categoryProducts.collectAsStateWithLifecycle()
 
     LaunchedEffect(selectedCategory) {

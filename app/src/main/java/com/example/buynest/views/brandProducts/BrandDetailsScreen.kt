@@ -47,6 +47,7 @@ import com.example.buynest.viewmodel.brandproducts.BrandProductsFactory
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.ProductItem
 import com.example.buynest.views.component.SearchBar
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,18 +57,13 @@ fun BrandDetailsScreen(
     onCartClicked: () -> Unit,
     backClicked: () -> Unit,
     onProductClicked: (productId: String) -> Unit,
-    onSearchClicked:()->Unit
+    onSearchClicked:()->Unit,
+    brandProductsViewModel: BrandDetailsViewModel = koinViewModel(),
+    favViewModel: FavouritesViewModel = koinViewModel()
 ) {
     val phenomenaFontFamily = FontFamily(Font(R.font.phenomena_bold))
 
-    val brandProductsViewModel: BrandDetailsViewModel = viewModel(
-        factory = BrandProductsFactory(HomeRepository())
-    )
     val brandProducts by brandProductsViewModel.brandProducts.collectAsStateWithLifecycle()
-    val favViewModel: FavouritesViewModel = viewModel(
-        factory = FavouritesViewModel.FavouritesFactory(FavoriteRepoImpl())
-    )
-
     val filterExpanded = remember { mutableStateOf(false) }
 
     LaunchedEffect(brandID) {

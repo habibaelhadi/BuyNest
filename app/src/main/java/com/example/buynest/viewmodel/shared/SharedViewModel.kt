@@ -14,8 +14,4 @@ class SharedViewModel : ViewModel() {
         _mutableCategory.value = categories
         Log.i("TAG", "setCategories: ${_mutableCategory.value}")
     }
-//    fun getCategories():List<BrandsAndProductsQuery.Node3>{
-//        Log.i("TAG", "getCategories: ${category.value}")
-//        return category.value
-//    }
 }

@@ -47,27 +47,19 @@ import com.example.buynest.utils.strategies.SignUpAuthenticationStrategy
 import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
 import com.example.buynest.views.authentication.CustomTextField
 import com.example.buynest.views.customsnackbar.CustomSnackbar
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SignUpScreen( navigateToLogin: () -> Unit) {
+fun SignUpScreen(
+    navigateToLogin: () -> Unit,
+    viewModel: AuthenticationViewModel = koinViewModel()
+) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val name = remember { mutableStateOf("") }
     val phone = remember { mutableStateOf("") }
     val passwordVisible = remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
-    val viewModel: AuthenticationViewModel = viewModel(
-        factory = AuthenticationViewModel.AuthenticationViewModelFactory(
-            AuthenticationRepoImpl(
-                FirebaseRepositoryImpl(
-                    FirebaseDataSourceImpl()
-                ),
-                ShopifyAuthRepositoryImpl(
-                    ShopifyAuthRemoteDataSourceImpl()
-                )
-            )
-        )
-    )
 
     val snackbarMessage = remember { mutableStateOf<String?>(null) }
 
