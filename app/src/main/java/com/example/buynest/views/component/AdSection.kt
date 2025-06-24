@@ -24,6 +24,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,16 +41,25 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
+import com.example.buynest.model.entity.OfferModel
 import com.example.buynest.ui.theme.MainColor
-import com.example.buynest.views.home.OfferModel
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.calculateCurrentOffsetForPage
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.delay
 import kotlin.math.abs
 
 @Composable
 fun AdsSection(offers: List<OfferModel>) {
     val pagerState = rememberPagerState(offers.size)
+
+    LaunchedEffect(pagerState) {
+        while (true) {
+            delay(5_000)
+            val nextPage = (pagerState.currentPage + 1) % offers.size
+            pagerState.animateScrollToPage(nextPage)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -60,7 +70,6 @@ fun AdsSection(offers: List<OfferModel>) {
             HorizontalPager(
                 count = offers.size,
                 state = pagerState,
-                contentPadding = PaddingValues(horizontal = 16.dp),
                 itemSpacing = 8.dp,
                 modifier = Modifier
                     .fillMaxWidth()
