@@ -242,7 +242,15 @@ fun SetupNavHost(mainNavController: NavHostController) {
             )
         }
         composable(RoutesScreens.Search.route) {
-            SearchScreen()
+            SearchScreen(
+                onBackClicked = {
+                    mainNavController.popBackStack()
+                },
+                onProductClicked = { productId ->
+                    mainNavController.navigate(RoutesScreens.ProductInfo.route
+                        .replace("{productId}", productId))
+                }
+            )
         }
     }
 }

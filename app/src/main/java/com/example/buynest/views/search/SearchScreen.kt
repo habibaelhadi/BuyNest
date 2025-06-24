@@ -80,7 +80,8 @@ import com.example.buynest.views.orders.phenomenaFontFamily
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-
+    onBackClicked: () -> Unit,
+    onProductClicked: (productId: String) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf(FilterType.All) }
@@ -127,7 +128,7 @@ fun SearchScreen(
                 )
             },
             navigationIcon = {
-                IconButton(onClick = { }) {
+                IconButton(onClick = { onBackClicked() }) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = null,
@@ -267,7 +268,7 @@ fun SearchScreen(
         }
 
 
-        AllProductsSection(filteredProducts ?: uiProducts.orEmpty())
+        AllProductsSection(filteredProducts ?: uiProducts.orEmpty(),onProductClicked)
 
 
     }
@@ -300,13 +301,13 @@ fun FilterTabs(selected: FilterType, onSelect: (FilterType) -> Unit) {
 @Composable
 fun ProductCard(
     product: UiProduct,
-    onClick: () -> Unit = {}
+    onProductClicked: (productId: String) -> Unit
     ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .clickable { onClick() },
+            .clickable { onProductClicked(product.id.substringAfterLast("/")) },
         border = BorderStroke(1.dp, MainColor.copy(0.5f)),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(4.dp)
@@ -381,11 +382,12 @@ fun FilterExpansionSection(
 
 @Composable
 fun AllProductsSection(
-    uiProducts: List<UiProduct>
+    uiProducts: List<UiProduct>,
+    onProductClicked: (productId: String) -> Unit
 ) {
     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(uiProducts) { product ->
-            ProductCard(product)
+            ProductCard(product,onProductClicked)
         }
     }
 }
