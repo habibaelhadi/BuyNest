@@ -2,7 +2,7 @@ mutation CartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
     cartLinesUpdate(cartId: $cartId, lines: $lines) {
         cart {
             id
-            lines(first: 10) {
+            lines(first: 100) {
                 edges {
                     node {
                         id
@@ -11,6 +11,10 @@ mutation CartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
                             ... on ProductVariant {
                                 id
                                 title
+                                selectedOptions {
+                                    name
+                                    value
+                                }
                             }
                         }
                     }

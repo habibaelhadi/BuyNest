@@ -176,7 +176,7 @@ fun FavouriteCard(
                     onClick = {
                         item.onProduct?.variants?.edges?.firstOrNull()?.node?.id?.let { variantId ->
                             viewModel.viewModelScope.launch {
-                                viewModel.addToCart(variantId, 1, size, color)
+                                viewModel.addToCart(variantId, 1)
                             }
                         }
                     },

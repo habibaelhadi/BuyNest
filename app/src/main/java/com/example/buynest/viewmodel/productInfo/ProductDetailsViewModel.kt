@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.apollographql.apollo3.api.ApolloResponse
+import com.example.buynest.CreateCartMutation
 import com.example.buynest.ProductDetailsByIDQuery
 import com.example.buynest.model.data.remote.graphql.ApolloClient.apolloClient
 import com.example.buynest.model.state.UiResponseState
@@ -39,32 +41,29 @@ class ProductDetailsViewModel(val repository: ProductDetailsRepository): ViewMod
         }
     }
 
-    suspend fun addToCart(variantId: String, quantity: Int, selectedSize: String?, selectedColor: String) {
-        val cartId = SecureSharedPrefHelper.getString(KEY_CART_ID)
-        if (cartId != null) {
-            CartManager.setup(CartRepositoryImpl(cartDataSource = CartDataSourceImpl(apolloClient)))
-            val response = CartManager.addItemToCart(cartId, variantId, quantity, selectedSize, selectedColor)
-            if (response.hasErrors()) {
-                Log.e("CartError", "Failed to add item from product details: ${response.errors}")
-            } else {
-                Log.i("CartSuccess", "Added item to cart from product details : $cartId")
-            }
-        } else {
-            Log.w("CartWarning", "No cart ID found. You may want to call createCart() first.")
-        }
-    }
+    suspend fun addToCart(variantId: String, quantity: Int) {
+        var cartId = SecureSharedPrefHelper.getString(KEY_CART_ID)
 
-    fun getVariantIdForOptions(
-        product: ProductDetailsByIDQuery.Product?,
-        selectedSize: String?,
-        selectedColor: String?
-    ): String? {
-        return product?.variants?.edges?.firstOrNull { edge ->
-            val options = edge.node.selectedOptions
-            val sizeMatch = selectedSize == null || options.any { it.name.equals("Size", ignoreCase = true) && it.value == selectedSize }
-            val colorMatch = selectedColor == null || options.any { it.name.equals("Color", ignoreCase = true) && it.value == selectedColor }
-            sizeMatch && colorMatch
-        }?.node?.id
+        Log.i("CartInfo from pd_viewmodel", "Cart ID: $cartId")
+
+        if (cartId == null) {
+            Log.i("CartInfo", "No cart ID found. Creating new cart.")
+            val createResponse: ApolloResponse<CreateCartMutation.Data> = CartManager.createCart()
+            cartId = createResponse.data?.cartCreate?.cart?.id
+
+            if (cartId == null) {
+                Log.e("CartError", "Failed to create cart.")
+                return
+            }
+
+            SecureSharedPrefHelper.putString(KEY_CART_ID, cartId)
+        }
+        val response = CartManager.addOrUpdateCartItem(cartId, variantId, quantity)
+        if (response.hasErrors()) {
+            Log.e("CartError", "Failed to add item: ${response.errors}")
+        } else {
+            Log.i("CartSuccess", "Item added to cart: $variantId in cart $cartId")
+        }
     }
 
     class ProductInfoFactory(private val repository: ProductDetailsRepository): ViewModelProvider.Factory {

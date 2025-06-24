@@ -1,7 +1,6 @@
 package com.example.buynest.repository.cart
 
 import com.apollographql.apollo3.api.ApolloResponse
-import com.example.buynest.AddItemToCartMutation
 import com.example.buynest.CreateCartMutation
 import com.example.buynest.GetCartQuery
 import com.example.buynest.LinkCartToCustomerMutation
@@ -20,8 +19,8 @@ class CartRepositoryImpl(
     override suspend fun getCart(cartId: String): ApolloResponse<GetCartQuery.Data> =
         cartDataSource.getCart(cartId)
 
-    override suspend fun addOrUpdateCartItem(cartId: String, variantId: String, quantity: Int, selectedSize: String?, selectedColor: String?): ApolloResponse<*> =
-        cartDataSource.addOrUpdateItem(cartId, variantId, quantity, selectedSize, selectedColor)
+    override suspend fun addItemToCart(cartId: String, variantId: String, quantity: Int): ApolloResponse<*> =
+        cartDataSource.addItemToCart(cartId, variantId, quantity)
 
     override suspend fun removeItem(cartId: String, lineId: String): ApolloResponse<RemoveItemFromCartMutation.Data> =
         cartDataSource.removeItem(cartId, lineId)

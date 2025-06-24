@@ -85,7 +85,7 @@ fun CartScreen(
             val imageUrl = variant.image?.url?.toString() ?: ""
 
             CartItem(
-                id = node.id.hashCode(),
+                id = "${node.id}-$size-$color".hashCode(),
                 lineId = node.id,
                 name = product?.title ?: "Unknown Product",
                 price = price,

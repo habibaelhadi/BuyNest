@@ -63,18 +63,20 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductDetailsByIDQuery
 import com.example.buynest.ProductsDetailsByIDsQuery
 import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.repository.favorite.FavoriteRepoImpl
 import com.example.buynest.repository.productDetails.ProductDetailsRepositoryImpl
 import com.example.buynest.ui.theme.LightGray
 import com.example.buynest.ui.theme.MainColor
-import com.example.buynest.utils.mapColorNameToColor
 import com.example.buynest.utils.toColorList
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.viewmodel.productInfo.ProductDetailsViewModel
 import com.example.buynest.views.component.BottomSection
 import com.example.buynest.views.component.ExpandableText
+import com.example.buynest.views.component.GuestAlertDialog
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.QuantitySelector
+import com.example.buynest.views.customsnackbar.CustomSnackbar
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.calculateCurrentOffsetForPage
 import com.google.accompanist.pager.rememberPagerState
@@ -92,19 +94,26 @@ fun ProductInfoScreen(
     )
 
     val response by viewModel.productDetails.collectAsStateWithLifecycle()
-    var totalPrice by remember { mutableIntStateOf(0) }
 
+    var snackbarMessage by remember { mutableStateOf<String?>(null) }
+    var totalPrice by remember { mutableIntStateOf(0) }
     var selectedSize by remember { mutableStateOf<String?>(null) }
     var selectedColor by remember { mutableStateOf<String?>(null) }
+    var quantity by remember { mutableIntStateOf(1) }
 
     val favViewModel: FavouritesViewModel = viewModel(
         factory = FavouritesViewModel.FavouritesFactory(FavoriteRepoImpl())
     )
 
+    val showGuestDialog = remember { mutableStateOf(false) }
+    val user = FirebaseAuthObject.getAuth().currentUser
+
     LaunchedEffect(Unit) {
+        if (user != null){
+            favViewModel.getAllFavorites()
+        }
         val actualId = "gid://shopify/Product/$productId"
         viewModel.getProductDetails(actualId)
-        favViewModel.getAllFavorites()
     }
 
 
@@ -113,18 +122,31 @@ fun ProductInfoScreen(
         bottomBar = {
             if (response is UiResponseState.Success<*>) {
                 val product = (response as UiResponseState.Success<ProductDetailsByIDQuery.Data>).data.product
-
-                val variantId = viewModel.getVariantIdForOptions(
-                    product = product,
-                    selectedSize = selectedSize,
-                    selectedColor = selectedColor
-                )
-
-                BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart") {
-                    variantId?.let {
-                        viewModel.viewModelScope.launch {
-                            viewModel.addToCart(it, 1, selectedSize, selectedColor.toString())
+                val selectedVariantId = product?.variants?.edges
+                    ?.mapNotNull { it?.node }
+                    ?.find { variant ->
+                        val options = variant.selectedOptions.associate {
+                            it.name.lowercase() to it.value.lowercase()
                         }
+                        val sizeMatch = selectedSize?.lowercase()?.let { options["size"] == it } ?: false
+                        val colorMatch = selectedColor?.lowercase()?.let { options["color"] == it } ?: false
+                        sizeMatch && colorMatch
+                    }?.id
+
+                val currentQuantity = quantity
+                BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart") {
+                    if (selectedSize == null || selectedColor == null) {
+                        snackbarMessage = "Please select size and color before adding to cart"
+                        return@BottomSection
+                    }
+
+                    selectedVariantId?.let {
+                        viewModel.viewModelScope.launch {
+                            viewModel.addToCart(it, currentQuantity)
+                            snackbarMessage = "Item added to cart successfully"
+                        }
+                    } ?: run {
+                        snackbarMessage = "No matching variant found"
                     }
                 }
             }
@@ -145,10 +167,17 @@ fun ProductInfoScreen(
                     product = product,
                     onTotalChange = { updatedTotal -> totalPrice = updatedTotal },
                     favViewModel = favViewModel,
-                    onSizeSelected = { selectedSize = it },
-                    onColorSelected = { selectedColor = it }
+                    onSizePicked = { selectedSize = it },
+                    onColorPicked = { selectedColor = it },
+                    quantity = quantity,
+                    onQuantityChanged = { quantity = it }
                 )
             }
+        }
+    }
+    snackbarMessage?.let { message ->
+        CustomSnackbar(message = message) {
+            snackbarMessage = null
         }
     }
 }
@@ -160,8 +189,10 @@ fun ProductInfo(
     product: ProductDetailsByIDQuery.Product?,
     onTotalChange: (Int) -> Unit,
     favViewModel: FavouritesViewModel,
-    onSizeSelected: (String) -> Unit,
-    onColorSelected: (String) -> Unit
+    onSizePicked: (String) -> Unit,
+    onColorPicked: (String) -> Unit,
+    quantity: Int,
+    onQuantityChanged: (Int) -> Unit
 ) {
     val scrollState = rememberScrollState()
     val media = product?.media?.edges
@@ -170,9 +201,9 @@ fun ProductInfo(
     val size = product?.options?.get(0)?.values
     val color = product?.options?.get(1)?.values
     val colorList = color?.toColorList()
-    var quantity by remember { mutableIntStateOf(1) }
     val id = product?.id.toString()
     val productName = product?.title.toString()
+
     LaunchedEffect(key1 = quantity, key2 = price) {
         val total = price.toDouble() * quantity
         Log.d("UI", "Sending total: $total")
@@ -194,9 +225,11 @@ fun ProductInfo(
                     description = product.description,
                     sizes = size,
                     colors = colorList,
-                    onQuantityChange = { _, newQty -> quantity = newQty },
-                    onSizeSelected = { onSizeSelected },
-                    onColorSelected = { color -> onColorSelected(mapColorNameToColor(color.toString()).toString()) }
+                    onQuantityChange = { newQty -> onQuantityChanged(newQty) },
+                    onColorSelected = {
+                        onColorPicked(color?.getOrNull(colorList?.indexOf(it) ?: -1) ?: "")
+                    },
+                    onSizeSelected = { onSizePicked(it.toString()) }
                 )
             }
 
@@ -216,6 +249,8 @@ fun ProductImages(
     var itemToDelete by remember { mutableStateOf<ProductsDetailsByIDsQuery.Node?>(null) }
     var showConfirmDialog by remember { mutableStateOf(false) }
     val pagerState = rememberPagerState(images.size)
+    val showGuestDialog = remember { mutableStateOf(false) }
+    val user = FirebaseAuthObject.getAuth().currentUser
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -260,25 +295,30 @@ fun ProductImages(
                     )
 
                     IconButton(
-                        onClick = {
-                            if (isFav) {
-                            itemToDelete = ProductsDetailsByIDsQuery.Node(
-                                __typename = productName,
-                                onProduct = ProductsDetailsByIDsQuery.OnProduct(
-                                    id = productId,
-                                    title = productName,
-                                    vendor = "", productType = "", description = "",
-                                    featuredImage = null,
-                                    variants = ProductsDetailsByIDsQuery.Variants(emptyList()),
-                                    media = ProductsDetailsByIDsQuery.Media(emptyList()),
-                                    options = emptyList()
-                                )
-                            )
-                            showConfirmDialog = true
-                        } else {
-                            favViewModel.addToFavorite(productId)
-                        }
-                                  },
+                        onClick =
+                            {
+                                if (user == null) {
+                                    showGuestDialog.value = true
+                                }else{
+                                    if (isFav) {
+                                        itemToDelete = ProductsDetailsByIDsQuery.Node(
+                                            __typename = productName,
+                                            onProduct = ProductsDetailsByIDsQuery.OnProduct(
+                                                id = productId,
+                                                title = productName,
+                                                vendor = "", productType = "", description = "",
+                                                featuredImage = null,
+                                                variants = ProductsDetailsByIDsQuery.Variants(emptyList()),
+                                                media = ProductsDetailsByIDsQuery.Media(emptyList()),
+                                                options = emptyList()
+                                            )
+                                        )
+                                        showConfirmDialog = true
+                                    } else {
+                                        favViewModel.addToFavorite(productId)
+                                    }
+                                }
+                            },
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .padding(12.dp)
@@ -345,6 +385,14 @@ fun ProductImages(
             }
         )
     }
+
+    GuestAlertDialog(
+        showDialog = showGuestDialog.value,
+        onDismiss = { showGuestDialog.value = false },
+        onConfirm = {
+            showGuestDialog.value = false
+        }
+    )
 }
 
 @Composable
@@ -355,7 +403,7 @@ fun ProductDetails(
     description: String,
     sizes: List<String>?,
     colors: List<Color>?,
-    onQuantityChange: (Int, Int) -> Unit,
+    onQuantityChange: (Int) -> Unit,
     onColorSelected: (Color) -> Unit = {},
     onSizeSelected: (Int) -> Unit = {},
 ) {
@@ -391,7 +439,7 @@ fun ProductDetails(
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.weight(1f))
-            QuantitySelector(quantity) { newQuantity -> onQuantityChange(1, newQuantity) }
+            QuantitySelector(quantity) { newQuantity -> onQuantityChange(newQuantity) }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -425,7 +473,7 @@ fun ProductDetails(
                             .background(if (isSelected) MainColor else LightGray)
                             .clickable {
                                 selectedSize.value = size
-                                onSizeSelected(size.toIntOrNull() ?: -1)
+                                onSizeSelected(size.toInt())
                             },
                         contentAlignment = Alignment.Center
                     ) {
