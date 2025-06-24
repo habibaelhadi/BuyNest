@@ -68,12 +68,21 @@ fun FavouriteCard(
         ?.selectedOptions
         ?.firstOrNull { it.name.equals("Color", ignoreCase = true) }
         ?.value
+
+    val size = item.onProduct?.variants?.edges
+        ?.firstOrNull()
+        ?.node
+        ?.selectedOptions
+        ?.firstOrNull { it.name.equals("Size", ignoreCase = true) } //////////////////////////////////
+        ?.value
+
     val price = item.onProduct?.variants?.edges
         ?.firstOrNull()
         ?.node
         ?.price
         ?.amount
         ?.toString()
+
     val colorDot = mapColorNameToColor(color)
     val favoriteProducts by viewModel.favorite.collectAsState()
     val isFav = favoriteProducts.contains(item.onProduct?.id)

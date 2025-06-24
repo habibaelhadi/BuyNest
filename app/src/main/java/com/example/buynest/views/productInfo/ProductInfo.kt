@@ -76,6 +76,7 @@ import com.example.buynest.views.component.ExpandableText
 import com.example.buynest.views.component.GuestAlertDialog
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.QuantitySelector
+import com.example.buynest.views.customsnackbar.CustomSnackbar
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.calculateCurrentOffsetForPage
 import com.google.accompanist.pager.rememberPagerState
@@ -93,7 +94,12 @@ fun ProductInfoScreen(
     )
 
     val response by viewModel.productDetails.collectAsStateWithLifecycle()
+
+    var snackbarMessage by remember { mutableStateOf<String?>(null) }
     var totalPrice by remember { mutableIntStateOf(0) }
+    var selectedSize by remember { mutableStateOf<String?>(null) }
+    var selectedColor by remember { mutableStateOf<String?>(null) }
+    var quantity by remember { mutableIntStateOf(1) }
 
     val favViewModel: FavouritesViewModel = viewModel(
         factory = FavouritesViewModel.FavouritesFactory(FavoriteRepoImpl())
@@ -116,13 +122,31 @@ fun ProductInfoScreen(
         bottomBar = {
             if (response is UiResponseState.Success<*>) {
                 val product = (response as UiResponseState.Success<ProductDetailsByIDQuery.Data>).data.product
-                val variantId = product?.variants?.edges?.firstOrNull()?.node?.id
-
-                BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart") {
-                    variantId?.let {
-                        viewModel.viewModelScope.launch {
-                            viewModel.addToCart(it, 1)
+                val selectedVariantId = product?.variants?.edges
+                    ?.mapNotNull { it?.node }
+                    ?.find { variant ->
+                        val options = variant.selectedOptions.associate {
+                            it.name.lowercase() to it.value.lowercase()
                         }
+                        val sizeMatch = selectedSize?.lowercase()?.let { options["size"] == it } ?: false
+                        val colorMatch = selectedColor?.lowercase()?.let { options["color"] == it } ?: false
+                        sizeMatch && colorMatch
+                    }?.id
+
+                val currentQuantity = quantity
+                BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart") {
+                    if (selectedSize == null || selectedColor == null) {
+                        snackbarMessage = "Please select size and color before adding to cart"
+                        return@BottomSection
+                    }
+
+                    selectedVariantId?.let {
+                        viewModel.viewModelScope.launch {
+                            viewModel.addToCart(it, currentQuantity)
+                            snackbarMessage = "Item added to cart successfully"
+                        }
+                    } ?: run {
+                        snackbarMessage = "No matching variant found"
                     }
                 }
             }
@@ -142,9 +166,18 @@ fun ProductInfoScreen(
                     innerPadding = innerPadding,
                     product = product,
                     onTotalChange = { updatedTotal -> totalPrice = updatedTotal },
-                    favViewModel = favViewModel
+                    favViewModel = favViewModel,
+                    onSizePicked = { selectedSize = it },
+                    onColorPicked = { selectedColor = it },
+                    quantity = quantity,
+                    onQuantityChanged = { quantity = it }
                 )
             }
+        }
+    }
+    snackbarMessage?.let { message ->
+        CustomSnackbar(message = message) {
+            snackbarMessage = null
         }
     }
 }
@@ -155,7 +188,11 @@ fun ProductInfo(
     innerPadding: PaddingValues,
     product: ProductDetailsByIDQuery.Product?,
     onTotalChange: (Int) -> Unit,
-    favViewModel: FavouritesViewModel
+    favViewModel: FavouritesViewModel,
+    onSizePicked: (String) -> Unit,
+    onColorPicked: (String) -> Unit,
+    quantity: Int,
+    onQuantityChanged: (Int) -> Unit
 ) {
     val scrollState = rememberScrollState()
     val media = product?.media?.edges
@@ -164,9 +201,9 @@ fun ProductInfo(
     val size = product?.options?.get(0)?.values
     val color = product?.options?.get(1)?.values
     val colorList = color?.toColorList()
-    var quantity by remember { mutableIntStateOf(1) }
     val id = product?.id.toString()
     val productName = product?.title.toString()
+
     LaunchedEffect(key1 = quantity, key2 = price) {
         val total = price.toDouble() * quantity
         Log.d("UI", "Sending total: $total")
@@ -188,9 +225,11 @@ fun ProductInfo(
                     description = product.description,
                     sizes = size,
                     colors = colorList,
-                    onQuantityChange = { _, newQty -> quantity = newQty },
-                    onColorSelected = { /* Handle color selection */ },
-                    onSizeSelected = { /* Handle size selection */ }
+                    onQuantityChange = { newQty -> onQuantityChanged(newQty) },
+                    onColorSelected = {
+                        onColorPicked(color?.getOrNull(colorList?.indexOf(it) ?: -1) ?: "")
+                    },
+                    onSizeSelected = { onSizePicked(it.toString()) }
                 )
             }
 
@@ -364,7 +403,7 @@ fun ProductDetails(
     description: String,
     sizes: List<String>?,
     colors: List<Color>?,
-    onQuantityChange: (Int, Int) -> Unit,
+    onQuantityChange: (Int) -> Unit,
     onColorSelected: (Color) -> Unit = {},
     onSizeSelected: (Int) -> Unit = {},
 ) {
@@ -400,7 +439,7 @@ fun ProductDetails(
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.weight(1f))
-            QuantitySelector(quantity) { newQuantity -> onQuantityChange(1, newQuantity) }
+            QuantitySelector(quantity) { newQuantity -> onQuantityChange(newQuantity) }
         }
 
         Spacer(modifier = Modifier.height(12.dp))

@@ -50,9 +50,13 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.buynest.model.data.remote.graphql.ApolloClient.apolloClient
 import com.example.buynest.navigation.RoutesScreens
+import com.example.buynest.repository.cart.CartRepositoryImpl
+import com.example.buynest.repository.cart.datasource.CartDataSourceImpl
 import com.example.buynest.ui.theme.white
 import com.example.buynest.utils.SecureSharedPrefHelper
+import com.example.buynest.viewmodel.cart.CartManager
 import kotlinx.coroutines.delay
 
 val routIndex = MutableLiveData<Int>(0)
@@ -63,6 +67,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         SecureSharedPrefHelper.init(this)
+        CartManager.setup(CartRepositoryImpl(CartDataSourceImpl(apolloClient)))
 
         setContent {
             var showSplash by remember { mutableStateOf(true) }

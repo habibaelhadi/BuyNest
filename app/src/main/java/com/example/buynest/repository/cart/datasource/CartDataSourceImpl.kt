@@ -1,14 +1,17 @@
 package com.example.buynest.repository.cart.datasource
 
+import android.util.Log
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.api.Optional
 import com.example.buynest.AddItemToCartMutation
+import com.example.buynest.CartLinesUpdateMutation
 import com.example.buynest.CreateCartMutation
 import com.example.buynest.GetCartQuery
 import com.example.buynest.LinkCartToCustomerMutation
 import com.example.buynest.RemoveItemFromCartMutation
 import com.example.buynest.type.CartLineInput
+import com.example.buynest.type.CartLineUpdateInput
 
 class CartDataSourceImpl(
     private val apolloClient: ApolloClient,
@@ -27,15 +30,27 @@ class CartDataSourceImpl(
         return apolloClient.query(GetCartQuery(cartId)).execute()
     }
 
-    override suspend fun addItem(cartId: String, variantId: String, quantity: Int): ApolloResponse<AddItemToCartMutation.Data> {
-        val lines = listOf(
-            CartLineInput(
-                quantity = Optional.Present(quantity),
-                merchandiseId = variantId
-            )
+    override suspend fun addItemToCart(
+        cartId: String,
+        variantId: String,
+        quantity: Int
+    ): ApolloResponse<*> {
+        Log.i("CartAdd", "Adding variantId=$variantId with qty=$quantity to cart $cartId")
+
+        val lineInput = CartLineInput(
+            merchandiseId = variantId,
+            quantity = Optional.Present(quantity)
         )
-        return apolloClient.mutation(AddItemToCartMutation(cartId, lines)).execute()
+
+        return apolloClient.mutation(
+            AddItemToCartMutation(
+                cartId = cartId,
+                lines = listOf(lineInput)
+            )
+        ).execute()
     }
+
+
 
     override suspend fun removeItem(cartId: String, lineId: String): ApolloResponse<RemoveItemFromCartMutation.Data> {
         return apolloClient.mutation(RemoveItemFromCartMutation(cartId, listOf(lineId))).execute()
