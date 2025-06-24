@@ -80,6 +80,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.calculateCurrentOffsetForPage
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
+import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import kotlin.math.abs
 
 @Composable
@@ -245,8 +246,8 @@ fun ProductImages(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(20.dp))
                 ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(images[page]),
+                    ZoomableAsyncImage(
+                        model = images[page],
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
