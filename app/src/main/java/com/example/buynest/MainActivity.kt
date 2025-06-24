@@ -50,12 +50,13 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.example.buynest.model.data.remote.graphql.ApolloClient.apolloClient
+import com.example.buynest.model.data.remote.graphql.ApolloClient
 import com.example.buynest.navigation.RoutesScreens
 import com.example.buynest.repository.cart.CartRepositoryImpl
 import com.example.buynest.repository.cart.datasource.CartDataSourceImpl
 import com.example.buynest.ui.theme.white
 import com.example.buynest.utils.SecureSharedPrefHelper
+import com.example.buynest.utils.constant.*
 import com.example.buynest.viewmodel.cart.CartManager
 import kotlinx.coroutines.delay
 
@@ -67,6 +68,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         SecureSharedPrefHelper.init(this)
+        val apolloClient = ApolloClient.createApollo(
+            BASE_URL = CLIENT_BASE_URL,
+            ACCESS_TOKEN = BuildConfig.SHOPIFY_ACCESS_TOKEN,
+            Header = CLIENT_HEADER
+        )
+
         CartManager.setup(CartRepositoryImpl(CartDataSourceImpl(apolloClient)))
 
         setContent {

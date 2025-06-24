@@ -2,10 +2,11 @@ package com.example.buynest.repository.authentication.shopify.datasource
 
 import android.util.Log
 import com.apollographql.apollo3.api.Optional
+import com.example.buynest.BuildConfig
 import com.example.buynest.CreateCustomerMutation
 import com.example.buynest.CustomerAccessTokenCreateMutation
 import com.example.buynest.LoginCustomerMutation
-import com.example.buynest.model.data.remote.graphql.ApolloClient.apolloClient
+import com.example.buynest.model.data.remote.graphql.ApolloClient
 import com.example.buynest.repository.cart.CartRepositoryImpl
 import com.example.buynest.repository.cart.datasource.CartDataSourceImpl
 import com.example.buynest.type.CustomerAccessTokenCreateInput
@@ -15,6 +16,7 @@ import com.example.buynest.utils.AppConstants.KEY_CHECKOUT_URL
 import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_ID
 import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_TOKEN
 import com.example.buynest.utils.SecureSharedPrefHelper
+import com.example.buynest.utils.constant.*
 import com.example.buynest.viewmodel.cart.CartManager
 
 class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
@@ -41,9 +43,16 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
                 phone = Optional.presentIfNotNull(formattedPhone)
             )
 
-            val response = apolloClient
+            val client = ApolloClient.createApollo(
+                BASE_URL = CLIENT_BASE_URL,
+                ACCESS_TOKEN = BuildConfig.SHOPIFY_ACCESS_TOKEN,
+                Header = CLIENT_HEADER
+            )
+
+            val response = client
                 .mutation(CreateCustomerMutation(input))
                 .execute()
+
 
             val customer = response.data?.customerCreate?.customer
             val errors = response.data?.customerCreate?.userErrors.orEmpty()
@@ -59,7 +68,7 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
             Log.i("TAG", "Saved Customer ID: ${customer.id}")
 
             // Get access token
-            val tokenResponse = apolloClient.mutation(
+            val tokenResponse = client.mutation(
                 CustomerAccessTokenCreateMutation(
                     CustomerAccessTokenCreateInput(email, password)
                 )
@@ -78,7 +87,7 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
             Log.i("TAG", "Saved Customer Token: $accessToken")
 
             // Create cart
-            CartManager.setup(CartRepositoryImpl(CartDataSourceImpl(apolloClient)))
+            CartManager.setup(CartRepositoryImpl(CartDataSourceImpl(client)))
             val cartResponse = CartManager.createCart()
             val cart = cartResponse.data?.cartCreate?.cart
 
@@ -100,7 +109,7 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
         } catch (e: Exception) {
             Log.e("TAG", "Exception during sign up: ${e.message}", e)
             Result.failure(e)
-        }
+        } as Result<CreateCustomerMutation.Customer?>
     }
 
     override suspend fun loginCustomer(
@@ -109,8 +118,14 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
     ): Result<LoginCustomerMutation.CustomerAccessToken?> {
         return try {
             val input = CustomerAccessTokenCreateInput(email, password)
+            val client = ApolloClient.createApollo(
+                BASE_URL = CLIENT_BASE_URL,
+                ACCESS_TOKEN = BuildConfig.SHOPIFY_ACCESS_TOKEN,
+                Header = CLIENT_HEADER
+            )
 
-            val response = apolloClient
+
+            val response = client
                 .mutation(LoginCustomerMutation(input))
                 .execute()
 
@@ -131,6 +146,6 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
         } catch (e: Exception) {
             Log.i("TAG", "fail loginCustomer: $e")
             Result.failure(e)
-        }
+        } as Result<LoginCustomerMutation.CustomerAccessToken?>
     }
 }

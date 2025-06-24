@@ -6,11 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.ApolloResponse
 import com.example.buynest.CreateCartMutation
-import com.example.buynest.ProductDetailsByIDQuery
-import com.example.buynest.model.data.remote.graphql.ApolloClient.apolloClient
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.cart.CartRepositoryImpl
-import com.example.buynest.repository.cart.datasource.CartDataSourceImpl
 import com.example.buynest.repository.productDetails.ProductDetailsRepository
 import com.example.buynest.utils.AppConstants.KEY_CART_ID
 import com.example.buynest.utils.SecureSharedPrefHelper
