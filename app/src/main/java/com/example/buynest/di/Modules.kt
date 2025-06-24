@@ -105,7 +105,7 @@ val diModule = module {
         ShopifyAddressDataSourceImpl(get(named("CLIENT_APOLLO")))
     }
     factory<IFirebaseDataSource> { FirebaseDataSourceImpl() }
-    factory<ShopifyAuthRemoteDataSource> { ShopifyAuthRemoteDataSourceImpl() }
+    factory<ShopifyAuthRemoteDataSource> { ShopifyAuthRemoteDataSourceImpl(get(named("CLIENT_APOLLO"))) }
     factory<CartDataSource> { CartDataSourceImpl(get(named("CLIENT_APOLLO"))) }
     factory<IRemoteDataSource> { RemoteDataSourceImpl(get()) }
 
