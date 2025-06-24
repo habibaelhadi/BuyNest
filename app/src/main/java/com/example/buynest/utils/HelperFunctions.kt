@@ -45,7 +45,8 @@ fun mapFromBrandProduct(node: BrandsAndProductsQuery.Node): UiProduct {
     return UiProduct(
         id = node.id,
         title = node.title,
-        imageUrl = node.featuredImage?.url ?: ""
+        imageUrl = node.featuredImage?.url ?: "",
+        price = node.variants.edges.firstOrNull()?.node?.price?.amount?.toString()?.toFloatOrNull()
     )
 }
 
@@ -53,6 +54,7 @@ fun mapFromCategoryProduct(node: ProductsByHandleQuery.Node): UiProduct {
     return UiProduct(
         id = node.id,
         title = node.title,
-        imageUrl = node.featuredImage?.url ?: ""
+        imageUrl = node.featuredImage?.url ?: "",
+        price = node.variants.edges.firstOrNull()?.node?.price?.amount?.toString()?.toFloatOrNull()
     )
 }

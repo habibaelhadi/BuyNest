@@ -23,20 +23,25 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,6 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
@@ -69,6 +75,7 @@ import com.example.buynest.viewmodel.brandproducts.BrandDetailsViewModel
 import com.example.buynest.viewmodel.brandproducts.BrandProductsFactory
 import com.example.buynest.viewmodel.categoryViewModel.CategoryFactory
 import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
+import com.example.buynest.views.orders.phenomenaFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,31 +99,52 @@ fun SearchScreen(
     var categoryUiProducts by remember { mutableStateOf<List<UiProduct>?>(null) }
     var uiProducts by remember { mutableStateOf<List<UiProduct>?>(null) }
     var filteredProducts by remember { mutableStateOf<List<UiProduct>?>(null) }
+    val filterExpanded = remember { mutableStateOf(false) }
+    val selectedPrice = remember { mutableFloatStateOf(1000f) }
 
     LaunchedEffect(Unit) {
         homeViewModel.getBrands()
     }
 
-    LaunchedEffect(searchQuery, uiProducts) {
-        filteredProducts = if (searchQuery.isBlank()) {
-            null
-        } else {
-            uiProducts?.filter {
-                it.title.contains(searchQuery, ignoreCase = true)
-            }
+    LaunchedEffect(searchQuery, uiProducts, selectedPrice.floatValue) {
+        filteredProducts = uiProducts?.filter { product ->
+            val matchesQuery = product.title.contains(searchQuery, ignoreCase = true)
+            val priceMatches = product.price != null && product.price <= selectedPrice.floatValue
+            matchesQuery && priceMatches
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        IconButton(onClick = {
-
-        }) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = null,
-                tint = MainColor
-            )
-        }
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
+        CenterAlignedTopAppBar(
+            title = {
+                Text(
+                    "Search", fontSize = 20.sp,
+                    fontFamily = phenomenaFontFamily,
+                    color = MainColor,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            },
+            navigationIcon = {
+                IconButton(onClick = { }) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null,
+                        tint = MainColor
+                    )
+                }
+            },
+            actions = {
+                IconButton(onClick = { filterExpanded.value = !filterExpanded.value }) {
+                    Icon(
+                        imageVector = Icons.Default.FilterList,
+                        contentDescription = "Filter",
+                        tint = MainColor
+                    )
+                }
+            }
+        )
 
         SearchBar(
             query = searchQuery,
@@ -200,6 +228,44 @@ fun SearchScreen(
             isCategorySelected && categoryUiProducts != null -> categoryUiProducts
             else -> productsList.map { mapFromBrandProduct(it) }
         }
+
+        val prices = uiProducts?.mapNotNull { it.price }
+        val minPrice = prices?.minOrNull() ?: 0f
+        val maxPrice = prices?.maxOrNull() ?: 1000f
+
+        val adjustedMin = if (minPrice == maxPrice) minPrice - 1 else minPrice
+        val adjustedMax = if (minPrice == maxPrice) maxPrice + 1 else maxPrice
+        val sliderSteps = if (adjustedMax - adjustedMin >= 2) 4 else 0
+
+        LaunchedEffect(maxPrice) {
+            if (selectedPrice.floatValue > maxPrice || selectedPrice.floatValue == 1000f)
+                selectedPrice.floatValue = maxPrice
+        }
+
+
+        if (filterExpanded.value) {
+            Text(
+                text = "Min Price: ${selectedPrice.floatValue.toInt()}LE - Max price: ${adjustedMax.toInt()}LE",
+                color = MainColor,
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
+            )
+
+            Slider(
+                value = selectedPrice.floatValue.coerceIn(adjustedMin, adjustedMax),
+                onValueChange = { selectedPrice.floatValue = it },
+                valueRange = adjustedMin..adjustedMax,
+                steps = sliderSteps,
+                modifier = Modifier.padding(horizontal = 8.dp),
+                colors = SliderDefaults.colors(
+                    thumbColor = MainColor,
+                    activeTrackColor = MainColor,
+                    inactiveTrackColor = Color.LightGray
+                )
+            )
+
+        }
+
 
         AllProductsSection(filteredProducts ?: uiProducts.orEmpty())
 
@@ -303,7 +369,7 @@ fun FilterExpansionSection(
                     modifier = Modifier
                         .clip(RoundedCornerShape(16.dp))
                         .background(LightGray2)
-                        .clickable { onItemClick(filterType.name,item) }
+                        .clickable { onItemClick(filterType.name, item) }
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                     style = MaterialTheme.typography.bodyMedium
                 )
