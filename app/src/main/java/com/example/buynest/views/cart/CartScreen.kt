@@ -70,6 +70,10 @@ fun CartScreen(
                     val orderId = draftOrderid?.data?.draftOrderCreate?.draftOrder?.id
                     if (orderId != null) {
                         cartViewModel.completeOrder(orderId)
+                        cartItems.forEach { item ->
+                            cartViewModel.removeItemFromCart(cartId!!, item.lineId)
+                        }
+                        cartItems = emptyList()
                     }else{
                         Log.i("TAG", "CartScreen: DraftOrderId is null ")
                     }

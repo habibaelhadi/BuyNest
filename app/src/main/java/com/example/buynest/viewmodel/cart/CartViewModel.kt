@@ -92,11 +92,6 @@ class CartViewModel(
 
     fun draftOrder(order: OrderModel){
         viewModelScope.launch {
-            Log.i("TAG", "viewModel draftOrder: $order")
-            order.orderItems.forEach {
-                Log.d("TAG", "Item: ${it.name}, variantId: '${it.variantId}'")
-            }
-
             val response = orderRepository.draftOrder(order)
             _orderResponse.value = response
 
