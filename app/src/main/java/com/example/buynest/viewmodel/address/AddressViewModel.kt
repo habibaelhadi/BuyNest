@@ -80,6 +80,25 @@ class AddressViewModel(
         }
     }
 
+    fun updateAddress(token: String, addressId: String, addressInput: MailingAddressInput) {
+        Log.d("AddressViewModel", "Updating address ID: $addressId with $addressInput")
+        viewModelScope.launch {
+            repository.updateAddress(token, addressId, addressInput).fold(
+                onSuccess = { updatedAddr ->
+                    Log.d("AddressViewModel", "Address updated successfully, reloading addresses")
+                    loadAddresses(token)
+                    _error.value = null
+                    stopEditingAddress()
+                },
+                onFailure = { ex ->
+                    val errorMsg = ex.message ?: "Failed to update address"
+                    Log.e("AddressViewModel", "Error updating address: $errorMsg")
+                    _error.value = errorMsg
+                }
+            )
+        }
+    }
+
     fun setDefaultAddress(token: String, addressId: String) {
         Log.d("AddressViewModel", "Setting default address ID: $addressId")
         viewModelScope.launch {

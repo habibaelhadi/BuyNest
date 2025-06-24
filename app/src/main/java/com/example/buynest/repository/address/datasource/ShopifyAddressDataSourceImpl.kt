@@ -66,6 +66,37 @@ class ShopifyAddressDataSourceImpl(
         }
     }
 
+    override suspend fun updateAddress(token: String, addressId: String, address: MailingAddressInput): Result<AddressModel> {
+        Log.d("ShopifyAddressDS", "Updating address ID: $addressId with $address")
+
+        val response = apolloClient.mutation(
+            CustomerAddressUpdateMutation(token, addressId, address)
+        ).execute()
+
+        val data = response.data?.customerAddressUpdate?.customerAddress
+
+        return if (data != null) {
+            val model = AddressModel(
+                id = data.id,
+                firstName = data.firstName ?: "Unknown",
+                lastName = data.lastName ?: "Unknown",
+                address1 = data.address1 ?: "",
+                address2 = data.address2 ?: "",
+                city = data.city ?: "",
+                country = data.country ?: "",
+                phone = data.phone ?: ""
+            )
+            Log.d("ShopifyAddressDS", "Address updated successfully: $model")
+            Result.success(model)
+        } else {
+            val error = response.errors?.firstOrNull()?.message
+                ?: response.data?.customerAddressUpdate?.customerUserErrors?.firstOrNull()?.message
+                ?: "Update failed"
+            Log.e("ShopifyAddressDS", "Update address failed: $error")
+            Result.failure(Exception(error))
+        }
+    }
+
     override suspend fun setDefaultAddress(token: String, addressId: String): Result<AddressModel> {
         Log.d("ShopifyAddressDS", "Setting default address ID: $addressId")
         val response = apolloClient.mutation(

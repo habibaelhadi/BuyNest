@@ -57,7 +57,9 @@ fun AddressScreen(
                         addressViewModel.stopEditingAddress()
                     },
                     onSave = { updatedInput ->
-                        addressViewModel.addAddress(token, updatedInput)
+                        editingAddress?.id?.let { addressId ->
+                            addressViewModel.updateAddress(token, addressId, updatedInput)
+                        }
                         coroutineScope.launch { bottomSheetState.hide() }
                         addressViewModel.stopEditingAddress()
                     }
