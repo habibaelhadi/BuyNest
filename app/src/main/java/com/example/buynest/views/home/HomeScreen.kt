@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.R
+import com.example.buynest.model.entity.OfferModel
+import com.example.buynest.repository.home.HomeRepository
 import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.viewmodel.home.HomeViewModel
 import com.example.buynest.viewmodel.shared.SharedViewModel
@@ -32,30 +34,24 @@ import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.component.TopBrandsSection
 import org.koin.androidx.compose.koinViewModel
 
-data class OfferModel(
-    val title: String,
-    val subtitle: String,
-    val buttonText: String,
-    val imageRes: Int
-)
 val offers = listOf(
     OfferModel(
         title = "UP TO 25% OFF",
         subtitle = "For all Headphones & AirPods",
         buttonText = "Shop Now",
-        imageRes = R.drawable.ad_background
+        imageRes = R.drawable.ad1_background
     ),
     OfferModel(
         title = "Buy 1 Get 1 Free",
         subtitle = "Selected fashion items",
         buttonText = "Shop Now",
-        imageRes = R.drawable.ad_background
+        imageRes = R.drawable.ad2_background
     ),
     OfferModel(
         title = "Big Summer Sale",
         subtitle = "Electronics & more",
         buttonText = "Shop Now",
-        imageRes = R.drawable.ad_background
+        imageRes = R.drawable.ad3_background
     )
 )
 
