@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.unit.dp
-import com.example.buynest.model.entity.Address
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_FRIEND
 import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_HOME
@@ -32,10 +31,10 @@ fun AddressScreen(
     addressViewModel: AddressViewModel
 ) {
     val addressList by addressViewModel.addresses.collectAsState()
+    val defaultAddress by addressViewModel.defaultAddress.collectAsState()
     val error by addressViewModel.error.collectAsState()
     val editingAddress by addressViewModel.editingAddress.collectAsState()
 
-    var selectedIndex by remember { mutableStateOf(-1) }
     val bottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val coroutineScope = rememberCoroutineScope()
 
@@ -68,7 +67,7 @@ fun AddressScreen(
         }
     ) {
         Scaffold(
-            modifier = Modifier.padding(top = 60.dp),
+            modifier = Modifier.padding(top = 10.dp),
             topBar = {
                 TopAppBar(
                     backgroundColor = White,
@@ -130,10 +129,12 @@ fun AddressScreen(
                         Text("No addresses found", modifier = Modifier.align(Alignment.CenterHorizontally))
                     } else {
                         LazyColumn {
-                            itemsIndexed(addressList) { index, address ->
+                            itemsIndexed(addressList) { _, address ->
                                 val labelType = address.address2?.split("-")?.firstOrNull()?.trim()?.lowercase() ?: "other"
                                 val landmark = address.address2?.split("-")?.lastOrNull()?.trim()
                                 val label = labelType.replaceFirstChar { it.uppercase() }
+
+                                val isSameId = defaultAddress?.id?.normalizedId() == address.id?.normalizedId()
 
                                 AddressItem(
                                     label = label,
@@ -147,14 +148,10 @@ fun AddressScreen(
                                     phone = address.phone ?: "",
                                     receiverName = address.firstName ?: "",
                                     landmark = landmark,
-                                    isSelected = selectedIndex == index,
-                                    onSelect = {
-                                        selectedIndex = index
-                                    },
-                                    onMapClick = {
-                                        Log.d("AddressScreen", "View on map clicked for ${address.address1}")
-                                    },
+                                    isSelected = isSameId,
+                                    isDefault = isSameId,
                                     onSetDefault = {
+                                        Log.d("AddressScreen", "Setting default address ID: ${address.id}")
                                         addressViewModel.setDefaultAddress(token, address.id ?: "")
                                     },
                                     onEdit = {
@@ -162,6 +159,7 @@ fun AddressScreen(
                                         coroutineScope.launch { bottomSheetState.show() }
                                     }
                                 )
+
                             }
                         }
                     }
@@ -170,4 +168,6 @@ fun AddressScreen(
         )
     }
 }
+
+private fun String.normalizedId(): String = this.substringBefore("?")
 

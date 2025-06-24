@@ -105,7 +105,10 @@ class AddressViewModel(
             repository.setDefaultAddress(token, addressId).fold(
                 onSuccess = { defaultAddr ->
                     Log.d("AddressViewModel", "Default address set: $defaultAddr")
-                    _defaultAddress.value = defaultAddr
+                    if (_defaultAddress.value?.id != defaultAddr?.id) {
+                        _defaultAddress.value = defaultAddr
+                    }
+                    loadAddresses(token)
                     _error.value = null
                 },
                 onFailure = { ex ->
@@ -150,5 +153,6 @@ class AddressViewModel(
         val parts = address.split(",").map { it.trim() }
         return extractor(parts)
     }
+
 
 }
