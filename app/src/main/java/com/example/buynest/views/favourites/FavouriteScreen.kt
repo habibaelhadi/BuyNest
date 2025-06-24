@@ -50,16 +50,15 @@ import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.orders.phenomenaFontFamily
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun FavouriteScreen(
     onCartClicked:()->Unit,
     navigateToProductInfo: (String) -> Unit,
-    onSearchClicked:()->Unit
+    onSearchClicked:()->Unit,
+    viewModel: FavouritesViewModel = koinViewModel()
 ) {
-    val viewModel: FavouritesViewModel = viewModel(
-        factory = FavouritesViewModel.FavouritesFactory(FavoriteRepoImpl())
-    )
     val product by viewModel.productDetails.collectAsStateWithLifecycle()
     val user = FirebaseAuthObject.getAuth().currentUser
 

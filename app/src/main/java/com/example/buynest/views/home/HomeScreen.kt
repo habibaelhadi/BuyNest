@@ -20,12 +20,9 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.R
-import com.example.buynest.repository.home.HomeRepository
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.viewmodel.home.HomeFactory
 import com.example.buynest.viewmodel.home.HomeViewModel
 import com.example.buynest.viewmodel.shared.SharedViewModel
 import com.example.buynest.views.component.AdsSection
@@ -33,7 +30,7 @@ import com.example.buynest.views.component.ForYouSection
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.component.TopBrandsSection
-
+import org.koin.androidx.compose.koinViewModel
 
 data class OfferModel(
     val title: String,
@@ -67,16 +64,15 @@ val phenomenaBold = FontFamily(
     Font(R.font.phenomena_bold)
 )
 @Composable
-fun HomeScreen(onCategoryClick: (String,String) -> Unit ,
-               onCardClicked:()->Unit,
-               onSearchClicked:()->Unit,
-               sharedViewModel: SharedViewModel,
-               onProductClicked: (productId: String) -> Unit
+fun HomeScreen(
+    onCategoryClick: (String,String) -> Unit,
+    onCardClicked:()->Unit,
+    onSearchClicked:()->Unit,
+    sharedViewModel: SharedViewModel,
+    onProductClicked: (productId: String) -> Unit,
+    homeViewModel: HomeViewModel = koinViewModel()
 ) {
     val activity = LocalActivity.current
-    val homeViewModel: HomeViewModel = viewModel(
-        factory = HomeFactory(HomeRepository())
-    )
     val brands by homeViewModel.brand.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {

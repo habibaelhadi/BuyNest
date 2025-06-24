@@ -61,30 +61,21 @@ import com.example.buynest.utils.strategies.LoginAuthenticationStrategy
 import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
 import com.example.buynest.views.authentication.CustomTextField
 import com.example.buynest.views.customsnackbar.CustomSnackbar
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LoginScreen(
     navigateToHome: () -> Unit,
     navigateToSignUp: () -> Unit,
-    navigateToForgotPassword: () -> Unit) {
+    navigateToForgotPassword: () -> Unit,
+    viewModel: AuthenticationViewModel = koinViewModel()
+) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val passwordVisible = remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     val activity = LocalActivity.current
     val context = LocalContext.current
-    val viewModel: AuthenticationViewModel = viewModel(
-        factory = AuthenticationViewModel.AuthenticationViewModelFactory(
-            AuthenticationRepoImpl(
-                FirebaseRepositoryImpl(
-                    FirebaseDataSourceImpl()
-                ),
-                ShopifyAuthRepositoryImpl(
-                    ShopifyAuthRemoteDataSourceImpl()
-                )
-            )
-        )
-    )
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->

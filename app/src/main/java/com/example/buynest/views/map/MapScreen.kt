@@ -35,6 +35,7 @@ import com.example.buynest.viewmodel.address.AddressViewModel
 import com.example.buynest.views.component.MapTopBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.androidx.compose.koinViewModel
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint

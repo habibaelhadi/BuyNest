@@ -53,44 +53,34 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.home.HomeRepository
 import com.example.buynest.ui.theme.LightGray
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.utils.FilterType
-import com.example.buynest.viewmodel.home.HomeFactory
 import com.example.buynest.viewmodel.home.HomeViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.ProductsByHandleQuery
 import com.example.buynest.model.entity.UiProduct
-import com.example.buynest.repository.category.CategoryRepoImpl
 import com.example.buynest.utils.mapFromBrandProduct
 import com.example.buynest.utils.mapFromCategoryProduct
-import com.example.buynest.viewmodel.brandproducts.BrandDetailsViewModel
-import com.example.buynest.viewmodel.brandproducts.BrandProductsFactory
-import com.example.buynest.viewmodel.categoryViewModel.CategoryFactory
 import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
 import com.example.buynest.views.orders.phenomenaFontFamily
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     onBackClicked: () -> Unit,
-    onProductClicked: (productId: String) -> Unit
+    onProductClicked: (productId: String) -> Unit,
+    homeViewModel: HomeViewModel = koinViewModel(),
+    categoryViewModel: CategoryViewModel = koinViewModel()
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf(FilterType.All) }
-    val homeViewModel: HomeViewModel = viewModel(
-        factory = HomeFactory(HomeRepository())
-    )
-    val categoryViewModel: CategoryViewModel = viewModel(
-        factory = CategoryFactory(CategoryRepoImpl())
-    )
     val brands by homeViewModel.brand.collectAsStateWithLifecycle()
     val categoryProductsState by categoryViewModel.categoryProducts.collectAsStateWithLifecycle()
     var brandsList by remember { mutableStateOf<List<BrandsAndProductsQuery.Node3>>(emptyList()) }

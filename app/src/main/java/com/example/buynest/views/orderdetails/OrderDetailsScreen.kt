@@ -26,12 +26,15 @@ import com.example.buynest.views.component.PaymentDetails
 import com.example.buynest.views.orders.phenomenaFontFamily
 import com.example.buynest.model.entity.CartItem
 import com.example.buynest.viewmodel.orders.OrdersViewModel
-
+import org.koin.androidx.compose.koinViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderDetailsScreen(backClicked: () -> Unit, orderViewModel: OrdersViewModel) {
+fun OrderDetailsScreen(
+    backClicked: () -> Unit,
+    orderViewModel: OrdersViewModel
+) {
     val selectedOrder by orderViewModel.selectedOrder.collectAsStateWithLifecycle()
 
     selectedOrder?.let { order ->

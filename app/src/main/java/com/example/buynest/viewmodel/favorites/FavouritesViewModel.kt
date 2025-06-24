@@ -89,11 +89,4 @@ class FavouritesViewModel(val repo: FavoriteRepo): ViewModel() {
             Log.w("CartWarning", "No cart ID found. You may want to call createCart() first.")
         }
     }
-
-    @Suppress("UNCHECKED_CAST")
-    class FavouritesFactory(private val repo: FavoriteRepo): ViewModelProvider.Factory{
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return FavouritesViewModel(repo) as T
-        }
-    }
 }

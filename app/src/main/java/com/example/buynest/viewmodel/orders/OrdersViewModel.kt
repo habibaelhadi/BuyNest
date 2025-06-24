@@ -47,15 +47,3 @@ class OrdersViewModel(private val repository: IOrderRepo) : ViewModel() {
             }
     }
 }
-
-
-
-class OrdersFactory(private val repo: IOrderRepo) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(OrdersViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return OrdersViewModel(repo) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}

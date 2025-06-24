@@ -34,6 +34,7 @@ import com.example.buynest.ui.theme.*
 import com.example.buynest.viewmodel.orders.OrdersViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.OrderItem
+import org.koin.androidx.compose.koinViewModel
 
 val phenomenaFontFamily = FontFamily(
     Font(R.font.phenomena_bold)
@@ -42,7 +43,11 @@ val phenomenaFontFamily = FontFamily(
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrdersHistoryScreen(backClicked:()->Unit,gotoOrderDetails:()->Unit, orderViewModel: OrdersViewModel){
+fun OrdersHistoryScreen(
+    backClicked:()->Unit
+    ,gotoOrderDetails:()->Unit,
+    orderViewModel: OrdersViewModel
+){
 
     val orderList by orderViewModel.orders.collectAsStateWithLifecycle()
 

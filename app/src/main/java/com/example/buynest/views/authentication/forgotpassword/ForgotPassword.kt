@@ -44,23 +44,13 @@ import com.example.buynest.ui.theme.white
 import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
 import com.example.buynest.views.authentication.CustomTextField
 import com.example.buynest.views.customsnackbar.CustomSnackbar
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ForgotPasswordScreen(
-    onBackToLogin: () -> Unit
+    onBackToLogin: () -> Unit,
+    viewModel: AuthenticationViewModel = koinViewModel()
 ) {
-    val viewModel: AuthenticationViewModel = viewModel(
-        factory = AuthenticationViewModel.AuthenticationViewModelFactory(
-            AuthenticationRepoImpl(
-                FirebaseRepositoryImpl(
-                    FirebaseDataSourceImpl()
-                ),
-                ShopifyAuthRepositoryImpl(
-                    ShopifyAuthRemoteDataSourceImpl()
-                )
-            )
-        )
-    )
     var email by remember { mutableStateOf("") }
     val snackbarMessage = remember { mutableStateOf<String?>(null) }
 

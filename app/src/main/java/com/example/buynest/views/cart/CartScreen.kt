@@ -42,6 +42,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.rememberPaymentSheet
+import org.koin.androidx.compose.koinViewModel
 
 @SuppressLint("ViewModelConstructorInComposable")
 @OptIn(ExperimentalMaterialApi::class)

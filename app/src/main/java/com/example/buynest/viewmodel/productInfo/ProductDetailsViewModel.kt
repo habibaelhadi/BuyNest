@@ -2,7 +2,6 @@ package com.example.buynest.viewmodel.productInfo
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.ApolloResponse
 import com.example.buynest.CreateCartMutation
@@ -59,12 +58,6 @@ class ProductDetailsViewModel(val repository: ProductDetailsRepository): ViewMod
             Log.e("CartError", "Failed to add item: ${response.errors}")
         } else {
             Log.i("CartSuccess", "Item added to cart: $variantId in cart $cartId")
-        }
-    }
-
-    class ProductInfoFactory(private val repository: ProductDetailsRepository): ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ProductDetailsViewModel(repository) as T
         }
     }
 }

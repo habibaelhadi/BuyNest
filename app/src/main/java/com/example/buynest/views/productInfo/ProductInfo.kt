@@ -82,17 +82,17 @@ import com.google.accompanist.pager.calculateCurrentOffsetForPage
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
+import org.koin.androidx.compose.koinViewModel
 import kotlin.math.abs
 
 @Composable
 fun ProductInfoScreen(
     productId: String,
     backClicked :()->Unit,
-    navigateToCart :()->Unit
+    navigateToCart :()->Unit,
+    viewModel: ProductDetailsViewModel = koinViewModel(),
+    favViewModel: FavouritesViewModel = koinViewModel()
 ){
-    val viewModel: ProductDetailsViewModel = viewModel(
-        factory = ProductDetailsViewModel.ProductInfoFactory(ProductDetailsRepositoryImpl())
-    )
 
     val response by viewModel.productDetails.collectAsStateWithLifecycle()
 
@@ -101,10 +101,6 @@ fun ProductInfoScreen(
     var selectedSize by remember { mutableStateOf<String?>(null) }
     var selectedColor by remember { mutableStateOf<String?>(null) }
     var quantity by remember { mutableIntStateOf(1) }
-
-    val favViewModel: FavouritesViewModel = viewModel(
-        factory = FavouritesViewModel.FavouritesFactory(FavoriteRepoImpl())
-    )
 
     val showGuestDialog = remember { mutableStateOf(false) }
     val user = FirebaseAuthObject.getAuth().currentUser

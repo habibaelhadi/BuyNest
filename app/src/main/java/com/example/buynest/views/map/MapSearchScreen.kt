@@ -21,13 +21,13 @@ import com.example.buynest.views.component.MapSearchBar
 import com.example.buynest.views.component.SearchResultItem
 import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapSearchScreen(
     onBack: () -> Unit,
     onPlaceSelected: (GeoPoint, String) -> Unit,
-    searchViewModel: SearchViewModel
+    searchViewModel: SearchViewModel = koinViewModel()
 ) {
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     val searchResults by searchViewModel.places.collectAsStateWithLifecycle(initialValue = UiResponseState.Loading)

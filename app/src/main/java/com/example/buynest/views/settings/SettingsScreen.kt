@@ -48,13 +48,15 @@ import com.example.buynest.views.component.CurrencyOptionBottomSheet
 import com.example.buynest.views.component.GuestAlertDialog
 import com.example.buynest.views.component.PaymentOptionBottomSheet
 import com.example.buynest.views.component.SettingsCard
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SettingsScreen(
     gotoProfileScreen: () -> Unit,
     gotoOrdersHistoryScreen: () -> Unit,
     gotoAddressScreen: () -> Unit,
-    gotoLoginScreen: () -> Unit
+    gotoLoginScreen: () -> Unit,
+    authViewModel: AuthenticationViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
     val phenomenaBold = FontFamily(Font(R.font.phenomena_bold))
@@ -69,18 +71,6 @@ fun SettingsScreen(
     val user = FirebaseAuthObject.getAuth().currentUser
     val buttonText = if (user == null) "Login" else "Log out"
     val showGuestDialog = remember { mutableStateOf(false) }
-    val authViewModel: AuthenticationViewModel = viewModel(
-        factory = AuthenticationViewModel.AuthenticationViewModelFactory(
-            AuthenticationRepoImpl(
-                FirebaseRepositoryImpl(
-                    FirebaseDataSourceImpl()
-                ),
-                ShopifyAuthRepositoryImpl(
-                    ShopifyAuthRemoteDataSourceImpl()
-                )
-            )
-        )
-    )
 
     LaunchedEffect(Unit) {
         authViewModel.message.collect { message ->
