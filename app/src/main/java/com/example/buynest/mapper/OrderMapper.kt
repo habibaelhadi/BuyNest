@@ -20,10 +20,11 @@ fun OrderModel.toDraftOrderInput(): DraftOrderInput {
         company = Optional.Absent
     )
 
-    val lineItemsInput = orderItems.map {
+
+    val lineItems = orderItems.map { item ->
         DraftOrderLineItemInput(
-            variantId = Optional.Present("gid://shopify/ProductVariant/${it.id}"),
-            quantity = it.quantity
+            quantity = item.quantity,
+            variantId = Optional.Present(item.variantId)
         )
     }
 
@@ -35,7 +36,7 @@ fun OrderModel.toDraftOrderInput(): DraftOrderInput {
     return DraftOrderInput(
         email = Optional.Present(email),
         shippingAddress = Optional.Present(addressInput),
-        lineItems = Optional.Present(lineItemsInput),
+        lineItems = Optional.Present(lineItems),
         note = Optional.Present(note),
         tags = Optional.presentIfNotNull(listOf("Stripe Draft")),
         customAttributes = Optional.Absent,

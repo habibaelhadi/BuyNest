@@ -166,6 +166,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
                     mainNavController.popBackStack()
                 },
                 cartViewModel = cartViewModel,
+                addressViewModel = addressViewModel
             )
         }
         composable(RoutesScreens.ForgotPassword.route) {

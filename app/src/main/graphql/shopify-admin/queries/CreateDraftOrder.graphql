@@ -1,10 +1,11 @@
 mutation CompleteDraftOrder($id: ID!) {
-    draftOrderComplete(id: $id, paymentPending: false) {
+    draftOrderComplete(id: $id) {
         draftOrder {
             id
             name
-            status
+            createdAt
         }
+
         userErrors {
             field
             message
