@@ -35,6 +35,7 @@ import com.example.buynest.views.orderdetails.OrderDetailsScreen
 import com.example.buynest.views.orders.OrdersHistoryScreen
 import com.example.buynest.views.productInfo.ProductInfoScreen
 import com.example.buynest.views.profile.ProfileScreen
+import com.example.buynest.views.search.SearchScreen
 import com.example.buynest.views.settings.SettingsScreen
 
 @SuppressLint("ViewModelConstructorInComposable")
@@ -63,6 +64,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 onCardClicked = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
+                },
+                onSearchClicked = {
+                    mainNavController.navigate(RoutesScreens.Search.route)
                 }
                 , sharedViewModel,
                 onProductClicked = { productId ->
@@ -86,6 +90,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
                     onProductClicked = { productId ->
                         mainNavController.navigate(RoutesScreens.ProductInfo.route
                             .replace("{productId}", productId))
+                    },
+                    onSearchClicked = {
+                        mainNavController.navigate(RoutesScreens.Search.route)
                     }
                 )
             }
@@ -94,6 +101,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
             FavouriteScreen(
                 onCartClicked = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
+                },
+                onSearchClicked = {
+                    mainNavController.navigate(RoutesScreens.Search.route)
                 },
                 navigateToProductInfo = { productId ->
                     mainNavController.navigate(RoutesScreens.ProductInfo.route
@@ -108,8 +118,11 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 onProductClicked = { productId ->
                     mainNavController.navigate(RoutesScreens.ProductInfo.route
                         .replace("{productId}", productId))
+                },
+                onSearchClicked = {
+                    mainNavController.navigate(RoutesScreens.Search.route)
                 }
-                , sharedViewModel
+                , sharedViewModel = sharedViewModel
             )
         }
         composable(RoutesScreens.Profile.route) {
@@ -236,6 +249,17 @@ fun SetupNavHost(mainNavController: NavHostController) {
                     Log.d("MapSearchScreen", "Selected location: $latLng, $address")
                 },
                 searchViewModel = SearchViewModel(context)
+            )
+        }
+        composable(RoutesScreens.Search.route) {
+            SearchScreen(
+                onBackClicked = {
+                    mainNavController.popBackStack()
+                },
+                onProductClicked = { productId ->
+                    mainNavController.navigate(RoutesScreens.ProductInfo.route
+                        .replace("{productId}", productId))
+                }
             )
         }
     }

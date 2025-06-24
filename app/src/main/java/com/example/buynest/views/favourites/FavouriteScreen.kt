@@ -54,7 +54,8 @@ import com.example.buynest.views.orders.phenomenaFontFamily
 @Composable
 fun FavouriteScreen(
     onCartClicked:()->Unit,
-    navigateToProductInfo: (String) -> Unit
+    navigateToProductInfo: (String) -> Unit,
+    onSearchClicked:()->Unit
 ) {
     val viewModel: FavouritesViewModel = viewModel(
         factory = FavouritesViewModel.FavouritesFactory(FavoriteRepoImpl())
@@ -77,7 +78,8 @@ fun FavouriteScreen(
     ) {
         Spacer(modifier = Modifier.height(8.dp))
         SearchBar(
-            onCartClicked = onCartClicked
+            onCartClicked = onCartClicked,
+            onSearchClicked = onSearchClicked
         )
         Spacer(modifier = Modifier.height(24.dp))
         if (user == null){

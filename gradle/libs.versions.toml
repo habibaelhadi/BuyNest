@@ -1,4 +1,5 @@
 [versions]
+accompanistFlowlayout = "0.36.0"
 accompanistPager = "0.34.0"
 accompanistPagerIndicators = "0.31.5-beta"
 accompanistPagerIndicatorsVersion = "0.34.0"
@@ -24,6 +25,7 @@ playServicesAuthVersion = "21.0.0"
 firebaseFirestoreKtx = "25.1.4"
 
 [libraries]
+accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistFlowlayout" }
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
 accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanistPagerIndicators" }
 accompanist-pager-indicators-v0340 = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanistPagerIndicatorsVersion" }
