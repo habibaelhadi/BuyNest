@@ -17,7 +17,7 @@ class PaymentViewModel(
     val error: StateFlow<String?> = _error
 
     fun initiatePaymentFlow(
-        amount: Int,
+        amount: Double,
         currency: String = "usd",
         onClientSecretReady: (String) -> Unit
     ) {

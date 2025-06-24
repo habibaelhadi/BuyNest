@@ -99,7 +99,7 @@ fun CartScreen(
             val node = edge.node
             val variant = node.merchandise.onProductVariant ?: return@mapNotNull null
             val product = variant.product
-            val price = variant.priceV2.amount.toString().toDoubleOrNull()?.toInt() ?: 0
+            val price = variant.priceV2.amount.toString().toDouble()
             val color = variant.selectedOptions.firstOrNull { it.name == "Color" }?.value ?: "Default"
             val size = variant.selectedOptions.firstOrNull { it.name == "Size" }?.value?.toIntOrNull() ?: 0
             val imageUrl = variant.image?.url?.toString() ?: ""

@@ -10,11 +10,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.buynest.repository.order.OrderRepo
 import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.viewmodel.address.AddressViewModel
 import com.example.buynest.viewmodel.address.AddressViewModelFactory
 import com.example.buynest.viewmodel.cart.CartViewModel
 import com.example.buynest.viewmodel.cart.CartViewModelFactory
+import com.example.buynest.viewmodel.orders.OrdersFactory
+import com.example.buynest.viewmodel.orders.OrdersViewModel
 import com.example.buynest.viewmodel.shared.SharedViewModel
 import com.example.buynest.viewmodel.sreachMap.SearchViewModel
 import com.example.buynest.views.address.AddressScreen
@@ -44,6 +47,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
     val sharedViewModel: SharedViewModel = viewModel()
     val addressViewModel: AddressViewModel = viewModel(factory = AddressViewModelFactory())
     val cartViewModel: CartViewModel = viewModel(factory = CartViewModelFactory())
+    val ordersViewModel: OrdersViewModel = viewModel(factory = OrdersFactory(OrderRepo()))
 
     NavHost(
         navController = mainNavController, startDestination = startDestination
@@ -176,6 +180,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 }
             )
         }
+
         composable(RoutesScreens.OrdersHistory.route) {
             OrdersHistoryScreen(
                 backClicked = {
@@ -183,16 +188,20 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 gotoOrderDetails ={
                     mainNavController.navigate(RoutesScreens.OrderDetails.route)
-                }
+                },
+                orderViewModel = ordersViewModel
             )
         }
         composable(RoutesScreens.OrderDetails.route) {
             OrderDetailsScreen(
                 backClicked = {
                     mainNavController.popBackStack()
-                }
+                },
+                orderViewModel = ordersViewModel
             )
         }
+
+
         composable(
             route = RoutesScreens.ProductInfo.route,
             ){ backStackEntry ->

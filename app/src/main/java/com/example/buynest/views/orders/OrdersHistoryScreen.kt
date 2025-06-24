@@ -25,15 +25,12 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.R
 import androidx.compose.runtime.getValue
 import com.example.buynest.admin.GetOrdersByEmailQuery
 import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.repository.FirebaseAuthObject
-import com.example.buynest.repository.order.OrderRepo
 import com.example.buynest.ui.theme.*
-import com.example.buynest.viewmodel.orders.OrdersFactory
 import com.example.buynest.viewmodel.orders.OrdersViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.OrderItem
@@ -45,10 +42,7 @@ val phenomenaFontFamily = FontFamily(
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrdersHistoryScreen(backClicked:()->Unit,gotoOrderDetails:()->Unit){
-    val orderViewModel: OrdersViewModel = viewModel(
-        factory = OrdersFactory(OrderRepo())
-    )
+fun OrdersHistoryScreen(backClicked:()->Unit,gotoOrderDetails:()->Unit, orderViewModel: OrdersViewModel){
 
     val orderList by orderViewModel.orders.collectAsStateWithLifecycle()
 
@@ -93,9 +87,11 @@ fun OrdersHistoryScreen(backClicked:()->Unit,gotoOrderDetails:()->Unit){
             }
             is UiResponseState.Success<*> -> {
                 val response = result.data as GetOrdersByEmailQuery.Data
-                val orders = response.orders.edges.mapNotNull { it.node }
-                AllOrdersList(orders, gotoOrderDetails)
-
+                val orders = response.orders.edges.map { it.node }
+                AllOrdersList(orders = orders, onOrderClick = {
+                    orderViewModel.setSelectedOrder(it)
+                    gotoOrderDetails()
+                })
             }
         }
     }
@@ -104,12 +100,12 @@ fun OrdersHistoryScreen(backClicked:()->Unit,gotoOrderDetails:()->Unit){
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AllOrdersList(orders: List<GetOrdersByEmailQuery.Node>, gotoOrderDetails: () -> Unit){
+fun AllOrdersList(orders: List<GetOrdersByEmailQuery.Node>, onOrderClick: (GetOrdersByEmailQuery.Node) -> Unit){
         LazyColumn(
             modifier = Modifier.padding(top = 16.dp, end = 18.dp)
         ){
-            items(orders.size){
-                OrderItem(order = orders[it],gotoOrderDetails)
+            items(orders.size) {
+                OrderItem(order = orders[it], gotoOrderDetails = { onOrderClick(orders[it]) })
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }

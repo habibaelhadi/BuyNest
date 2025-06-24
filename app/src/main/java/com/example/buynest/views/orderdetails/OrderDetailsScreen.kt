@@ -17,91 +17,107 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.buynest.R
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.getValue
 import com.example.buynest.ui.theme.*
 import com.example.buynest.views.component.OrderProductItem
 import com.example.buynest.views.component.PaymentDetails
 import com.example.buynest.views.orders.phenomenaFontFamily
 import com.example.buynest.model.entity.CartItem
+import com.example.buynest.viewmodel.orders.OrdersViewModel
 
-val cartItems = listOf(
-            CartItem(1, "Nike Air Jordan", "",3500, "Orange", 40, "", 1),
-            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, "", 2),
-            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, "", 2),
-            CartItem(1, "Nike Air Jordan", "",3500, "Orange", 40,"", 1),
-            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, "", 2),
-            CartItem(1, "Nike Air Jordan", "",3500, "Orange", 40, "", 1),
-            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, "", 2),
-            CartItem(1, "Nike Air Jordan", "",3500, "Orange", 40, "", 1),
-            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, "", 2),
-            CartItem(1, "Nike Air Jordan", "",3500, "Orange", 40, "", 1),
-            CartItem(2, "Adidas Runner", "",2800, "Blue", 42, "", 2),
 
-        )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderDetailsScreen(backClicked: () -> Unit) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(white)
-            .padding(start = 24.dp, end = 18.dp)
-    ) {
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        "Order Details", fontSize = 20.sp,
-                        fontFamily = phenomenaFontFamily,
-                        color = MainColor,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        backClicked()
-                    }) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
-                            tint = MainColor
+fun OrderDetailsScreen(backClicked: () -> Unit, orderViewModel: OrdersViewModel) {
+    val selectedOrder by orderViewModel.selectedOrder.collectAsStateWithLifecycle()
+
+    selectedOrder?.let { order ->
+        val id = order.id
+        val cartItems = order.lineItems.edges.map { edge ->
+            val item = edge.node
+            val variant = item.variant
+            val options = variant?.selectedOptions ?: emptyList()
+
+            val color = options.find { it.name == "Color" }?.value ?: ""
+            val size = options.find { it.name == "Size" }?.value ?: ""
+
+            CartItem(
+                id = 0,
+                name = item.title,
+                imageUrl = (variant?.image?.url ?: "").toString(),
+                price = variant?.price.toString().toDouble(),
+                color = color,
+                size = size.toIntOrNull() ?: 0,
+                quantity = item.quantity,
+                lineId = id,
+                variantId = item.variant?.id ?: ""
+            )
+        }
+
+
+        val totalAmount = order.totalPriceSet.shopMoney.amount
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(white)
+                .padding(start = 24.dp, end = 18.dp)
+        ) {
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            "Order Details", fontSize = 20.sp,
+                            fontFamily = phenomenaFontFamily,
+                            color = MainColor,
                         )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = backClicked) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = null,
+                                tint = MainColor
+                            )
+                        }
                     }
-                }
-            )
-        }
+                )
+            }
 
-        item {
-            Text(
-                "Order Products",
-                fontSize = 20.sp,
-                fontFamily = phenomenaFontFamily,
-                color = MainColor,
-                modifier = Modifier.padding(top = 8.dp, start = 4.dp)
-            )
-        }
+            item {
+                Text(
+                    "Order Products",
+                    fontSize = 20.sp,
+                    fontFamily = phenomenaFontFamily,
+                    color = MainColor,
+                    modifier = Modifier.padding(top = 8.dp, start = 4.dp)
+                )
+            }
 
-        items(cartItems.size) {
-            OrderProductItem(item = cartItems[it])
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+            items(cartItems.size) {
+                OrderProductItem(item = cartItems[it])
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
-        item {
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                "Payment Details",
-                fontSize = 20.sp,
-                fontFamily = phenomenaFontFamily,
-                color = MainColor,
-                modifier = Modifier.padding(start = 4.dp)
-            )
-        }
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    "Payment Details",
+                    fontSize = 20.sp,
+                    fontFamily = phenomenaFontFamily,
+                    color = MainColor,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
 
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-            PaymentDetails()
-            Spacer(modifier = Modifier.height(24.dp))
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                PaymentDetails(totalAmount)
+                Spacer(modifier = Modifier.height(24.dp))
+            }
         }
     }
 }

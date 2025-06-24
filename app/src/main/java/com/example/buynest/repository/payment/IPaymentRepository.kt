@@ -5,7 +5,7 @@ import retrofit2.Response
 
 interface IPaymentRepository {
     suspend fun createPaymentIntent(
-        amount: Int,
+        amount: Double,
         currency: String,
         paymentMethod: String = "card"
     ): Response<JsonObject>

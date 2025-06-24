@@ -3,6 +3,7 @@ package com.example.buynest.viewmodel.orders
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.buynest.admin.GetOrdersByEmailQuery
 import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.repository.home.IHomeRepository
 import com.example.buynest.repository.order.IOrderRepo
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 class OrdersViewModel(private val repository: IOrderRepo) : ViewModel() {
     private val _mutableOrders = MutableStateFlow<UiResponseState>(UiResponseState.Loading)
     val orders = _mutableOrders
+    val selectedOrder = MutableStateFlow<GetOrdersByEmailQuery.Node?>(null)
 
     fun getAllOrders(email: String){
         viewModelScope.launch {
@@ -29,6 +31,10 @@ class OrdersViewModel(private val repository: IOrderRepo) : ViewModel() {
                 }
             }
         }
+    }
+
+    fun setSelectedOrder(order: GetOrdersByEmailQuery.Node) {
+        selectedOrder.value = order
     }
 }
 

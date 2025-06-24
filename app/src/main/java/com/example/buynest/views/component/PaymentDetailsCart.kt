@@ -17,8 +17,7 @@ import com.example.buynest.ui.theme.white
 import com.example.buynest.views.orderdetails.cartItems
 
 @Composable
-fun PaymentDetails(){
-    val totalAmount = cartItems.sumOf { it.price*it.quantity }
+fun PaymentDetails(totalAmount1: Any) {
     Card (
         modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
         colors = CardDefaults.cardColors(white),
@@ -30,7 +29,7 @@ fun PaymentDetails(){
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
-        Text("Total Price : $totalAmount LE",
+        Text("Total Price : $totalAmount1 LE",
             modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 16.dp),
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold

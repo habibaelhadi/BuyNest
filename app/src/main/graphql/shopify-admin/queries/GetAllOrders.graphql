@@ -12,11 +12,22 @@ query getOrdersByEmail($email: String!) {
                         currencyCode
                     }
                 }
-                lineItems(first: 5) {
+                lineItems(first: 10) {
                     edges {
                         node {
                             title
                             quantity
+                            variant {
+                                id
+                                image {
+                                    url
+                                }
+                                price
+                                selectedOptions {
+                                    name
+                                    value
+                                }
+                            }
                         }
                     }
                 }
