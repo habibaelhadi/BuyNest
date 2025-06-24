@@ -1,5 +1,7 @@
 package com.example.buynest.views.orders
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -36,34 +38,11 @@ import com.example.buynest.viewmodel.orders.OrdersViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.OrderItem
 
-data class Order(
-    val id: Int,
-    val deliveryDate: String,
-    val imageRes: Int
-)
-val pastOrders =
-    listOf(
-        Order(1001, "June 17, 2025", R.drawable.product),
-        Order(2521, "June 15, 2025", R.drawable.product),
-        Order(2545, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(101654, "June 17, 2025", R.drawable.product),
-        Order(25454, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-    )
-
 val phenomenaFontFamily = FontFamily(
     Font(R.font.phenomena_bold)
 )
 
-
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrdersHistoryScreen(backClicked:()->Unit,gotoOrderDetails:()->Unit){
@@ -123,6 +102,7 @@ fun OrdersHistoryScreen(backClicked:()->Unit,gotoOrderDetails:()->Unit){
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AllOrdersList(orders: List<GetOrdersByEmailQuery.Node>, gotoOrderDetails: () -> Unit){
         LazyColumn(
