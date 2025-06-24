@@ -89,9 +89,22 @@ fun SearchScreen(
     var categoryList by remember { mutableStateOf<List<BrandsAndProductsQuery.Node3>>(emptyList()) }
     var productsList by remember { mutableStateOf<List<BrandsAndProductsQuery.Node>>(emptyList()) }
     var isCategorySelected by remember { mutableStateOf(false) }
+    var categoryUiProducts by remember { mutableStateOf<List<UiProduct>?>(null) }
+    var uiProducts by remember { mutableStateOf<List<UiProduct>?>(null) }
+    var filteredProducts by remember { mutableStateOf<List<UiProduct>?>(null) }
 
     LaunchedEffect(Unit) {
         homeViewModel.getBrands()
+    }
+
+    LaunchedEffect(searchQuery, uiProducts) {
+        filteredProducts = if (searchQuery.isBlank()) {
+            null
+        } else {
+            uiProducts?.filter {
+                it.title.contains(searchQuery, ignoreCase = true)
+            }
+        }
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -107,17 +120,21 @@ fun SearchScreen(
 
         SearchBar(
             query = searchQuery,
-            onQueryChange = { searchQuery = it },
-            onSearch = { /* Optional: Handle search action */ },
+            onQueryChange =
+            { searchQuery = it },
+            onSearch = {},
             active = false,
             onActiveChange = { /* Optional: Handle focus change */ },
-            placeholder = { Text("Search products, categories, or brands...") },
+            placeholder = { Text("Search products using categories, or brands...") },
             leadingIcon = {
                 Icon(Icons.Default.Search, contentDescription = "Search Icon")
             },
             trailingIcon = {
                 if (searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { searchQuery = "" }) {
+                    IconButton(onClick = {
+                        searchQuery = ""
+                        filteredProducts = null
+                    }) {
                         Icon(Icons.Default.Close, contentDescription = "Clear")
                     }
                 }
@@ -171,7 +188,7 @@ fun SearchScreen(
             }
         }
 
-        val categoryUiProducts = when (val result = categoryProductsState) {
+         categoryUiProducts = when (val result = categoryProductsState) {
             is UiResponseState.Success<*> -> {
                 val data = result.data as ProductsByHandleQuery.Data
                 data.collectionByHandle?.products?.edges?.map { mapFromCategoryProduct(it.node) }
@@ -179,12 +196,12 @@ fun SearchScreen(
             else -> null
         }
 
-        val uiProducts = when {
+         uiProducts = when {
             isCategorySelected && categoryUiProducts != null -> categoryUiProducts
             else -> productsList.map { mapFromBrandProduct(it) }
         }
 
-        AllProductsSection(uiProducts)
+        AllProductsSection(filteredProducts ?: uiProducts.orEmpty())
 
 
     }
@@ -272,7 +289,7 @@ fun FilterExpansionSection(
         FilterType.Categories -> categories
         FilterType.Brands -> brands
         else -> emptyList()
-    }.filter { it.contains(query, ignoreCase = true) }
+    }
 
     if (filterType != FilterType.All) {
         FlowRow(
