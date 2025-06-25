@@ -69,6 +69,8 @@ fun CartScreen(
     val cartId = SecureSharedPrefHelper.getString(AppConstants.KEY_CART_ID)
     var cartItems by remember { mutableStateOf(emptyList<CartItem>()) }
     val cartState by cartViewModel.cartResponse.collectAsState()
+    var itemToDelete by remember { mutableStateOf<CartItem?>(null) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
     val defaultAddress by addressViewModel.defaultAddress.collectAsStateWithLifecycle()
     val draftOrderId by cartViewModel.orderResponse.collectAsStateWithLifecycle()
@@ -100,8 +102,8 @@ fun CartScreen(
                     }
                 }
 
-                PaymentSheetResult.Canceled -> TODO()
-                is PaymentSheetResult.Failed -> TODO()
+                PaymentSheetResult.Canceled -> {}
+                is PaymentSheetResult.Failed -> {}
             }
         }
     )
@@ -120,11 +122,14 @@ fun CartScreen(
             val node = edge.node
             val variant = node.merchandise.onProductVariant ?: return@mapNotNull null
             val product = variant.product
-            val price = variant.priceV2.amount?.toString()?.toDoubleOrNull()?.times(rate)?.toInt() ?: 0
-            val color = variant.selectedOptions.firstOrNull { it.name == "Color" }?.value ?: "Default"
-            val size = variant.selectedOptions.firstOrNull { it.name == "Size" }?.value?.toIntOrNull() ?: 0
+            val price =
+                variant.priceV2.amount?.toString()?.toDoubleOrNull()?.times(rate)?.toInt() ?: 0
+            val color =
+                variant.selectedOptions.firstOrNull { it.name == "Color" }?.value ?: "Default"
+            val size =
+                variant.selectedOptions.firstOrNull { it.name == "Size" }?.value?.toIntOrNull() ?: 0
             val imageUrl = variant.image?.url?.toString() ?: ""
-            val maxQuantity = variant.quantityAvailable?.toInt() ?:0
+            val maxQuantity = variant.quantityAvailable?.toInt() ?: 0
             CartItem(
                 id = "${node.id}-$size-$color".hashCode(),
                 lineId = node.id,
@@ -144,7 +149,9 @@ fun CartScreen(
         totalPrice = (originalTotal * (1 - discount)).toInt()
     }
 
-    fun launchCheckoutFlow() { activeSheet = SheetType.Coupon }
+    fun launchCheckoutFlow() {
+        activeSheet = SheetType.Coupon
+    }
 
     LaunchedEffect(activeSheet) {
         coroutineScope.launch {
@@ -180,21 +187,37 @@ fun CartScreen(
                     defaultAddress = defaultAddress,
                     onNavigateToAddress = goTOAddress,
                     onProceed = {
-                        val email = FirebaseAuthObject.getAuth().currentUser?.email ?: return@AddressSheet
+                        val email =
+                            FirebaseAuthObject.getAuth().currentUser?.email ?: return@AddressSheet
                         val method = SharedPrefHelper.getPaymentMethod(context)
                         val isCOD = method == "Cash on Delivery" && totalPrice < 10000
 
-                        cartViewModel.getOrderModelFromCart(email, defaultAddress, cartItems, !isCOD, discount)
+                        cartViewModel.getOrderModelFromCart(
+                            email,
+                            defaultAddress,
+                            cartItems,
+                            !isCOD,
+                            discount
+                        )
 
                         if (isCOD) {
-                            Toast.makeText(context, "Order placed successfully!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                "Order placed successfully!",
+                                Toast.LENGTH_SHORT
+                            ).show()
                             coroutineScope.launch {
                                 sheetState.hide()
                                 activeSheet = SheetType.None
                             }
                             draftOrderId?.data?.draftOrderCreate?.draftOrder?.id?.let { orderId ->
                                 cartViewModel.completeOrder(orderId)
-                                cartItems.forEach { cartViewModel.removeItemFromCart(cartId!!, it.lineId) }
+                                cartItems.forEach {
+                                    cartViewModel.removeItemFromCart(
+                                        cartId!!,
+                                        it.lineId
+                                    )
+                                }
                                 cartItems = emptyList()
                             }
                         } else {
@@ -235,10 +258,8 @@ fun CartScreen(
                 val dismissState = rememberDismissState(
                     confirmStateChange = {
                         if (it == DismissValue.DismissedToEnd || it == DismissValue.DismissedToStart) {
-                            cartViewModel.removeItemFromCart(cartId!!, item.lineId)
-                            cartItems = cartItems.filterNot { it.id == item.id }
-                            originalTotal = cartItems.sumOf { i -> i.price * i.quantity }
-                            totalPrice = (originalTotal * (1 - discount)).toInt()
+                            itemToDelete = item
+                            showConfirmDialog = true
                             false
                         } else true
                     }
@@ -288,10 +309,8 @@ fun CartScreen(
                                 totalPrice = (originalTotal * (1 - discount)).toInt()
                             },
                             onDelete = { id ->
-                                cartViewModel.removeItemFromCart(cartId!!, item.lineId)
-                                cartItems = cartItems.filterNot { it.id == id }
-                                originalTotal = cartItems.sumOf { it.price * it.quantity }
-                                totalPrice = (originalTotal * (1 - discount)).toInt()
+                                itemToDelete = cartItems.find { it.id == id }
+                                showConfirmDialog = true
                             },
                             onItemClick = {}
                         )
@@ -301,4 +320,34 @@ fun CartScreen(
             }
         }
     }
-        }
+    if (showConfirmDialog && itemToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("Confirm Deletion") },
+            text = { Text("Are you sure you want to delete '${itemToDelete?.name}' from your cart?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    itemToDelete?.let { item ->
+                        cartId?.let {
+                            cartViewModel.removeItemFromCart(it, item.lineId)
+                        }
+                        cartItems = cartItems.filterNot { it.id == item.id }
+                    }
+                    itemToDelete = null
+                    showConfirmDialog = false
+                }) {
+                    Text("Delete", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    itemToDelete = null
+                    showConfirmDialog = false
+                }) {
+                    Text("Cancel", color = Color.Gray)
+                }
+            },
+            shape = RoundedCornerShape(12.dp)
+        )
+    }
+}
