@@ -46,4 +46,16 @@ class OrdersViewModel(private val repository: IOrderRepo) : ViewModel() {
                 if (parts.size == 2) parts[1].trim() else null
             }
     }
+    fun extractPaymentMethodFromNote(note: String?): String {
+        if (note == null) return "Unknown"
+
+        val lines = note.lines()
+        for (line in lines) {
+            if (line.startsWith("PaymentStatus:")) {
+                return line.substringAfter("Payment Method:").trim()
+            }
+        }
+        return "Unknown"
+    }
+
 }

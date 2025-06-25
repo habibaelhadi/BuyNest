@@ -133,7 +133,8 @@ fun CartScreen(
                 cartViewModel.getOrderModelFromCart(
                     email = email,
                     address = defaultAddress,
-                    items = cartItems
+                    items = cartItems,
+                    isPaid = true
                 )
                 paymentViewModel.initiatePaymentFlow(
                     amount = totalPrice * 100,

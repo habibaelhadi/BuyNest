@@ -2,8 +2,12 @@ mutation CompleteDraftOrder($id: ID!) {
     draftOrderComplete(id: $id) {
         draftOrder {
             id
+            status
             name
             createdAt
+            order {
+                displayFinancialStatus
+            }
         }
 
         userErrors {
