@@ -241,7 +241,8 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 navigateToCart = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
                 },
-                productId = productId ?: ""
+                productId = productId ?: "",
+                currencyViewModel = currencyViewModel
             )
         }
         composable(RoutesScreens.Map.route) {

@@ -65,6 +65,7 @@ import com.example.buynest.ui.theme.LightGray
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.utils.mapSizeFromTextToInteger
 import com.example.buynest.utils.toColorList
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.viewmodel.productInfo.ProductDetailsViewModel
 import com.example.buynest.views.component.BottomSection
@@ -87,7 +88,8 @@ fun ProductInfoScreen(
     backClicked :()->Unit,
     navigateToCart :()->Unit,
     viewModel: ProductDetailsViewModel = koinViewModel(),
-    favViewModel: FavouritesViewModel = koinViewModel()
+    favViewModel: FavouritesViewModel = koinViewModel(),
+    currencyViewModel: CurrencyViewModel
 ){
 
     val response by viewModel.productDetails.collectAsStateWithLifecycle()
@@ -98,6 +100,9 @@ fun ProductInfoScreen(
     var selectedColor by remember { mutableStateOf<String?>(null) }
     var quantity by remember { mutableIntStateOf(1) }
     var maxQuantity by remember { mutableIntStateOf(1) }
+    val rate by currencyViewModel.rate
+    var actualPrice = (totalPrice*rate).toInt()
+    val currencySymbol by currencyViewModel.currencySymbol
 
     val showGuestDialog = remember { mutableStateOf(false) }
     val user = FirebaseAuthObject.getAuth().currentUser
@@ -132,7 +137,7 @@ fun ProductInfoScreen(
                 Log.i("TAG", "ProductInfoScreen:${selectedVariant} ")
 
                 val currentQuantity = quantity
-                BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart") {
+                BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart",currencySymbol) {
                     if (selectedSize == null || selectedColor == null) {
                         snackbarMessage = "Please select size and color before adding to cart"
                         return@BottomSection
@@ -169,7 +174,9 @@ fun ProductInfoScreen(
                     onColorPicked = { selectedColor = it },
                     quantity = quantity,
                     onQuantityChanged = { quantity = it },
-                    availableQuantity = maxQuantity
+                    availableQuantity = maxQuantity,
+                    rate = rate,
+                    currencySymbol = currencySymbol
                 )
             }
         }
@@ -191,22 +198,25 @@ fun ProductInfo(
     onSizePicked: (String) -> Unit,
     onColorPicked: (String) -> Unit,
     quantity: Int,
-    onQuantityChanged: (Int) -> Unit
-    , availableQuantity: Int
+    onQuantityChanged: (Int) -> Unit,
+    availableQuantity: Int,
+    rate: Double,
+    currencySymbol: String?
 ) {
     Log.i("TAG", "ProductInfoScreen: ${product?.id} ")
     val scrollState = rememberScrollState()
     val media = product?.media?.edges
     val images = media?.map { it.node.previewImage?.url.toString() } ?: emptyList()
     val price = product?.variants?.edges?.get(0)?.node?.price?.amount.toString()
+    var actualPrice = (price.toDouble()*rate).toInt()
     val size = product?.options?.get(0)?.values
     val color = product?.options?.get(1)?.values
     val colorList = color?.toColorList()
     val id = product?.id.toString()
     val productName = product?.title.toString()
 
-    LaunchedEffect(key1 = quantity, key2 = price) {
-        val total = price.toDouble() * quantity
+    LaunchedEffect(key1 = quantity, key2 = actualPrice) {
+        val total = actualPrice.toDouble() * quantity
         onTotalChange(total.toInt())
     }
 
@@ -220,7 +230,7 @@ fun ProductInfo(
             if (product != null) {
                 ProductDetails(
                     title = product.title,
-                    price = price.toDouble(),
+                    price = actualPrice.toDouble(),
                     quantity = quantity,
                     maxQuantity = availableQuantity,
                     description = product.description,
@@ -230,7 +240,8 @@ fun ProductInfo(
                     onColorSelected = {
                         onColorPicked(color?.getOrNull(colorList?.indexOf(it) ?: -1) ?: "")
                     },
-                    onSizeSelected = { onSizePicked(it.toString()) }
+                    onSizeSelected = { onSizePicked(it.toString()) },
+                    currencySymbol = currencySymbol
                 )
             }
 
@@ -408,6 +419,7 @@ fun ProductDetails(
     onColorSelected: (Color) -> Unit = {},
     onSizeSelected: (Int) -> Unit = {},
     maxQuantity: Int,
+    currencySymbol: String?,
 ) {
     val selectedColor = remember { mutableStateOf(colors?.firstOrNull() ?: Color.Unspecified) }
     val selectedSize = remember { mutableStateOf(sizes?.get(0) ?: "") }
@@ -435,7 +447,7 @@ fun ProductDetails(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "LE $price",
+                text = "$currencySymbol $price",
                 fontSize = 18.sp,
                 color = Color.Black,
                 fontWeight = FontWeight.Bold

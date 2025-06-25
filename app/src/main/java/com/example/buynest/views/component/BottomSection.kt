@@ -30,6 +30,7 @@ fun BottomSection(
     totalPrice: Int,
     icon: ImageVector,
     title: String,
+    currencySymbol: String?,
     onClick: () -> Unit
 ) {
     val showGuestDialog = remember { mutableStateOf(false) }
@@ -47,7 +48,7 @@ fun BottomSection(
                 fontSize = 20.sp
             )
             Text(
-                "EGP $totalPrice",
+                "$currencySymbol $totalPrice",
                 color = MainColor,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
