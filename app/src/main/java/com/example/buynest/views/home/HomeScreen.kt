@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.R
-import com.example.buynest.model.entity.OfferModel
 import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.viewmodel.discount.DiscountViewModel
 import com.example.buynest.viewmodel.home.HomeViewModel

@@ -32,7 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -40,7 +39,6 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.buynest.ProductsDetailsByIDsQuery
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.favorite.FavoriteRepoImpl
 import com.example.buynest.R
 import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.LightGray2

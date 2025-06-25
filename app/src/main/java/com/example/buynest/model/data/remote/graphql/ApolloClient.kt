@@ -1,7 +1,6 @@
 package com.example.buynest.model.data.remote.graphql
 
 import com.apollographql.apollo3.ApolloClient
-import com.example.buynest.BuildConfig
 
 object ApolloClient {
     fun createApollo(

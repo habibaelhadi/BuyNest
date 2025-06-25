@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -58,14 +57,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductDetailsByIDQuery
 import com.example.buynest.ProductsDetailsByIDsQuery
 import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.repository.FirebaseAuthObject
-import com.example.buynest.repository.favorite.FavoriteRepoImpl
-import com.example.buynest.repository.productDetails.ProductDetailsRepositoryImpl
 import com.example.buynest.ui.theme.LightGray
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.utils.toColorList

@@ -17,7 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -34,16 +33,12 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.ProductsByCollectionIDQuery
 import com.example.buynest.R
-import com.example.buynest.repository.home.HomeRepository
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.favorite.FavoriteRepoImpl
 import com.example.buynest.ui.theme.*
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.viewmodel.brandproducts.BrandDetailsViewModel
-import com.example.buynest.viewmodel.brandproducts.BrandProductsFactory
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.ProductItem
 import com.example.buynest.views.component.SearchBar

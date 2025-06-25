@@ -1,6 +1,5 @@
 package com.example.buynest.views.orderdetails
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,7 +25,6 @@ import com.example.buynest.views.component.PaymentDetails
 import com.example.buynest.views.orders.phenomenaFontFamily
 import com.example.buynest.model.entity.CartItem
 import com.example.buynest.viewmodel.orders.OrdersViewModel
-import org.koin.androidx.compose.koinViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
