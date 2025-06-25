@@ -2,6 +2,7 @@ package com.example.buynest.repository.authentication.firebase.datasource
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.example.buynest.R
 import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.model.state.FirebaseResponse
@@ -11,6 +12,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class FirebaseDataSourceImpl : IFirebaseDataSource {
     private val auth: FirebaseAuth = FirebaseAuthObject.getAuth()
@@ -145,4 +148,59 @@ class FirebaseDataSourceImpl : IFirebaseDataSource {
             firebaseResponse?.onResponseFailure("No authenticated Google user found")
         }
     }
+
+    override fun saveShopifyTokenToFireStore(
+        customerToken: String,
+        customerId: String,
+        cartId: String,
+        checkOutKey: String
+    ) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            val data = hashMapOf(
+                "customerToken" to customerToken,
+                "customerId" to customerId,
+                "cartId" to cartId,
+                "checkOutKey" to checkOutKey
+            )
+
+            FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(user.uid)
+                .update(data as Map<String, String>)
+                .addOnSuccessListener {
+                    Log.i("TAG", "Shopify token saved successfully")
+                    firebaseResponse?.onResponseSuccess("Shopify token saved")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("TAG", "Failed to save Shopify token: ${e.message}")
+                    firebaseResponse?.onResponseFailure(e.message)
+                }
+        } else {
+            Log.e("TAG", "No Firebase user to link Shopify token")
+            firebaseResponse?.onResponseFailure("User not logged in")
+        }
+    }
+
+    override suspend fun getCartId(): String = suspendCoroutine { continuation ->
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(user.uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    val cartId = document.getString("cartId") ?: ""
+                    Log.i("TAG", "Firestore CartId: $cartId")
+                    continuation.resume(cartId)
+                }
+                .addOnFailureListener { e ->
+                    Log.e("TAG", "Failed to fetch CartId: ${e.message}")
+                    continuation.resume("")
+                }
+        } else {
+            continuation.resume("")
+        }
+    }
+
 }
