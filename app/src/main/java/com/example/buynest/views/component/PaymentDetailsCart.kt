@@ -16,14 +16,16 @@ import com.example.buynest.ui.theme.Gray
 import com.example.buynest.ui.theme.white
 
 @Composable
-fun PaymentDetails(totalAmount1: Any) {
+fun PaymentDetails(totalAmount1: Any,PaymentWay: String) {
+    val paymentWay = PaymentWay
     Card (
         modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
         colors = CardDefaults.cardColors(white),
         shape = RoundedCornerShape(16.dp),
         border = BorderStroke(2.dp, Gray),
     ){
-        Text("Payment Way : Cash on Delivery",
+        Text(
+            paymentWay,
             modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 6.dp),
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold

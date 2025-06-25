@@ -21,7 +21,10 @@ import androidx.compose.ui.unit.dp
 import com.example.buynest.ui.theme.MainColor
 
 @Composable
-fun QuantitySelector(quantity: Int, onChange: (Int) -> Unit) {
+fun QuantitySelector(
+    quantity: Int,
+    maxQuantity: Int,
+    onChange: (Int) -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -38,7 +41,13 @@ fun QuantitySelector(quantity: Int, onChange: (Int) -> Unit) {
             color = Color.White,
             fontWeight = FontWeight.Bold
         )
-        IconButton(onClick = { onChange(quantity + 1) }) {
+        IconButton(
+            onClick = {
+                if (quantity < maxQuantity) {
+                    onChange(quantity + 1)
+                }
+            }
+        ) {
             Icon(imageVector = Icons.Default.Add, contentDescription = "Increase", tint = Color.White)
         }
     }

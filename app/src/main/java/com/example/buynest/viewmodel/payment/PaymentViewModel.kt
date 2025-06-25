@@ -1,5 +1,6 @@
 package com.example.buynest.viewmodel.payment
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.buynest.repository.payment.IPaymentRepository
@@ -18,9 +19,10 @@ class PaymentViewModel(
 
     fun initiatePaymentFlow(
         amount: Int,
-        currency: String = "usd",
+        currency: String = "EGP",
         onClientSecretReady: (String) -> Unit
     ) {
+        Log.i("TAG", "initiatePaymentFlow: $amount")
         viewModelScope.launch {
             try {
                 val response = repository.createPaymentIntent(amount, currency)

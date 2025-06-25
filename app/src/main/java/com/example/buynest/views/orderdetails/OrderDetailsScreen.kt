@@ -45,8 +45,6 @@ fun OrderDetailsScreen(
     }
 
     selectedOrder?.let { order ->
-        val id = order.id
-
         val imageUrls = orderViewModel.extractImageUrlsFromNote(order.note)
 
         val cartItems = order.lineItems.edges.mapIndexed { index, edge ->
@@ -58,6 +56,7 @@ fun OrderDetailsScreen(
             val size = options.find { it.name == "Size" }?.value ?: ""
 
             val image = imageUrls.getOrNull(index) ?: variant?.image?.url.toString()
+
 
             CartItem(
                 id = 0,
@@ -73,6 +72,9 @@ fun OrderDetailsScreen(
             )
         }
 
+
+
+        val paymentMethod = orderViewModel.extractPaymentMethodFromNote(order.note)
         val totalAmount = order.totalPriceSet.shopMoney.amount.toString().toDoubleOrNull()?.times(rate)?.toInt() ?: 0
 
         LazyColumn(
@@ -131,7 +133,7 @@ fun OrderDetailsScreen(
 
             item {
                 Spacer(modifier = Modifier.height(16.dp))
-                PaymentDetails(totalAmount)
+                PaymentDetails(totalAmount,paymentMethod)
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
