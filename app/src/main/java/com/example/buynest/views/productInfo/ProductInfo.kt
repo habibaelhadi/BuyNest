@@ -63,6 +63,7 @@ import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.LightGray
 import com.example.buynest.ui.theme.MainColor
+import com.example.buynest.utils.mapSizeFromTextToInteger
 import com.example.buynest.utils.toColorList
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.viewmodel.productInfo.ProductDetailsViewModel
@@ -468,7 +469,11 @@ fun ProductDetails(
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 it.forEach { size ->
-                    val isSelected = selectedSize.value == size
+                    val isSelected = if (size.contains(Regex("[XLMSxlms]"))) {
+                        mapSizeFromTextToInteger(selectedSize.value) == mapSizeFromTextToInteger(size)
+                    } else {
+                        selectedSize.value.equals(size, ignoreCase = true)
+                    }
                     Box(
                         modifier = Modifier
                             .size(36.dp)
@@ -476,7 +481,7 @@ fun ProductDetails(
                             .background(if (isSelected) MainColor else LightGray)
                             .clickable {
                                 selectedSize.value = size
-                                onSizeSelected(size.toInt())
+                                onSizeSelected(mapSizeFromTextToInteger(size))
                             },
                         contentAlignment = Alignment.Center
                     ) {

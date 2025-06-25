@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.buynest.BuildConfig
 import com.example.buynest.model.data.remote.rest.RemoteDataSourceImpl
+import com.example.buynest.model.entity.CartItem
+import com.example.buynest.repository.payment.datasource.PaymentDataSourceImpl
 import com.example.buynest.model.data.remote.rest.StripeClient
 import com.example.buynest.model.entity.CartItem
 import com.example.buynest.model.state.SheetType
@@ -51,6 +53,11 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.rememberPaymentSheet
 import kotlinx.coroutines.launch
+import androidx.compose.material3.rememberModalBottomSheetState
+import com.example.buynest.model.state.SheetType
+import com.example.buynest.utils.SharedPrefHelper
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
+
 
 @SuppressLint("ViewModelConstructorInComposable")
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
@@ -60,7 +67,8 @@ fun CartScreen(
     goTOAddress: () -> Unit,
     cartViewModel: CartViewModel,
     addressViewModel: AddressViewModel,
-    discountViewModel: DiscountViewModel
+    discountViewModel: DiscountViewModel,
+    currencyViewModel: CurrencyViewModel
 ) {
     val context = LocalContext.current
     val cartId = SecureSharedPrefHelper.getString(AppConstants.KEY_CART_ID)
@@ -75,14 +83,23 @@ fun CartScreen(
     val sheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
 
-    val paymentViewModel = PaymentViewModel(PaymentRepositoryImpl(RemoteDataSourceImpl(StripeClient.api)))
-    val paymentSheet = rememberPaymentSheet { result ->
-        when (result) {
-            is PaymentSheetResult.Completed -> {
-                draftOrderId?.data?.draftOrderCreate?.draftOrder?.id?.let { orderId ->
-                    cartViewModel.completeOrder(orderId)
-                    cartItems.forEach { cartViewModel.removeItemFromCart(cartId!!, it.lineId) }
-                    cartItems = emptyList()
+    val paymentViewModel = PaymentViewModel(
+        repository = PaymentRepositoryImpl(PaymentDataSourceImpl(StripeClient.api))
+    )
+    val paymentSheet = rememberPaymentSheet(
+        paymentResultCallback = { result ->
+            when (result) {
+                is PaymentSheetResult.Completed -> {
+                    val orderId = draftOrderid?.data?.draftOrderCreate?.draftOrder?.id
+                    if (orderId != null) {
+                        cartViewModel.completeOrder(orderId)
+                        cartItems.forEach { item ->
+                            cartViewModel.removeItemFromCart(cartId!!, item.lineId)
+                        }
+                        cartItems = emptyList()
+                    }else{
+                        Log.i("TAG", "CartScreen: DraftOrderId is null ")
+                    }
                 }
             }
             else -> {}

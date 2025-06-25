@@ -1,16 +1,12 @@
-package com.example.buynest.model.data.remote.rest
+package com.example.buynest.repository.payment.datasource
 
-import android.content.Context
 import com.google.gson.JsonObject
 import retrofit2.Response
 
-interface IRemoteDataSource {
+interface IPaymentDataSource {
     suspend fun createPaymentIntent(
         amount: Int,
         currency: String,
         paymentMethod: String = "card"
     ): Response<JsonObject>
-
-    suspend fun getUsdToTargetRate(context: Context): Double
-
 }

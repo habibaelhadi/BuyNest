@@ -4,6 +4,8 @@ import androidx.compose.ui.graphics.Color
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.ProductsByHandleQuery
 import com.example.buynest.model.entity.UiProduct
+import com.example.buynest.model.mapper.countryToCurrencyCodeMap
+import com.example.buynest.model.mapper.currencySymbolMap
 
 fun List<String>.toColorList(): List<Color> {
     return this.map { colorName ->
@@ -57,4 +59,25 @@ fun mapFromCategoryProduct(node: ProductsByHandleQuery.Node): UiProduct {
         imageUrl = node.featuredImage?.url ?: "",
         price = node.variants.edges.firstOrNull()?.node?.price?.amount?.toString()?.toFloatOrNull()
     )
+}
+
+fun getCurrencySymbol(code: String): String {
+    return currencySymbolMap[code] ?: code
+}
+
+fun getCurrencyName(code: String): String {
+    return countryToCurrencyCodeMap[code] ?: code
+}
+
+
+fun mapSizeFromTextToInteger(size: String): Int{
+    return when(size.uppercase()){
+        "XS"  -> 0
+        "S" -> 1
+        "M" -> 2
+        "L" -> 3
+        "XL" -> 4
+        "XXL" -> 5
+        else -> 1
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.buynest.views.home
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
@@ -16,14 +17,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.R
-import com.example.buynest.model.entity.OfferModel
 import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.utils.SharedPrefHelper
+import com.example.buynest.utils.getCurrencyName
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.discount.DiscountViewModel
 import com.example.buynest.viewmodel.home.HomeViewModel
 import com.example.buynest.viewmodel.shared.SharedViewModel
@@ -46,15 +50,19 @@ fun HomeScreen(
     sharedViewModel: SharedViewModel,
     onProductClicked: (productId: String) -> Unit,
     homeViewModel: HomeViewModel = koinViewModel() ,
-    discountViewModel: DiscountViewModel
+    discountViewModel: DiscountViewModel,
+    currencyViewModel: CurrencyViewModel
 ) {
     val activity = LocalActivity.current
     val brands by homeViewModel.brand.collectAsStateWithLifecycle()
     val offers by discountViewModel.offers.collectAsStateWithLifecycle()
+    val rate by currencyViewModel.rate
+    val currencySymbol by currencyViewModel.currencySymbol
 
     LaunchedEffect(Unit) {
         homeViewModel.getBrands()
         discountViewModel.loadDiscounts()
+        currencyViewModel.loadCurrency()
     }
 
     Column(
@@ -86,7 +94,7 @@ fun HomeScreen(
                 TopBrandsSection(items = brandList.dropLast(4), onCategoryClick = onCategoryClick)
                 sharedViewModel.setCategories(brandList.subList(12,16))
                 Spacer(modifier = Modifier.height(24.dp))
-                ForYouSection(items = productList.drop(10),onProductClicked)
+                ForYouSection(items = productList.drop(10),onProductClicked, rate, currencySymbol.toString())
             }
         }
     }

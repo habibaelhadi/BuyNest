@@ -40,7 +40,9 @@ import com.example.buynest.utils.mapColorNameToColor
 @Composable
 fun CategoryItem(
     product: ProductsByHandleQuery.Node,
-    onProductClicked: (productId: String) -> Unit
+    onProductClicked: (productId: String) -> Unit,
+    rate: Double,
+    currencySymbol: String
 ) {
     val cleanedTitle = product.title.replace(Regex("\\(.*?\\)"), "").trim()
     val parts = cleanedTitle.split("|").map { it.trim() }
@@ -103,9 +105,12 @@ fun CategoryItem(
                         fontSize = 14.sp
                     )
                 }
+                val finalPrice = product.variants.edges.firstOrNull()?.node?.price?.amount
+                    ?.toString()?.toDoubleOrNull()?.times(rate)?.toInt() ?: 0
+
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "${product.variants.edges[0].node.price.amount} LE",
+                    text = "$finalPrice $currencySymbol",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = MainColor

@@ -83,7 +83,7 @@ fun OrderProductItem(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "EGP ${item.price}",
+                    text = "${item.price} ${item.currencySymbol}",
                     fontWeight = FontWeight.Bold,
                     color = MainColor
                 )

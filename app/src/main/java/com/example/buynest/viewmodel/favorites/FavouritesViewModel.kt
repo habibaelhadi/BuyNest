@@ -2,7 +2,6 @@ package com.example.buynest.viewmodel.favorites
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.buynest.BuildConfig
 import com.example.buynest.model.data.remote.graphql.ApolloClient

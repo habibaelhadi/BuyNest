@@ -7,6 +7,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.example.buynest.ui.theme.MainColor
 
 @Composable
 fun Indicator(){
@@ -14,6 +15,8 @@ fun Indicator(){
       modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ){
-        CircularProgressIndicator()
+        CircularProgressIndicator(
+            color = MainColor,
+        )
     }
 }
