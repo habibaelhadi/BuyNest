@@ -20,6 +20,7 @@ query ProductDetailsByID($id: ID!) {
                         amount
                         currencyCode
                     }
+                    quantityAvailable
                     selectedOptions {
                         name
                         value

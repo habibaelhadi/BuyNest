@@ -17,7 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -34,16 +33,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.ProductsByCollectionIDQuery
 import com.example.buynest.R
-import com.example.buynest.repository.home.HomeRepository
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.favorite.FavoriteRepoImpl
 import com.example.buynest.ui.theme.*
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.viewmodel.brandproducts.BrandDetailsViewModel
-import com.example.buynest.viewmodel.brandproducts.BrandProductsFactory
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.ProductItem
 import com.example.buynest.views.component.SearchBar
@@ -59,12 +55,19 @@ fun BrandDetailsScreen(
     onProductClicked: (productId: String) -> Unit,
     onSearchClicked:()->Unit,
     brandProductsViewModel: BrandDetailsViewModel = koinViewModel(),
-    favViewModel: FavouritesViewModel = koinViewModel()
+    favViewModel: FavouritesViewModel = koinViewModel(),
+    currencyViewModel: CurrencyViewModel = koinViewModel()
 ) {
     val phenomenaFontFamily = FontFamily(Font(R.font.phenomena_bold))
 
     val brandProducts by brandProductsViewModel.brandProducts.collectAsStateWithLifecycle()
     val filterExpanded = remember { mutableStateOf(false) }
+    val rate by currencyViewModel.rate
+    val currencySymbol by currencyViewModel.currencySymbol
+
+    LaunchedEffect(Unit) {
+        currencyViewModel.loadCurrency()
+    }
 
     LaunchedEffect(brandID) {
         val id = "gid://shopify/Collection/$brandID"
@@ -163,7 +166,9 @@ fun BrandDetailsScreen(
                 ProductGrid(
                     onProductClicked = onProductClicked,
                     bradProduct = filteredProducts,
-                    favViewModel = favViewModel
+                    favViewModel = favViewModel,
+                    rate = rate,
+                    currencySymbol = currencySymbol.toString()
                 )
             }
         }
@@ -177,7 +182,9 @@ fun BrandDetailsScreen(
 fun ProductGrid(
     onProductClicked: (productId: String) -> Unit,
     bradProduct: List<ProductsByCollectionIDQuery.Node>? = null,
-    favViewModel: FavouritesViewModel
+    favViewModel: FavouritesViewModel,
+    rate: Double,
+    currencySymbol: String
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -187,7 +194,7 @@ fun ProductGrid(
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ){
         items(bradProduct?.size ?: 0) {
-            ProductItem(onProductClicked, bradProduct?.get(it),favViewModel)
+            ProductItem(onProductClicked, bradProduct?.get(it),favViewModel,rate,currencySymbol)
         }
     }
 }

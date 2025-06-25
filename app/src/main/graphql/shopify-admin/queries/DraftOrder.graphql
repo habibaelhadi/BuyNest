@@ -4,7 +4,6 @@ mutation CreateDraftOrder($input: DraftOrderInput!) {
             id
             name
             createdAt
-
             email
             shippingAddress {
                 firstName
@@ -15,22 +14,26 @@ mutation CreateDraftOrder($input: DraftOrderInput!) {
                 country
                 phone
             }
-
+            appliedDiscount {
+                value
+            }
             subtotalPriceSet {
                 shopMoney {
                     amount
                     currencyCode
                 }
             }
-
+            customAttributes {
+                key
+                value
+            }
             totalPriceSet {
                 shopMoney {
                     amount
                     currencyCode
                 }
             }
-
-            lineItems(first: 10) {
+            lineItems(first: 100) {
                 edges {
                     node {
                         title
@@ -43,7 +46,7 @@ mutation CreateDraftOrder($input: DraftOrderInput!) {
                         }
                         variant {
                             id
-                            image{
+                            image {
                                 url
                             }
                         }
@@ -51,7 +54,6 @@ mutation CreateDraftOrder($input: DraftOrderInput!) {
                 }
             }
         }
-
         userErrors {
             field
             message

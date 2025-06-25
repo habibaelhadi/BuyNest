@@ -34,7 +34,6 @@ import com.example.buynest.ui.theme.*
 import com.example.buynest.viewmodel.orders.OrdersViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.OrderItem
-import org.koin.androidx.compose.koinViewModel
 
 val phenomenaFontFamily = FontFamily(
     Font(R.font.phenomena_bold)

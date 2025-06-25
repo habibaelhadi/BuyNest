@@ -1,5 +1,5 @@
 query getOrdersByEmail($email: String!) {
-    orders(first: 10, query: $email) {
+    orders(first: 100, query: $email) {
         edges {
             node {
                 id
@@ -15,7 +15,7 @@ query getOrdersByEmail($email: String!) {
                     }
                 }
 
-                lineItems(first: 10) {
+                lineItems(first: 100) {
                     edges {
                         node {
                             title
