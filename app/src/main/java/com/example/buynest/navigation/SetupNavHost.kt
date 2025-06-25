@@ -182,7 +182,11 @@ fun SetupNavHost(mainNavController: NavHostController) {
                     mainNavController.popBackStack()
                 },
                 cartViewModel = cartViewModel,
-                addressViewModel = addressViewModel
+                addressViewModel = addressViewModel,
+                discountViewModel = discountViewModel,
+                goTOAddress = {
+                    mainNavController.navigate(RoutesScreens.Address.route)
+                }
             )
         }
         composable(RoutesScreens.ForgotPassword.route) {

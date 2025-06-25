@@ -2,6 +2,7 @@ package com.example.buynest.views.cart
 
 import android.annotation.SuppressLint
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,6 +15,8 @@ import androidx.compose.material.DismissValue
 import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowRightAlt
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,7 +37,10 @@ import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_TOKEN
 import com.example.buynest.utils.SecureSharedPrefHelper
 import com.example.buynest.viewmodel.address.AddressViewModel
 import com.example.buynest.viewmodel.cart.CartViewModel
+import com.example.buynest.viewmodel.discount.DiscountViewModel
 import com.example.buynest.viewmodel.payment.PaymentViewModel
+import com.example.buynest.views.cart.components.AddressSheet
+import com.example.buynest.views.cart.components.CouponSheet
 import com.example.buynest.views.component.BottomSection
 import com.example.buynest.views.component.CartItemRow
 import com.example.buynest.views.component.CartTopBar
@@ -42,28 +48,41 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.rememberPaymentSheet
-import org.koin.androidx.compose.koinViewModel
+import kotlinx.coroutines.launch
+import androidx.compose.material3.rememberModalBottomSheetState
+import com.example.buynest.model.state.SheetType
+import com.example.buynest.utils.SharedPrefHelper
+
 
 @SuppressLint("ViewModelConstructorInComposable")
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
     onBackClicked: () -> Unit,
+    goTOAddress: () -> Unit,
     cartViewModel: CartViewModel,
-    addressViewModel: AddressViewModel
+    addressViewModel: AddressViewModel,
+    discountViewModel: DiscountViewModel
 ) {
     val context = LocalContext.current
+    val cartId = SecureSharedPrefHelper.getString(KEY_CART_ID)
     var cartItems by remember { mutableStateOf(emptyList<CartItem>()) }
+    val cartState by cartViewModel.cartResponse.collectAsState()
+
     var showConfirmDialog by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<CartItem?>(null) }
-    val cartId = SecureSharedPrefHelper.getString(KEY_CART_ID)
+
     val defaultAddress by addressViewModel.defaultAddress.collectAsStateWithLifecycle()
     val draftOrderid by cartViewModel.orderResponse.collectAsStateWithLifecycle()
+    val token = SecureSharedPrefHelper.getString(KEY_CUSTOMER_TOKEN).toString()
+
+    var activeSheet by remember { mutableStateOf<SheetType>(SheetType.None) }
+    val sheetState = rememberModalBottomSheetState()
+    val coroutineScope = rememberCoroutineScope()
+
     val paymentViewModel = PaymentViewModel(
         repository = PaymentRepositoryImpl(RemoteDataSourceImpl(StripeClient.api))
     )
-
-    val token = SecureSharedPrefHelper.getString(KEY_CUSTOMER_TOKEN).toString()
     val paymentSheet = rememberPaymentSheet(
         paymentResultCallback = { result ->
             when (result) {
@@ -93,8 +112,6 @@ fun CartScreen(
         addressViewModel.loadDefaultAddress(token)
     }
 
-    val cartState by cartViewModel.cartResponse.collectAsState()
-
     LaunchedEffect(cartState) {
         cartItems = cartState?.data?.cart?.lines?.edges?.mapNotNull { edge ->
             val node = edge.node
@@ -121,31 +138,96 @@ fun CartScreen(
 
     }
 
+    var totalPrice = cartItems.sumOf { it.price * it.quantity }
 
-    val totalPrice = cartItems.sumOf { it.price * it.quantity }
+    fun launchCheckoutFlow() {
+        activeSheet = SheetType.Coupon
+    }
+
+    LaunchedEffect(activeSheet) {
+        coroutineScope.launch {
+            when (activeSheet) {
+                is SheetType.None -> {
+                    if (sheetState.isVisible) {
+                        sheetState.hide()
+                    }
+                }
+                else -> {
+                    if (!sheetState.isVisible) {
+                        sheetState.show()
+                    }
+                }
+            }
+        }
+    }
+
+    if (activeSheet != SheetType.None) {
+        ModalBottomSheet(
+            sheetState = sheetState,
+            onDismissRequest = {
+                coroutineScope.launch {
+                    sheetState.hide()
+                    activeSheet = SheetType.None
+                }
+            },
+            shape = RoundedCornerShape(20.dp),
+            tonalElevation = 4.dp
+        ) {
+            when (activeSheet) {
+                is SheetType.Coupon -> CouponSheet(
+                    onValidCoupon = { coupon ->
+                        var discount:Double  = discountViewModel.applyCoupon(coupon)
+                        totalPrice = (totalPrice * (1 - discount)).toInt()
+                        activeSheet = SheetType.Address
+                    },
+                    checkCoupon = { coupon ->
+                        discountViewModel.isCouponValid(coupon)
+                    },
+                    onSkip = {
+                        activeSheet = SheetType.Address
+                    }
+                )
+
+                is SheetType.Address -> AddressSheet(
+                    defaultAddress = defaultAddress,
+                    onNavigateToAddress = { goTOAddress() },
+                    onProceed = {
+                        val email = FirebaseAuthObject.getAuth().currentUser?.email ?: return@AddressSheet
+
+                        cartViewModel.getOrderModelFromCart(email, defaultAddress, cartItems)
+
+                        val method = SharedPrefHelper.getPaymentMethod(context)
+
+                        if (method == "Cash on Delivery") {
+                            Toast.makeText(context, "Order placed successfully!", Toast.LENGTH_SHORT).show()
+                            coroutineScope.launch {
+                                sheetState.hide()
+                                activeSheet = SheetType.None
+                            }
+                        } else if (totalPrice >= 20000) {
+                            paymentViewModel.initiatePaymentFlow(
+                                amount = totalPrice * 100,
+                                onClientSecretReady = { secret ->
+                                    paymentSheet.presentWithPaymentIntent(
+                                        paymentIntentClientSecret = secret,
+                                        configuration = PaymentSheet.Configuration("BuyNest")
+                                    )
+                                }
+                            )
+                        }
+                    }
+                )
+                else -> Spacer(modifier = Modifier.height(1.dp))
+            }
+        }
+    }
 
     Scaffold(
-        modifier = Modifier.padding(top = 32.dp),
+        modifier = Modifier.padding(top = 8.dp),
         topBar = { CartTopBar(backClicked = onBackClicked) },
         bottomBar = {
             BottomSection(totalPrice, Icons.Default.ArrowRightAlt, "Check Out") {
-                val email = FirebaseAuthObject.getAuth().currentUser?.email ?: return@BottomSection
-                cartViewModel.getOrderModelFromCart(
-                    email = email,
-                    address = defaultAddress,
-                    items = cartItems
-                )
-                paymentViewModel.initiatePaymentFlow(
-                    amount = totalPrice * 100,
-                    onClientSecretReady = { secret ->
-                        paymentSheet.presentWithPaymentIntent(
-                            paymentIntentClientSecret = secret,
-                            configuration = PaymentSheet.Configuration(
-                                merchantDisplayName = "BuyNest"
-                            )
-                        )
-                    }
-                )
+                launchCheckoutFlow()
             }
         }
     ) { paddingValues ->
@@ -165,7 +247,6 @@ fun CartScreen(
                         } else true
                     }
                 )
-
                 SwipeToDismiss(
                     state = dismissState,
                     directions = setOf(DismissDirection.StartToEnd, DismissDirection.EndToStart),

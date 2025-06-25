@@ -18,4 +18,13 @@ class DiscountViewModel(private val repository: DiscountRepository) : ViewModel(
             _offers.value = repository.getAllDiscounts()
         }
     }
+
+    suspend fun isCouponValid(coupon: String): Boolean {
+        return repository.isCouponValid(coupon)
+    }
+
+    suspend fun applyCoupon(coupon: String): Double {
+        return repository.getDiscountAmount(coupon)
+    }
+
 }

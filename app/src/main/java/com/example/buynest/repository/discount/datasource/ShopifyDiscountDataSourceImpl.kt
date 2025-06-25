@@ -34,4 +34,35 @@ class ShopifyDiscountDataSourceImpl(
             )
         }
     }
+
+    override suspend fun isCouponValid(coupon: String): Boolean {
+        val response = apolloClient.query(GetDiscountAmountDetailsQuery()).execute()
+        val discountEdges = response.data?.discountNodes?.edges.orEmpty()
+
+        return discountEdges.any { edge ->
+            val discount = edge?.node?.discount?.onDiscountCodeBasic
+            val isTitleMatch = discount?.title?.trim()?.equals(coupon.trim(), ignoreCase = true) == true
+            val isStatusActive = discount?.status?.name == "ACTIVE"
+            isTitleMatch && isStatusActive
+        }
+    }
+
+    override suspend fun getDiscountAmount(coupon: String): Double {
+        val response = apolloClient.query(GetDiscountAmountDetailsQuery()).execute()
+        val discountEdges = response.data?.discountNodes?.edges.orEmpty()
+
+        val discountNode = discountEdges.firstOrNull { edge ->
+            val discount = edge?.node?.discount?.onDiscountCodeBasic
+            val isTitleMatch = discount?.title?.trim()?.equals(coupon.trim(), ignoreCase = true) == true
+            val isStatusActive = discount?.status?.name == "ACTIVE"
+            isTitleMatch && isStatusActive
+        }?.node?.discount?.onDiscountCodeBasic
+
+        return discountNode?.customerGets
+            ?.value
+            ?.onDiscountPercentage
+            ?.percentage
+            ?: 0.0
+    }
+
 }
