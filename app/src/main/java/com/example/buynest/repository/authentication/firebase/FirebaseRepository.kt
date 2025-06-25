@@ -12,4 +12,11 @@ interface FirebaseRepository {
     fun getGoogleSignInIntent(context: Context): Intent?
     fun sendPasswordResetEmail(email: String)
     fun saveGoogleUserToFireStore(context: Context)
+    fun saveShopifyTokenToFireStore(
+        customerToken: String,
+        customerId: String,
+        cartId: String,
+        checkOutKey: String
+    )
+    suspend fun getCartId(): String
 }

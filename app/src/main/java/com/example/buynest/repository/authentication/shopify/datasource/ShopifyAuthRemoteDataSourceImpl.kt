@@ -1,12 +1,12 @@
 package com.example.buynest.repository.authentication.shopify.datasource
 
 import android.util.Log
+import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Optional
 import com.example.buynest.BuildConfig
 import com.example.buynest.CreateCustomerMutation
 import com.example.buynest.CustomerAccessTokenCreateMutation
 import com.example.buynest.LoginCustomerMutation
-import com.example.buynest.model.data.remote.graphql.ApolloClient
 import com.example.buynest.repository.cart.CartRepositoryImpl
 import com.example.buynest.repository.cart.datasource.CartDataSourceImpl
 import com.example.buynest.type.CustomerAccessTokenCreateInput
@@ -19,7 +19,7 @@ import com.example.buynest.utils.SecureSharedPrefHelper
 import com.example.buynest.utils.constant.*
 import com.example.buynest.viewmodel.cart.CartManager
 
-class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
+class ShopifyAuthRemoteDataSourceImpl(private val client: ApolloClient): ShopifyAuthRemoteDataSource {
 
     override suspend fun signUpCustomer(
         firstName: String,
@@ -43,12 +43,6 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
                 phone = Optional.presentIfNotNull(formattedPhone)
             )
 
-            val client = ApolloClient.createApollo(
-                BASE_URL = CLIENT_BASE_URL,
-                ACCESS_TOKEN = BuildConfig.SHOPIFY_ACCESS_TOKEN,
-                Header = CLIENT_HEADER
-            )
-
             val response = client
                 .mutation(CreateCustomerMutation(input))
                 .execute()
@@ -57,7 +51,7 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
             val customer = response.data?.customerCreate?.customer
             val errors = response.data?.customerCreate?.userErrors.orEmpty()
 
-            if (!errors.isNullOrEmpty() || customer == null) {
+            if (errors.isNotEmpty() || customer == null) {
                 val errorMessage = errors.firstOrNull()?.message ?: "Unknown error"
                 Log.e("TAG", "SignUp failed: $errorMessage")
                 return Result.failure(Exception(errorMessage))
@@ -77,7 +71,7 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
             val accessToken = tokenResponse.data?.customerAccessTokenCreate?.customerAccessToken?.accessToken
             val tokenErrors = tokenResponse.data?.customerAccessTokenCreate?.userErrors.orEmpty()
 
-            if (!tokenErrors.isNullOrEmpty() || accessToken == null) {
+            if (tokenErrors.isNotEmpty() || accessToken == null) {
                 val tokenErrorMessage = tokenErrors.firstOrNull()?.message ?: "Token creation failed"
                 Log.e("TAG", "Access token error: $tokenErrorMessage")
                 return Result.failure(Exception(tokenErrorMessage))
@@ -114,16 +108,11 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
 
     override suspend fun loginCustomer(
         email: String,
-        password: String
+        password: String,
+        cartId: String
     ): Result<LoginCustomerMutation.CustomerAccessToken?> {
         return try {
             val input = CustomerAccessTokenCreateInput(email, password)
-            val client = ApolloClient.createApollo(
-                BASE_URL = CLIENT_BASE_URL,
-                ACCESS_TOKEN = BuildConfig.SHOPIFY_ACCESS_TOKEN,
-                Header = CLIENT_HEADER
-            )
-
 
             val response = client
                 .mutation(LoginCustomerMutation(input))
@@ -137,7 +126,10 @@ class ShopifyAuthRemoteDataSourceImpl: ShopifyAuthRemoteDataSource {
             if (errors.isEmpty() && token != null) {
                 Log.i("TAG", "loginCustomer: $token")
                 SecureSharedPrefHelper.putString(KEY_CUSTOMER_TOKEN, token.accessToken)
+                SecureSharedPrefHelper.putString(KEY_CART_ID,cartId)
                 Log.i("TAG", "Secure Shared: ${SecureSharedPrefHelper.getString(KEY_CUSTOMER_TOKEN)}")
+                Log.i("TAG", "Shopify -- Secure Shared: ${SecureSharedPrefHelper.getString(KEY_CART_ID)}")
+                CartManager.linkCartToCustomer(cartId, token.accessToken)
                 Result.success(token)
             } else {
                 Log.i("TAG", "else loginCustomer: $errors")

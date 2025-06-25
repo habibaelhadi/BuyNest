@@ -39,27 +39,6 @@ object FavFirebase {
             }
     }
 
-    fun isFavorite(productId: String){
-        val db = FirebaseFirestore.getInstance()
-        val userId = auth.currentUser?.uid!!
-        db.collection("users").document(userId).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val favList = document.get("fav") as? List<*>
-                    if (favList != null && favList.contains(productId)) {
-                        firebaseResponse?.onResponseSuccess(true)
-                    } else {
-                        firebaseResponse?.onResponseSuccess(false)
-                    }
-                } else {
-                    firebaseResponse?.onResponseFailure("User document not found")
-                }
-            }
-            .addOnFailureListener { e ->
-               firebaseResponse?.onResponseFailure(e.message)
-            }
-    }
-
     fun getAllFavorites(){
         val db = FirebaseFirestore.getInstance()
         val userId = auth.currentUser?.uid!!

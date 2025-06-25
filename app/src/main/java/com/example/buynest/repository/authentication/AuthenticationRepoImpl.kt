@@ -2,10 +2,16 @@ package com.example.buynest.repository.authentication
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import com.example.buynest.model.state.FirebaseResponse
 import com.example.buynest.repository.authentication.firebase.FirebaseRepository
 import com.example.buynest.repository.authentication.shopify.ShopifyAuthRepository
+import com.example.buynest.utils.AppConstants.KEY_CART_ID
+import com.example.buynest.utils.AppConstants.KEY_CHECKOUT_URL
+import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_ID
+import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_TOKEN
+import com.example.buynest.utils.SecureSharedPrefHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,7 +30,9 @@ class AuthenticationRepoImpl(
         firebaseRepository.setFirebaseResponse(object : FirebaseResponse {
             override fun <T> onResponseSuccess(message: T) {
                 CoroutineScope(Dispatchers.IO).launch {
-                    val shopifyResult = shopifyRepository.login(email, password)
+                    val cartId = firebaseRepository.getCartId()
+                    Log.i("TAG", "AuthRepo -- CartId: $cartId")
+                    val shopifyResult = shopifyRepository.login(email, password,cartId)
                     if (shopifyResult.isSuccess) {
                         continuation.resume(Result.success(Unit))
                     } else {
@@ -48,25 +56,39 @@ class AuthenticationRepoImpl(
         email: String,
         password: String
     ): Result<Unit> = suspendCoroutine { continuation ->
+        var resumed = false
+
         firebaseRepository.setFirebaseResponse(object : FirebaseResponse {
             override fun <T> onResponseSuccess(message: T) {
                 CoroutineScope(Dispatchers.IO).launch {
                     val shopifyResult = shopifyRepository.register(name, email, password, phone)
-                    if (shopifyResult.isSuccess) {
-                        continuation.resume(Result.success(Unit))
-                    } else {
-                        continuation.resume(Result.failure(shopifyResult.exceptionOrNull() ?: Exception("Shopify registration failed")))
+                    if (!resumed) {
+                        resumed = true
+                        if (shopifyResult.isSuccess) {
+                            val customerId = SecureSharedPrefHelper.getString(KEY_CUSTOMER_ID,"")!!
+                            val customerToken = SecureSharedPrefHelper.getString(KEY_CUSTOMER_TOKEN,"")!!
+                            val cartId = SecureSharedPrefHelper.getString(KEY_CART_ID,"")!!
+                            val checkOutKey = SecureSharedPrefHelper.getString(KEY_CHECKOUT_URL,"")!!
+                            firebaseRepository.saveShopifyTokenToFireStore(customerToken, customerId, cartId, checkOutKey)
+                            continuation.resume(Result.success(Unit))
+                        } else {
+                            continuation.resume(Result.failure(shopifyResult.exceptionOrNull() ?: Exception("Shopify registration failed")))
+                        }
                     }
                 }
             }
 
             override fun <T> onResponseFailure(message: T) {
-                continuation.resume(Result.failure(Exception(message.toString())))
+                if (!resumed) {
+                    resumed = true
+                    continuation.resume(Result.failure(Exception(message.toString())))
+                }
             }
         })
 
         firebaseRepository.signup(name, phone, email, password)
     }
+
 
 
     override suspend fun logInWithGoogle(context: Context, launcher: ActivityResultLauncher<Intent>): Result<Unit> {

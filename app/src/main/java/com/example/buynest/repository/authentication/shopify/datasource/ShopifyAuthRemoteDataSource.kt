@@ -13,6 +13,7 @@ interface ShopifyAuthRemoteDataSource {
 
     suspend fun loginCustomer(
         email: String,
-        password: String
+        password: String,
+        cartId: String
     ): Result<LoginCustomerMutation.CustomerAccessToken?>
 }

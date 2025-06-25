@@ -33,4 +33,16 @@ class FirebaseRepositoryImpl(private val firebaseDataSource: IFirebaseDataSource
     override fun saveGoogleUserToFireStore(context: Context) {
         firebaseDataSource.saveGoogleUserToFireStore(context)
     }
+
+    override fun saveShopifyTokenToFireStore(
+        customerToken: String,
+        customerId: String,
+        cartId: String,
+        checkOutKey: String
+    ) {
+        firebaseDataSource.saveShopifyTokenToFireStore(customerToken, customerId, cartId, checkOutKey)
+    }
+    override suspend fun getCartId(): String {
+        return firebaseDataSource.getCartId()
+    }
 }
