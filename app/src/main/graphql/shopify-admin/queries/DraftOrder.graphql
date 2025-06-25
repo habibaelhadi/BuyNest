@@ -14,6 +14,9 @@ mutation CreateDraftOrder($input: DraftOrderInput!) {
                 country
                 phone
             }
+            appliedDiscount {
+                value
+            }
             subtotalPriceSet {
                 shopMoney {
                     amount

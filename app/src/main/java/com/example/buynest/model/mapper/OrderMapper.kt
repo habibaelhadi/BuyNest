@@ -51,6 +51,6 @@ fun OrderModel.toDraftOrderInput(): DraftOrderInput {
         lineItems = Optional.Present(lineItems),
         note = Optional.Present(note),
         tags = Optional.presentIfNotNull(tags),
-        customAttributes = Optional.Present(noteAttributes)
+        customAttributes = Optional.Present(noteAttributes),
     )
 }
