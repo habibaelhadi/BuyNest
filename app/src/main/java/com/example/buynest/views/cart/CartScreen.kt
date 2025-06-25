@@ -27,8 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.buynest.BuildConfig
-import com.example.buynest.model.data.remote.rest.RemoteDataSourceImpl
-import com.example.buynest.model.entity.CartItem
 import com.example.buynest.repository.payment.datasource.PaymentDataSourceImpl
 import com.example.buynest.model.data.remote.rest.StripeClient
 import com.example.buynest.model.entity.CartItem
@@ -53,9 +51,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.rememberPaymentSheet
 import kotlinx.coroutines.launch
-import androidx.compose.material3.rememberModalBottomSheetState
-import com.example.buynest.model.state.SheetType
-import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
 
 
@@ -90,22 +85,23 @@ fun CartScreen(
         paymentResultCallback = { result ->
             when (result) {
                 is PaymentSheetResult.Completed -> {
-                    val orderId = draftOrderid?.data?.draftOrderCreate?.draftOrder?.id
+                    val orderId = draftOrderId?.data?.draftOrderCreate?.draftOrder?.id
                     if (orderId != null) {
                         cartViewModel.completeOrder(orderId)
                         cartItems.forEach { item ->
                             cartViewModel.removeItemFromCart(cartId!!, item.lineId)
                         }
                         cartItems = emptyList()
-                    }else{
+                    } else {
                         Log.i("TAG", "CartScreen: DraftOrderId is null ")
                     }
                 }
-            }
-            else -> {}
-        }
-    }
 
+                PaymentSheetResult.Canceled -> TODO()
+                is PaymentSheetResult.Failed -> TODO()
+            }
+        }
+    )
     var originalTotal by remember { mutableIntStateOf(0) }
     var totalPrice by remember { mutableIntStateOf(0) }
     var discount by remember { mutableStateOf(0.0) }
@@ -301,4 +297,4 @@ fun CartScreen(
             }
         }
     }
-}
+        }

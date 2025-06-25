@@ -36,21 +36,13 @@ fun OrderModel.toDraftOrderInput(): DraftOrderInput {
     orderItems.forEachIndexed { index, item ->
         noteBuilder.append("Item ${index + 1}: ${item.name}, Image: ${item.imageUrl}\n")
     }
-    val noteAttributes = listOf(
-        AttributeInput(
-            key = "payment_type",
-            value = status
-        )
-    )
+
     val note = noteBuilder.toString().trim()
-    val tags = if (isPaid) listOf("Stripe Paid") else listOf("Manual Payment")
 
     return DraftOrderInput(
         email = Optional.Present(email),
         shippingAddress = Optional.Present(addressInput),
         lineItems = Optional.Present(lineItems),
         note = Optional.Present(note),
-        tags = Optional.presentIfNotNull(tags),
-        customAttributes = Optional.Present(noteAttributes),
     )
 }
