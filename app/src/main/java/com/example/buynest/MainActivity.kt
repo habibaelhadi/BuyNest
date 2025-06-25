@@ -179,37 +179,39 @@ class MainActivity : ComponentActivity() {
         val currentIndex = ScreenMenuItem.menuItems.indexOfFirst { it.screen.route == currentRoute }
         val initialIndex = if (currentIndex != -1) currentIndex else 0
 
-        AndroidView(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(80.dp)
-                .background(White),
-            factory = { context ->
-                CurvedBottomNavigationView(context).apply {
+        androidx.compose.runtime.key(initialIndex) {
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .background(White),
+                factory = { context ->
+                    CurvedBottomNavigationView(context).apply {
+                        unSelectedColor = White.toArgb()
+                        selectedColor = MainColor.toArgb()
+                        navBackgroundColor = MainColor.toArgb()
 
-                    unSelectedColor = White.toArgb()
-                    selectedColor = MainColor.toArgb()
-                    navBackgroundColor = MainColor.toArgb()
+                        val cbnMenuItems = ScreenMenuItem.menuItems.map { screen ->
+                            CbnMenuItem(
+                                icon = screen.icon,
+                                avdIcon = screen.selectedIcon,
+                                destinationId = screen.id
+                            )
+                        }
 
-                    val cbnMenuItems = ScreenMenuItem.menuItems.map { screen ->
-                        CbnMenuItem(
-                            icon = screen.icon,
-                            avdIcon = screen.selectedIcon,
-                            destinationId = screen.id
-                        )
+                        layoutDirection = View.LAYOUT_DIRECTION_LTR
+                        setMenuItems(cbnMenuItems.toTypedArray(), initialIndex)
+
+                        setOnMenuItemClickListener { _, i ->
+                            navController.popBackStack()
+                            navController.navigate(ScreenMenuItem.menuItems[i].screen.route)
+                        }
                     }
-
-                    layoutDirection = View.LAYOUT_DIRECTION_LTR
-                    setMenuItems(cbnMenuItems.toTypedArray(), 0)
-                    setOnMenuItemClickListener { cbnMenuItem, i ->
-                        navController.popBackStack()
-                        navController.navigate(ScreenMenuItem.menuItems[i].screen.route)
-                    }
-                    setMenuItems(cbnMenuItems.toTypedArray(), initialIndex)
                 }
-            }
-        )
+            )
+        }
     }
+
 
     private fun hideSystemUI() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -236,6 +238,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        hideSystemUI()
     }
 }
 
