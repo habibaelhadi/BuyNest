@@ -68,7 +68,7 @@ fun CartItemRow(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "EGP ${item.price}",
+                    text = "${item.currencySymbol} ${item.price}",
                     fontWeight = FontWeight.Bold,
                     color = MainColor
                 )
