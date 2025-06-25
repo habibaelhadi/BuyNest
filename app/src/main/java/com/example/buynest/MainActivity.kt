@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        SecureSharedPrefHelper.init(this)
+
         val apolloClient = ApolloClient.createApollo(
             BASE_URL = CLIENT_BASE_URL,
             ACCESS_TOKEN = BuildConfig.SHOPIFY_ACCESS_TOKEN,

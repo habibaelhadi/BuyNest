@@ -13,6 +13,7 @@ interface ShopifyAuthRepository {
 
     suspend fun login(
         email: String,
-        password: String
+        password: String,
+        cartId: String
     ): Result<LoginCustomerMutation.CustomerAccessToken?>
 }

@@ -24,8 +24,9 @@ class ShopifyAuthRepositoryImpl(
 
     override suspend fun login(
         email: String,
-        password: String
+        password: String,
+        cartId: String
     ): Result<LoginCustomerMutation.CustomerAccessToken?> {
-        return remoteDataSource.loginCustomer(email, password)
+        return remoteDataSource.loginCustomer(email, password,cartId)
     }
 }
