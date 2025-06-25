@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowRightAlt
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,15 +27,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.buynest.BuildConfig
-import com.example.buynest.model.entity.CartItem
 import com.example.buynest.model.data.remote.rest.RemoteDataSourceImpl
 import com.example.buynest.model.data.remote.rest.StripeClient
+import com.example.buynest.model.entity.CartItem
+import com.example.buynest.model.state.SheetType
 import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.repository.payment.PaymentRepositoryImpl
 import com.example.buynest.ui.theme.LightGray2
-import com.example.buynest.utils.AppConstants.KEY_CART_ID
-import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_TOKEN
+import com.example.buynest.utils.AppConstants
 import com.example.buynest.utils.SecureSharedPrefHelper
+import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.viewmodel.address.AddressViewModel
 import com.example.buynest.viewmodel.cart.CartViewModel
 import com.example.buynest.viewmodel.discount.DiscountViewModel
@@ -49,10 +51,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.rememberPaymentSheet
 import kotlinx.coroutines.launch
-import androidx.compose.material3.rememberModalBottomSheetState
-import com.example.buynest.model.state.SheetType
-import com.example.buynest.utils.SharedPrefHelper
-
 
 @SuppressLint("ViewModelConstructorInComposable")
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
@@ -62,53 +60,42 @@ fun CartScreen(
     goTOAddress: () -> Unit,
     cartViewModel: CartViewModel,
     addressViewModel: AddressViewModel,
-    discountViewModel: DiscountViewModel,
+    discountViewModel: DiscountViewModel
 ) {
     val context = LocalContext.current
-    val cartId = SecureSharedPrefHelper.getString(KEY_CART_ID)
+    val cartId = SecureSharedPrefHelper.getString(AppConstants.KEY_CART_ID)
     var cartItems by remember { mutableStateOf(emptyList<CartItem>()) }
     val cartState by cartViewModel.cartResponse.collectAsState()
 
-    var showConfirmDialog by remember { mutableStateOf(false) }
-    var itemToDelete by remember { mutableStateOf<CartItem?>(null) }
-
     val defaultAddress by addressViewModel.defaultAddress.collectAsStateWithLifecycle()
-    val draftOrderid by cartViewModel.orderResponse.collectAsStateWithLifecycle()
-    val token = SecureSharedPrefHelper.getString(KEY_CUSTOMER_TOKEN).toString()
+    val draftOrderId by cartViewModel.orderResponse.collectAsStateWithLifecycle()
+    val token = SecureSharedPrefHelper.getString(AppConstants.KEY_CUSTOMER_TOKEN).toString()
 
     var activeSheet by remember { mutableStateOf<SheetType>(SheetType.None) }
     val sheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
 
-    val paymentViewModel = PaymentViewModel(
-        repository = PaymentRepositoryImpl(RemoteDataSourceImpl(StripeClient.api))
-    )
-    val paymentSheet = rememberPaymentSheet(
-        paymentResultCallback = { result ->
-            when (result) {
-                is PaymentSheetResult.Completed -> {
-                    val orderId = draftOrderid?.data?.draftOrderCreate?.draftOrder?.id
-                    if (orderId != null) {
-                        cartViewModel.completeOrder(orderId)
-                        cartItems.forEach { item ->
-                            cartViewModel.removeItemFromCart(cartId!!, item.lineId)
-                        }
-                        cartItems = emptyList()
-                    }else{
-                        Log.i("TAG", "CartScreen: DraftOrderId is null ")
-                    }
+    val paymentViewModel = PaymentViewModel(PaymentRepositoryImpl(RemoteDataSourceImpl(StripeClient.api)))
+    val paymentSheet = rememberPaymentSheet { result ->
+        when (result) {
+            is PaymentSheetResult.Completed -> {
+                draftOrderId?.data?.draftOrderCreate?.draftOrder?.id?.let { orderId ->
+                    cartViewModel.completeOrder(orderId)
+                    cartItems.forEach { cartViewModel.removeItemFromCart(cartId!!, it.lineId) }
+                    cartItems = emptyList()
                 }
-                is PaymentSheetResult.Canceled -> {}
-                is PaymentSheetResult.Failed -> {}
             }
+            else -> {}
         }
-    )
+    }
+
+    var originalTotal by remember { mutableIntStateOf(0) }
+    var totalPrice by remember { mutableIntStateOf(0) }
+    var discount by remember { mutableStateOf(0.0) }
 
     LaunchedEffect(Unit) {
         PaymentConfiguration.init(context, BuildConfig.STRIPE_PUBLISHABLE_KEY)
-        SecureSharedPrefHelper.getString(KEY_CART_ID)?.let {
-            cartViewModel.getCart(it)
-        }
+        cartId?.let { cartViewModel.getCart(it) }
         addressViewModel.loadDefaultAddress(token)
     }
 
@@ -135,29 +122,15 @@ fun CartScreen(
             )
         } ?: emptyList()
 
-
+        originalTotal = cartItems.sumOf { it.price * it.quantity }
+        totalPrice = (originalTotal * (1 - discount)).toInt()
     }
 
-    var totalPrice = cartItems.sumOf { it.price * it.quantity }
-
-    fun launchCheckoutFlow() {
-        activeSheet = SheetType.Coupon
-    }
+    fun launchCheckoutFlow() { activeSheet = SheetType.Coupon }
 
     LaunchedEffect(activeSheet) {
         coroutineScope.launch {
-            when (activeSheet) {
-                is SheetType.None -> {
-                    if (sheetState.isVisible) {
-                        sheetState.hide()
-                    }
-                }
-                else -> {
-                    if (!sheetState.isVisible) {
-                        sheetState.show()
-                    }
-                }
-            }
+            if (activeSheet != SheetType.None) sheetState.show() else sheetState.hide()
         }
     }
 
@@ -174,67 +147,44 @@ fun CartScreen(
             tonalElevation = 4.dp
         ) {
             when (activeSheet) {
-                is SheetType.Coupon -> CouponSheet(
+                SheetType.Coupon -> CouponSheet(
                     onValidCoupon = { coupon ->
-                        var discount:Double  = discountViewModel.applyCoupon(coupon)
-                        totalPrice = (totalPrice * (1 - discount)).toInt()
+                        discount = discountViewModel.applyCoupon(coupon)
+                        originalTotal = cartItems.sumOf { it.price * it.quantity }
+                        totalPrice = (originalTotal * (1 - discount)).toInt()
                         activeSheet = SheetType.Address
                     },
-                    checkCoupon = { coupon ->
-                        discountViewModel.isCouponValid(coupon)
-                    },
-                    onSkip = {
-                        activeSheet = SheetType.Address
-                    }
+                    checkCoupon = { discountViewModel.isCouponValid(it) },
+                    onSkip = { activeSheet = SheetType.Address }
                 )
 
-                is SheetType.Address -> AddressSheet(
+                SheetType.Address -> AddressSheet(
                     defaultAddress = defaultAddress,
-                    onNavigateToAddress = { goTOAddress() },
+                    onNavigateToAddress = goTOAddress,
                     onProceed = {
-                        val method = SharedPrefHelper.getPaymentMethod(context)
-
-                        val treatAsCash = method == "Cash on Delivery" && totalPrice < 10000
-
                         val email = FirebaseAuthObject.getAuth().currentUser?.email ?: return@AddressSheet
-                        if(treatAsCash){
-                            cartViewModel.getOrderModelFromCart(email, defaultAddress, cartItems, false)
-                        }else{
-                            cartViewModel.getOrderModelFromCart(email, defaultAddress, cartItems, true)
-                        }
+                        val method = SharedPrefHelper.getPaymentMethod(context)
+                        val isCOD = method == "Cash on Delivery" && totalPrice < 10000
 
-                        if (treatAsCash) {
+                        cartViewModel.getOrderModelFromCart(email, defaultAddress, cartItems, !isCOD)
+
+                        if (isCOD) {
                             Toast.makeText(context, "Order placed successfully!", Toast.LENGTH_SHORT).show()
                             coroutineScope.launch {
                                 sheetState.hide()
                                 activeSheet = SheetType.None
                             }
-
-                            val orderId = draftOrderid?.data?.draftOrderCreate?.draftOrder?.id
-                            Log.i("TAG", "CartScreen cash logic: $orderId")
-
-                            if (orderId != null) {
+                            draftOrderId?.data?.draftOrderCreate?.draftOrder?.id?.let { orderId ->
                                 cartViewModel.completeOrder(orderId)
-                                cartItems.forEach { item ->
-                                    cartViewModel.removeItemFromCart(cartId!!, item.lineId)
-                                }
+                                cartItems.forEach { cartViewModel.removeItemFromCart(cartId!!, it.lineId) }
                                 cartItems = emptyList()
-                            } else {
-                                Log.i("TAG", "CartScreen: DraftOrderId is null")
                             }
                         } else {
-                            if(totalPrice >= 10000){
-                                Toast.makeText(context, "you will pay with card", Toast.LENGTH_SHORT).show()
-                                coroutineScope.launch {
-                                    sheetState.hide()
-                                    activeSheet = SheetType.None
-                                }
-                            }
                             paymentViewModel.initiatePaymentFlow(
                                 amount = totalPrice * 100,
-                                onClientSecretReady = { secret ->
+                                onClientSecretReady = { clientSecret ->
                                     paymentSheet.presentWithPaymentIntent(
-                                        paymentIntentClientSecret = secret,
+                                        paymentIntentClientSecret = clientSecret,
                                         configuration = PaymentSheet.Configuration("BuyNest")
                                     )
                                 }
@@ -265,10 +215,12 @@ fun CartScreen(
         ) {
             items(cartItems, key = { it.id }) { item ->
                 val dismissState = rememberDismissState(
-                    confirmStateChange = { dismissValue ->
-                        if (dismissValue == DismissValue.DismissedToStart || dismissValue == DismissValue.DismissedToEnd) {
-                            itemToDelete = item
-                            showConfirmDialog = true
+                    confirmStateChange = {
+                        if (it == DismissValue.DismissedToEnd || it == DismissValue.DismissedToStart) {
+                            cartViewModel.removeItemFromCart(cartId!!, item.lineId)
+                            cartItems = cartItems.filterNot { it.id == item.id }
+                            originalTotal = cartItems.sumOf { i -> i.price * i.quantity }
+                            totalPrice = (originalTotal * (1 - discount)).toInt()
                             false
                         } else true
                     }
@@ -310,53 +262,25 @@ fun CartScreen(
                     dismissContent = {
                         CartItemRow(
                             item = item,
-                            onQuantityChange = { id, newQty ->
+                            onQuantityChange = { id, qty ->
                                 cartItems = cartItems.map {
-                                    if (it.id == id) it.copy(quantity = newQty) else it
+                                    if (it.id == id) it.copy(quantity = qty) else it
                                 }
+                                originalTotal = cartItems.sumOf { it.price * it.quantity }
+                                totalPrice = (originalTotal * (1 - discount)).toInt()
                             },
                             onDelete = { id ->
-                                itemToDelete = cartItems.find { it.id == id }
-                                showConfirmDialog = true
+                                cartViewModel.removeItemFromCart(cartId!!, item.lineId)
+                                cartItems = cartItems.filterNot { it.id == id }
+                                originalTotal = cartItems.sumOf { it.price * it.quantity }
+                                totalPrice = (originalTotal * (1 - discount)).toInt()
                             },
-                            onItemClick = {
-                            }
+                            onItemClick = {}
                         )
                     }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
-    }
-
-    if (showConfirmDialog && itemToDelete != null) {
-        AlertDialog(
-            onDismissRequest = { showConfirmDialog = false },
-            title = { Text("Confirm Deletion") },
-            text = { Text("Are you sure you want to delete '${itemToDelete?.name}' from your cart?") },
-            confirmButton = {
-                TextButton(onClick = {
-                    itemToDelete?.let { item ->
-                        cartId?.let {
-                            cartViewModel.removeItemFromCart(it, item.lineId)
-                        }
-                        cartItems = cartItems.filterNot { it.id == item.id }
-                    }
-                    itemToDelete = null
-                    showConfirmDialog = false
-                }) {
-                    Text("Delete", color = Color.Red)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    itemToDelete = null
-                    showConfirmDialog = false
-                }) {
-                    Text("Cancel", color = Color.Gray)
-                }
-            },
-            shape = RoundedCornerShape(12.dp)
-        )
     }
 }
