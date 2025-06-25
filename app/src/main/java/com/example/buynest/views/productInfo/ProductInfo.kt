@@ -203,7 +203,6 @@ fun ProductInfo(
 
     LaunchedEffect(key1 = quantity, key2 = price) {
         val total = price.toDouble() * quantity
-        Log.d("UI", "Sending total: $total")
         onTotalChange(total.toInt())
     }
 

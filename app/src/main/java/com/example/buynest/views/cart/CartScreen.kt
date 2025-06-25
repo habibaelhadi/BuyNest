@@ -62,7 +62,7 @@ fun CartScreen(
     goTOAddress: () -> Unit,
     cartViewModel: CartViewModel,
     addressViewModel: AddressViewModel,
-    discountViewModel: DiscountViewModel
+    discountViewModel: DiscountViewModel,
 ) {
     val context = LocalContext.current
     val cartId = SecureSharedPrefHelper.getString(KEY_CART_ID)
@@ -161,17 +161,6 @@ fun CartScreen(
         }
     }
 
-    Scaffold(
-        modifier = Modifier.padding(top = 32.dp),
-        topBar = { CartTopBar(backClicked = onBackClicked) },
-        bottomBar = {
-            BottomSection(totalPrice, Icons.Default.ArrowRightAlt, "Check Out") {
-                val email = FirebaseAuthObject.getAuth().currentUser?.email ?: return@BottomSection
-                cartViewModel.getOrderModelFromCart(
-                    email = email,
-                    address = defaultAddress,
-                    items = cartItems,
-                    isPaid = true)
     if (activeSheet != SheetType.None) {
         ModalBottomSheet(
             sheetState = sheetState,
@@ -205,7 +194,7 @@ fun CartScreen(
                     onProceed = {
                         val email = FirebaseAuthObject.getAuth().currentUser?.email ?: return@AddressSheet
 
-                        cartViewModel.getOrderModelFromCart(email, defaultAddress, cartItems)
+                        cartViewModel.getOrderModelFromCart(email, defaultAddress, cartItems,true)
 
                         val method = SharedPrefHelper.getPaymentMethod(context)
 
@@ -305,7 +294,6 @@ fun CartScreen(
                                 showConfirmDialog = true
                             },
                             onItemClick = {
-                                // TODO: handle item click
                             }
                         )
                     }
