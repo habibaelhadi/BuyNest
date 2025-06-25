@@ -79,13 +79,14 @@ class CartViewModel(
         }
     }
 
-    fun getOrderModelFromCart(email: String, address: AddressModel?, items: List<CartItem>,isPaid: Boolean) {
+    fun getOrderModelFromCart(email: String, address: AddressModel?, items: List<CartItem>,isPaid: Boolean,discount: Double) {
         Log.i("TAG", "getOrderModelFromCart: email is $email address is $address and items is $items")
         val order =  OrderModel(
             email = email,
             address = address!!,
             orderItems = items,
-            isPaid = isPaid
+            isPaid = isPaid,
+            discount = discount
         )
         draftOrder(order)
 

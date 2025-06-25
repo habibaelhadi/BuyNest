@@ -75,7 +75,12 @@ fun OrderDetailsScreen(
 
 
         val paymentMethod = orderViewModel.extractPaymentMethodFromNote(order.note)
-        val totalAmount = order.totalPriceSet.shopMoney.amount.toString().toDoubleOrNull()?.times(rate)?.toInt() ?: 0
+
+        val (totalBefore, discount, totalAfter) = orderViewModel.extractPriceDetailsFromNote(order.note)
+
+        val totalBeforeConverted = (totalBefore * rate).toInt()
+        val discountConverted = (discount * rate).toInt()
+        val totalAfterConverted = (totalAfter * rate).toInt()
 
         LazyColumn(
             modifier = Modifier
@@ -133,7 +138,7 @@ fun OrderDetailsScreen(
 
             item {
                 Spacer(modifier = Modifier.height(16.dp))
-                PaymentDetails(totalAmount,paymentMethod)
+                PaymentDetails(totalAfterConverted,paymentMethod,totalBeforeConverted.toString(),discountConverted.toString())
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }

@@ -180,7 +180,7 @@ fun CartScreen(
                         val method = SharedPrefHelper.getPaymentMethod(context)
                         val isCOD = method == "Cash on Delivery" && totalPrice < 10000
 
-                        cartViewModel.getOrderModelFromCart(email, defaultAddress, cartItems, !isCOD)
+                        cartViewModel.getOrderModelFromCart(email, defaultAddress, cartItems, !isCOD, discount)
 
                         if (isCOD) {
                             Toast.makeText(context, "Order placed successfully!", Toast.LENGTH_SHORT).show()

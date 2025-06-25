@@ -16,7 +16,7 @@ import com.example.buynest.ui.theme.Gray
 import com.example.buynest.ui.theme.white
 
 @Composable
-fun PaymentDetails(totalAmount1: Any,PaymentWay: String) {
+fun PaymentDetails(totalAmount1: Any,PaymentWay: String,priceBeforeDiscount: String,discount: String) {
     val paymentWay = PaymentWay
     Card (
         modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
@@ -30,7 +30,17 @@ fun PaymentDetails(totalAmount1: Any,PaymentWay: String) {
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
-        Text("Total Price : $totalAmount1 LE",
+        Text("Total Price : $priceBeforeDiscount LE",
+            modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 16.dp),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text("Discount : $discount LE",
+            modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 16.dp),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text("Total Price after Discount : $totalAmount1 LE",
             modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 16.dp),
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold

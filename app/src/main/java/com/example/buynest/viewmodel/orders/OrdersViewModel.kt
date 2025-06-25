@@ -55,4 +55,20 @@ class OrdersViewModel(private val repository: IOrderRepo) : ViewModel() {
         return "Unknown"
     }
 
+    fun extractPriceDetailsFromNote(note: String?): Triple<Int, Int, Int> {
+        if (note.isNullOrEmpty()) return Triple(0, 0, 0)
+
+        val totalBefore = Regex("""TotalBefore:\s*(\d+)""")
+            .find(note)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+
+        val discount = Regex("""Discount:\s*(\d+)""")
+            .find(note)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+
+        val totalAfter = Regex("""TotalAfter:\s*(\d+)""")
+            .find(note)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+
+        return Triple(totalBefore, discount, totalAfter)
+    }
+
+
 }

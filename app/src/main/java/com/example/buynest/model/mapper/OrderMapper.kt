@@ -25,24 +25,36 @@ fun OrderModel.toDraftOrderInput(): DraftOrderInput {
     }
 
     val totalBefore = orderItems.sumOf { it.price * it.quantity }
-    val discount = 100
-    val totalAfter = totalBefore - discount
+    val discountAmount = (totalBefore * discount).toInt()
+    val totalAfter = totalBefore - discountAmount
+    val discountPercentage = (discount * 100).toInt()
 
     val status = if (isPaid) "PAID" else "UNPAID"
 
     val noteBuilder = StringBuilder()
     noteBuilder.append("PaymentStatus: $status\n")
-    noteBuilder.append("TotalBefore: $totalBefore EGP | Discount: $discount EGP | TotalAfter: $totalAfter EGP\n")
+    noteBuilder.append("TotalBefore: $totalBefore EGP\n")
+    noteBuilder.append("Discount: $discountAmount EGP ($discountPercentage%)\n")
+    noteBuilder.append("TotalAfter: $totalAfter EGP\n")
     orderItems.forEachIndexed { index, item ->
         noteBuilder.append("Item ${index + 1}: ${item.name}, Image: ${item.imageUrl}\n")
     }
 
     val note = noteBuilder.toString().trim()
 
+    // Optional: Custom attributes (visible in Shopify Admin, not in email by default)
+    val attributes = listOf(
+        AttributeInput("TotalBefore", totalBefore.toString()),
+        AttributeInput("Discount", "$discountAmount EGP ($discountPercentage%)"),
+        AttributeInput("TotalAfter", totalAfter.toString()),
+        AttributeInput("PaymentStatus", status)
+    )
+
     return DraftOrderInput(
         email = Optional.Present(email),
         shippingAddress = Optional.Present(addressInput),
         lineItems = Optional.Present(lineItems),
         note = Optional.Present(note),
+        customAttributes = Optional.Present(attributes)
     )
 }
