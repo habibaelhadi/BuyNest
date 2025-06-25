@@ -39,10 +39,16 @@ fun CategoriesScreen(
     var selectedCategory by remember { mutableStateOf<String?>("Kid") }
     var selectedSubcategory by remember { mutableStateOf<String?>(null) }
     var showFilter by remember { mutableStateOf(false) }
+    val rate by currencyViewModel.rate
+    val currencySymbol by currencyViewModel.currencySymbol
 
     val phenomenaBold = FontFamily(Font(R.font.phenomena_bold))
 
     val categoryProduct by categoryViewModel.categoryProducts.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        currencyViewModel.loadCurrency()
+    }
 
     LaunchedEffect(selectedCategory) {
         if (selectedCategory != null) {
@@ -168,7 +174,7 @@ fun CategoriesScreen(
                                     edge.node.productType.contains(selectedSubcategory!!, ignoreCase = true)) &&
                                     price!! <= maxPrice
                         }
-                        CategoryProducts(onProductClicked, filteredEdges)
+                        CategoryProducts(onProductClicked, filteredEdges, rate, currencySymbol.toString())
                     }
                 }
             }
@@ -180,7 +186,9 @@ fun CategoriesScreen(
 @Composable
 fun CategoryProducts(
     onProductClicked: (productId: String) -> Unit,
-    categoryProductList: List<ProductsByHandleQuery.Edge>?
+    categoryProductList: List<ProductsByHandleQuery.Edge>?,
+    rate: Double,
+    currencySymbol: String
 ) {
     LazyColumn(
         modifier = Modifier
@@ -190,7 +198,9 @@ fun CategoryProducts(
         items(categoryProductList?.size ?: 0) { item ->
             CategoryItem(
                 product = categoryProductList!![item].node,
-                onProductClicked = onProductClicked
+                onProductClicked = onProductClicked,
+                rate = rate,
+                currencySymbol = currencySymbol
             )
         }
     }
