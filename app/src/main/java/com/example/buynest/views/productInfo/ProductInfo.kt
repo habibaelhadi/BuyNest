@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -58,14 +57,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductDetailsByIDQuery
 import com.example.buynest.ProductsDetailsByIDsQuery
 import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.repository.FirebaseAuthObject
-import com.example.buynest.repository.favorite.FavoriteRepoImpl
-import com.example.buynest.repository.productDetails.ProductDetailsRepositoryImpl
 import com.example.buynest.ui.theme.LightGray
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.utils.toColorList
@@ -101,6 +96,7 @@ fun ProductInfoScreen(
     var selectedSize by remember { mutableStateOf<String?>(null) }
     var selectedColor by remember { mutableStateOf<String?>(null) }
     var quantity by remember { mutableIntStateOf(1) }
+    var maxQuantity by remember { mutableIntStateOf(1) }
 
     val showGuestDialog = remember { mutableStateOf(false) }
     val user = FirebaseAuthObject.getAuth().currentUser
@@ -119,7 +115,7 @@ fun ProductInfoScreen(
         bottomBar = {
             if (response is UiResponseState.Success<*>) {
                 val product = (response as UiResponseState.Success<ProductDetailsByIDQuery.Data>).data.product
-                val selectedVariantId = product?.variants?.edges
+                val selectedVariant = product?.variants?.edges
                     ?.mapNotNull { it?.node }
                     ?.find { variant ->
                         val options = variant.selectedOptions.associate {
@@ -128,7 +124,11 @@ fun ProductInfoScreen(
                         val sizeMatch = selectedSize?.lowercase()?.let { options["size"] == it } ?: false
                         val colorMatch = selectedColor?.lowercase()?.let { options["color"] == it } ?: false
                         sizeMatch && colorMatch
-                    }?.id
+                    }
+
+                val selectedVariantId = selectedVariant?.id
+                maxQuantity = selectedVariant?.quantityAvailable ?: 0
+
 
                 val currentQuantity = quantity
                 BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart") {
@@ -167,7 +167,8 @@ fun ProductInfoScreen(
                     onSizePicked = { selectedSize = it },
                     onColorPicked = { selectedColor = it },
                     quantity = quantity,
-                    onQuantityChanged = { quantity = it }
+                    onQuantityChanged = { quantity = it },
+                    availableQuantity = maxQuantity
                 )
             }
         }
@@ -190,7 +191,9 @@ fun ProductInfo(
     onColorPicked: (String) -> Unit,
     quantity: Int,
     onQuantityChanged: (Int) -> Unit
+    , availableQuantity: Int
 ) {
+    Log.i("TAG", "ProductInfoScreen: ${product?.id} ")
     val scrollState = rememberScrollState()
     val media = product?.media?.edges
     val images = media?.map { it.node.previewImage?.url.toString() } ?: emptyList()
@@ -218,6 +221,7 @@ fun ProductInfo(
                     title = product.title,
                     price = price.toDouble(),
                     quantity = quantity,
+                    maxQuantity = availableQuantity,
                     description = product.description,
                     sizes = size,
                     colors = colorList,
@@ -402,6 +406,7 @@ fun ProductDetails(
     onQuantityChange: (Int) -> Unit,
     onColorSelected: (Color) -> Unit = {},
     onSizeSelected: (Int) -> Unit = {},
+    maxQuantity: Int,
 ) {
     val selectedColor = remember { mutableStateOf(colors?.firstOrNull() ?: Color.Unspecified) }
     val selectedSize = remember { mutableStateOf(sizes?.get(0) ?: "") }
@@ -435,7 +440,9 @@ fun ProductDetails(
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.weight(1f))
-            QuantitySelector(quantity) { newQuantity -> onQuantityChange(newQuantity) }
+            QuantitySelector(quantity, maxQuantity) { newQuantity ->
+                onQuantityChange(newQuantity)
+            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))

@@ -98,7 +98,8 @@ fun CartItemRow(
                 ) {
                     QuantitySelector(
                         quantity = item.quantity,
-                        onChange = { newQty -> onQuantityChange(item.id, newQty) }
+                        onChange = { newQty -> onQuantityChange(item.id, newQty) },
+                        maxQuantity = 20
                     )
 
                     IconButton(onClick = { onDelete(item.id) }) {
