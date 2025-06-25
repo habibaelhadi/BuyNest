@@ -192,12 +192,16 @@ fun CartScreen(
                     defaultAddress = defaultAddress,
                     onNavigateToAddress = { goTOAddress() },
                     onProceed = {
-                        val email = FirebaseAuthObject.getAuth().currentUser?.email ?: return@AddressSheet
-                        cartViewModel.getOrderModelFromCart(email, defaultAddress, cartItems, true)
-
                         val method = SharedPrefHelper.getPaymentMethod(context)
 
                         val treatAsCash = method == "Cash on Delivery" && totalPrice < 10000
+
+                        val email = FirebaseAuthObject.getAuth().currentUser?.email ?: return@AddressSheet
+                        if(treatAsCash){
+                            cartViewModel.getOrderModelFromCart(email, defaultAddress, cartItems, false)
+                        }else{
+                            cartViewModel.getOrderModelFromCart(email, defaultAddress, cartItems, true)
+                        }
 
                         if (treatAsCash) {
                             Toast.makeText(context, "Order placed successfully!", Toast.LENGTH_SHORT).show()
