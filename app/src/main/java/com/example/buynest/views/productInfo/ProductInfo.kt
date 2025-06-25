@@ -135,7 +135,7 @@ fun ProductInfoScreen(
 
                 val selectedVariantId = selectedVariant?.id
                 maxQuantity = selectedVariant?.quantityAvailable ?: 0
-                Log.i("TAG", "ProductInfoScreen:${selectedVariant} ")
+                Log.i("TAG", "ProductInfoScreen variant id :${selectedVariant?.id} ")
 
                 val currentQuantity = quantity
                 BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart",currencySymbol) {
