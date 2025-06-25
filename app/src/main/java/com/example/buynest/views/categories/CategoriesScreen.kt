@@ -19,6 +19,7 @@ import com.example.buynest.R
 import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.ui.theme.*
 import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.shared.SharedViewModel
 import com.example.buynest.views.component.CategoryItem
 import com.example.buynest.views.component.Indicator
@@ -30,17 +31,24 @@ import org.koin.androidx.compose.koinViewModel
 fun CategoriesScreen(
     onCartClicked: () -> Unit,
     onProductClicked: (productId: String) -> Unit,
-    sharedViewModel: SharedViewModel,
     onSearchClicked: () -> Unit,
-    categoryViewModel: CategoryViewModel = koinViewModel()
-) {
+    sharedViewModel: SharedViewModel,
+    categoryViewModel: CategoryViewModel,
+    currencyViewModel: CurrencyViewModel
+    ) {
     var selectedCategory by remember { mutableStateOf<String?>("Kid") }
     var selectedSubcategory by remember { mutableStateOf<String?>(null) }
     var showFilter by remember { mutableStateOf(false) }
+    val rate by currencyViewModel.rate
+    val currencySymbol by currencyViewModel.currencySymbol
 
     val phenomenaBold = FontFamily(Font(R.font.phenomena_bold))
 
     val categoryProduct by categoryViewModel.categoryProducts.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        currencyViewModel.loadCurrency()
+    }
 
     LaunchedEffect(selectedCategory) {
         if (selectedCategory != null) {
@@ -166,7 +174,7 @@ fun CategoriesScreen(
                                     edge.node.productType.contains(selectedSubcategory!!, ignoreCase = true)) &&
                                     price!! <= maxPrice
                         }
-                        CategoryProducts(onProductClicked, filteredEdges)
+                        CategoryProducts(onProductClicked, filteredEdges, rate, currencySymbol.toString())
                     }
                 }
             }
@@ -178,7 +186,9 @@ fun CategoriesScreen(
 @Composable
 fun CategoryProducts(
     onProductClicked: (productId: String) -> Unit,
-    categoryProductList: List<ProductsByHandleQuery.Edge>?
+    categoryProductList: List<ProductsByHandleQuery.Edge>?,
+    rate: Double,
+    currencySymbol: String
 ) {
     LazyColumn(
         modifier = Modifier
@@ -188,7 +198,9 @@ fun CategoryProducts(
         items(categoryProductList?.size ?: 0) { item ->
             CategoryItem(
                 product = categoryProductList!![item].node,
-                onProductClicked = onProductClicked
+                onProductClicked = onProductClicked,
+                rate = rate,
+                currencySymbol = currencySymbol
             )
         }
     }

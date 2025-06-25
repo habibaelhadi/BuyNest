@@ -32,7 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -40,12 +39,12 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.buynest.ProductsDetailsByIDsQuery
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.favorite.FavoriteRepoImpl
 import com.example.buynest.R
 import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.SearchBar
@@ -57,7 +56,8 @@ fun FavouriteScreen(
     onCartClicked:()->Unit,
     navigateToProductInfo: (String) -> Unit,
     onSearchClicked:()->Unit,
-    viewModel: FavouritesViewModel = koinViewModel()
+    viewModel: FavouritesViewModel = koinViewModel(),
+    currencyViewModel: CurrencyViewModel
 ) {
     val product by viewModel.productDetails.collectAsStateWithLifecycle()
     val user = FirebaseAuthObject.getAuth().currentUser

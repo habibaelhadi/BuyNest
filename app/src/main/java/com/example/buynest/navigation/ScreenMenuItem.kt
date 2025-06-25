@@ -1,7 +1,7 @@
-package com.example.buynest
+package com.example.buynest.navigation
 
 import androidx.annotation.DrawableRes
-import com.example.buynest.navigation.RoutesScreens
+import com.example.buynest.R
 
 data class ScreenMenuItem(
     val screen: RoutesScreens,

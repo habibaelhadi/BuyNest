@@ -50,7 +50,9 @@ import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 fun ProductItem(
     onProductClicked: (productId: String) -> Unit,
     bradProduct: ProductsByCollectionIDQuery.Node?,
-    favViewModel: FavouritesViewModel
+    favViewModel: FavouritesViewModel,
+    rate: Double,
+    currencySymbol: String
 ) {
     val productId = bradProduct?.id.toString()
     val numericId = productId.substringAfterLast("/")
@@ -65,8 +67,8 @@ fun ProductItem(
             onProductClicked(numericId)
         }) {
         val productImageUrl = bradProduct?.featuredImage?.url.toString()
-        val productPrice =
-            bradProduct?.variants?.edges?.firstOrNull()?.node?.price?.amount.toString()
+        val finalPrice = bradProduct?.variants?.edges?.firstOrNull()?.node?.price?.amount
+            ?.toString()?.toDoubleOrNull()?.times(rate)?.toInt() ?: 0
 
         val cleanedTitle = bradProduct?.title?.replace(Regex("\\(.*?\\)"), "")?.trim()
         val parts = cleanedTitle?.split("|")?.map { it.trim() }
@@ -162,7 +164,7 @@ fun ProductItem(
                 Modifier.padding(bottom = 16.dp, end = 8.dp)
             ) {
                 Text(
-                    text = productPrice,
+                    text =  "${finalPrice} $currencySymbol",
                     style = MaterialTheme.typography.titleSmall,
                     color = MainColor,
                     modifier = Modifier.padding(horizontal = 8.dp)

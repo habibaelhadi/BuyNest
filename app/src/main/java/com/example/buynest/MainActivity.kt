@@ -7,7 +7,6 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,8 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
@@ -53,6 +49,7 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.buynest.model.data.remote.graphql.ApolloClient
 import com.example.buynest.navigation.RoutesScreens
+import com.example.buynest.navigation.ScreenMenuItem
 import com.example.buynest.repository.cart.CartRepositoryImpl
 import com.example.buynest.repository.cart.datasource.CartDataSourceImpl
 import com.example.buynest.ui.theme.white
@@ -238,11 +235,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        hideSystemUI()
     }
 }
 
