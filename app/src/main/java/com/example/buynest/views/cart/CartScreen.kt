@@ -108,7 +108,7 @@ fun CartScreen(
             val color = variant.selectedOptions.firstOrNull { it.name == "Color" }?.value ?: "Default"
             val size = variant.selectedOptions.firstOrNull { it.name == "Size" }?.value?.toIntOrNull() ?: 0
             val imageUrl = variant.image?.url?.toString() ?: ""
-
+            val maxQuantity = variant.quantityAvailable?.toInt() ?:0
             CartItem(
                 id = "${node.id}-$size-$color".hashCode(),
                 lineId = node.id,
@@ -118,7 +118,8 @@ fun CartScreen(
                 size = size,
                 imageUrl = imageUrl,
                 quantity = node.quantity,
-                variantId = variant.id
+                variantId = variant.id,
+                maxQuantity = maxQuantity
             )
         } ?: emptyList()
 
