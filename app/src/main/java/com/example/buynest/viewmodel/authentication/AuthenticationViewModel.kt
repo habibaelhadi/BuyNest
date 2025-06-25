@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.repository.authentication.AuthenticationRepo
@@ -16,9 +15,12 @@ import com.example.buynest.utils.validators.SignUpValidator
 import com.example.buynest.utils.validators.ValidationHandler
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewModel() {
@@ -125,9 +127,4 @@ class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewMo
         }
     }
 
-    class AuthenticationViewModelFactory(private val repo: AuthenticationRepo): ViewModelProvider.Factory{
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return AuthenticationViewModel(repo) as T
-        }
-    }
 }

@@ -82,7 +82,7 @@ class FavouritesViewModel(val repo: FavoriteRepo): ViewModel() {
             if (response.hasErrors()) {
                 Log.e("CartError", "Failed to add item: ${response.errors}")
             } else {
-                Log.i("CartSuccess", "Added item to cart: $cartId")
+                Log.i("CartSuccess", "Added item to cart: $cartId, $variantId, $quantity")
             }
         } else {
             Log.w("CartWarning", "No cart ID found. You may want to call createCart() first.")

@@ -75,7 +75,7 @@ fun FavouriteCard(
         ?.firstOrNull()
         ?.node
         ?.selectedOptions
-        ?.firstOrNull { it.name.equals("Size", ignoreCase = true) } //////////////////////////////////
+        ?.firstOrNull { it.name.equals("Size", ignoreCase = true) }
         ?.value
 
     val price = item.onProduct?.variants?.edges

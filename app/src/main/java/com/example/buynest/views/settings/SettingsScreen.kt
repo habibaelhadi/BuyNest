@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -62,8 +63,6 @@ fun SettingsScreen(
     val phenomenaBold = FontFamily(Font(R.font.phenomena_bold))
     val showSheet = remember { mutableStateOf(false) }
     val selectedPayment = remember { mutableStateOf(SharedPrefHelper.getPaymentMethod(context)) }
-    val showCountrySheet = remember { mutableStateOf(false) }
-    val selectedCountry = remember { mutableStateOf(SharedPrefHelper.getCountry(context)) }
     val showCurrencySheet = remember { mutableStateOf(false) }
     val selectedCurrency = remember { mutableStateOf(SharedPrefHelper.getCurrency(context)) }
     val launchEmailIntent = remember { mutableStateOf(false) }
@@ -100,7 +99,7 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
 
-        SettingsCard("Youssef Fayad", icon = Icons.Default.Person, bold = true,
+        SettingsCard(user?.displayName.toString(), icon = Icons.Default.Person, bold = true,
             onClick = {
                 if (user == null){
                     showGuestDialog.value = true
@@ -127,6 +126,7 @@ fun SettingsScreen(
                     gotoOrdersHistoryScreen()
                 }
             })
+        Spacer(modifier = Modifier.height(12.dp))
 
         SettingsCard("Payment Option", Icons.Default.Payment,
             onClick = {
@@ -137,17 +137,7 @@ fun SettingsScreen(
                 }
             }
         )
-        Spacer(modifier = Modifier.height(12.dp))
 
-        SettingsCard("Country/Region", Icons.Default.Public,
-            onClick = {
-                if (user == null){
-                    showGuestDialog.value = true
-                }else{
-                    showCountrySheet.value = true
-                }
-            }
-        )
         SettingsCard("Currency", Icons.Default.AttachMoney,
             onClick = { showCurrencySheet.value = true }
         )
@@ -191,16 +181,6 @@ fun SettingsScreen(
                 onSelectOption = {
                     selectedPayment.value = it
                     SharedPrefHelper.savePaymentMethod(context, it)
-                }
-            )
-        }
-        if (showCountrySheet.value) {
-            CountryOptionBottomSheet(
-                selectedCountry = selectedCountry.value,
-                onDismiss = { showCountrySheet.value = false },
-                onSelect = {
-                    selectedCountry.value = it
-                    SharedPrefHelper.saveCountry(context, it)
                 }
             )
         }
