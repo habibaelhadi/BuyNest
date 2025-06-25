@@ -1,4 +1,4 @@
-package com.example.buynest.mapper
+package com.example.buynest.model.mapper
 
 import com.apollographql.apollo3.api.Optional
 import com.example.buynest.admin.type.DraftOrderInput

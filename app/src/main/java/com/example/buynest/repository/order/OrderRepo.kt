@@ -5,7 +5,7 @@ import com.apollographql.apollo3.api.ApolloResponse
 import com.example.buynest.admin.CompleteDraftOrderMutation
 import com.example.buynest.admin.CreateDraftOrderMutation
 import com.example.buynest.admin.GetOrdersByEmailQuery
-import com.example.buynest.mapper.toDraftOrderInput
+import com.example.buynest.model.mapper.toDraftOrderInput
 import com.apollographql.apollo3.ApolloClient
 import com.example.buynest.model.entity.OrderModel
 import kotlinx.coroutines.flow.Flow

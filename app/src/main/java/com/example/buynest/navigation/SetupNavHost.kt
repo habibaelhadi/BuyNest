@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.viewmodel.address.AddressViewModel
 import com.example.buynest.viewmodel.cart.CartViewModel
+import com.example.buynest.viewmodel.discount.DiscountViewModel
 import com.example.buynest.viewmodel.orders.OrdersViewModel
 import com.example.buynest.viewmodel.shared.SharedViewModel
 import com.example.buynest.viewmodel.sreachMap.SearchViewModel
@@ -45,6 +46,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
     val addressViewModel: AddressViewModel = koinViewModel()
     val cartViewModel: CartViewModel = koinViewModel()
     val ordersViewModel: OrdersViewModel = koinViewModel()
+    val discountViewModel: DiscountViewModel = koinViewModel()
 
     NavHost(
         navController = mainNavController, startDestination = startDestination
@@ -68,7 +70,8 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 onProductClicked = { productId ->
                     mainNavController.navigate(RoutesScreens.ProductInfo.route
                         .replace("{productId}", productId))
-                }
+                },
+                discountViewModel = discountViewModel
             )
         }
 

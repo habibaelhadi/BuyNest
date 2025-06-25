@@ -24,6 +24,7 @@ import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.R
 import com.example.buynest.model.entity.OfferModel
 import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.viewmodel.discount.DiscountViewModel
 import com.example.buynest.viewmodel.home.HomeViewModel
 import com.example.buynest.viewmodel.shared.SharedViewModel
 import com.example.buynest.views.component.AdsSection
@@ -33,31 +34,10 @@ import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.component.TopBrandsSection
 import org.koin.androidx.compose.koinViewModel
 
-val offers = listOf(
-    OfferModel(
-        title = "UP TO 25% OFF",
-        subtitle = "For all Headphones & AirPods",
-        buttonText = "Shop Now",
-        imageRes = R.drawable.ad1_background
-    ),
-    OfferModel(
-        title = "Buy 1 Get 1 Free",
-        subtitle = "Selected fashion items",
-        buttonText = "Shop Now",
-        imageRes = R.drawable.ad2_background
-    ),
-    OfferModel(
-        title = "Big Summer Sale",
-        subtitle = "Electronics & more",
-        buttonText = "Shop Now",
-        imageRes = R.drawable.ad3_background
-    )
-)
-
-
 val phenomenaBold = FontFamily(
     Font(R.font.phenomena_bold)
 )
+
 @Composable
 fun HomeScreen(
     onCategoryClick: (String,String) -> Unit,
@@ -65,13 +45,16 @@ fun HomeScreen(
     onSearchClicked:()->Unit,
     sharedViewModel: SharedViewModel,
     onProductClicked: (productId: String) -> Unit,
-    homeViewModel: HomeViewModel = koinViewModel()
+    homeViewModel: HomeViewModel = koinViewModel() ,
+    discountViewModel: DiscountViewModel
 ) {
     val activity = LocalActivity.current
     val brands by homeViewModel.brand.collectAsStateWithLifecycle()
+    val offers by discountViewModel.offers.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         homeViewModel.getBrands()
+        discountViewModel.loadDiscounts()
     }
 
     Column(
