@@ -10,6 +10,6 @@ data class CartItem(
     val imageUrl: String,
     val quantity: Int,
     val variantId: String = "",
-    val maxQuantity : Int = 0
+    val maxQuantity : Int = 0,
     val currencySymbol: String = ""
 )
