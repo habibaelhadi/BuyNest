@@ -62,6 +62,12 @@ fun BrandDetailsScreen(
 
     val brandProducts by brandProductsViewModel.brandProducts.collectAsStateWithLifecycle()
     val filterExpanded = remember { mutableStateOf(false) }
+    val rate by currencyViewModel.rate
+    val currencySymbol by currencyViewModel.currencySymbol
+
+    LaunchedEffect(Unit) {
+        currencyViewModel.loadCurrency()
+    }
 
     LaunchedEffect(brandID) {
         val id = "gid://shopify/Collection/$brandID"
@@ -160,7 +166,9 @@ fun BrandDetailsScreen(
                 ProductGrid(
                     onProductClicked = onProductClicked,
                     bradProduct = filteredProducts,
-                    favViewModel = favViewModel
+                    favViewModel = favViewModel,
+                    rate = rate,
+                    currencySymbol = currencySymbol.toString()
                 )
             }
         }
@@ -174,7 +182,9 @@ fun BrandDetailsScreen(
 fun ProductGrid(
     onProductClicked: (productId: String) -> Unit,
     bradProduct: List<ProductsByCollectionIDQuery.Node>? = null,
-    favViewModel: FavouritesViewModel
+    favViewModel: FavouritesViewModel,
+    rate: Double,
+    currencySymbol: String
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -184,7 +194,7 @@ fun ProductGrid(
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ){
         items(bradProduct?.size ?: 0) {
-            ProductItem(onProductClicked, bradProduct?.get(it),favViewModel)
+            ProductItem(onProductClicked, bradProduct?.get(it),favViewModel,rate,currencySymbol)
         }
     }
 }
