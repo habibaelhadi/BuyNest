@@ -193,18 +193,39 @@ fun CartScreen(
                     onNavigateToAddress = { goTOAddress() },
                     onProceed = {
                         val email = FirebaseAuthObject.getAuth().currentUser?.email ?: return@AddressSheet
-
-                        cartViewModel.getOrderModelFromCart(email, defaultAddress, cartItems,true)
+                        cartViewModel.getOrderModelFromCart(email, defaultAddress, cartItems, true)
 
                         val method = SharedPrefHelper.getPaymentMethod(context)
 
-                        if (method == "Cash on Delivery") {
+                        val treatAsCash = method == "Cash on Delivery" && totalPrice < 10000
+
+                        if (treatAsCash) {
                             Toast.makeText(context, "Order placed successfully!", Toast.LENGTH_SHORT).show()
                             coroutineScope.launch {
                                 sheetState.hide()
                                 activeSheet = SheetType.None
                             }
-                        } else if (totalPrice >= 20000) {
+
+                            val orderId = draftOrderid?.data?.draftOrderCreate?.draftOrder?.id
+                            Log.i("TAG", "CartScreen cash logic: $orderId")
+
+                            if (orderId != null) {
+                                cartViewModel.completeOrder(orderId)
+                                cartItems.forEach { item ->
+                                    cartViewModel.removeItemFromCart(cartId!!, item.lineId)
+                                }
+                                cartItems = emptyList()
+                            } else {
+                                Log.i("TAG", "CartScreen: DraftOrderId is null")
+                            }
+                        } else {
+                            if(totalPrice >= 10000){
+                                Toast.makeText(context, "you will pay with card", Toast.LENGTH_SHORT).show()
+                                coroutineScope.launch {
+                                    sheetState.hide()
+                                    activeSheet = SheetType.None
+                                }
+                            }
                             paymentViewModel.initiatePaymentFlow(
                                 amount = totalPrice * 100,
                                 onClientSecretReady = { secret ->
@@ -217,6 +238,7 @@ fun CartScreen(
                         }
                     }
                 )
+
                 else -> Spacer(modifier = Modifier.height(1.dp))
             }
         }
