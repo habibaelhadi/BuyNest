@@ -81,7 +81,6 @@ fun CartScreen(
     var activeSheet by remember { mutableStateOf<SheetType>(SheetType.None) }
     val sheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
-
     val paymentViewModel = PaymentViewModel(
         repository = PaymentRepositoryImpl(PaymentDataSourceImpl(StripeClient.api))
     )

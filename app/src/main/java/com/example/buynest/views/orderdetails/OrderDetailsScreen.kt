@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,6 +25,7 @@ import com.example.buynest.views.component.OrderProductItem
 import com.example.buynest.views.component.PaymentDetails
 import com.example.buynest.views.orders.phenomenaFontFamily
 import com.example.buynest.model.entity.CartItem
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.orders.OrdersViewModel
 
 
@@ -31,9 +33,16 @@ import com.example.buynest.viewmodel.orders.OrdersViewModel
 @Composable
 fun OrderDetailsScreen(
     backClicked: () -> Unit,
-    orderViewModel: OrdersViewModel
+    orderViewModel: OrdersViewModel,
+    currencyViewModel: CurrencyViewModel
 ) {
     val selectedOrder by orderViewModel.selectedOrder.collectAsStateWithLifecycle()
+    val rate by currencyViewModel.rate
+    val currencySymbol by currencyViewModel.currencySymbol
+
+    LaunchedEffect(Unit) {
+        currencyViewModel.loadCurrency()
+    }
 
     selectedOrder?.let { order ->
         val id = order.id
@@ -43,7 +52,7 @@ fun OrderDetailsScreen(
         val cartItems = order.lineItems.edges.mapIndexed { index, edge ->
             val item = edge.node
             val variant = item.variant
-            val price = variant?.price.toString().toDoubleOrNull()?.toInt() ?: 0
+            val price = variant?.price.toString().toDoubleOrNull()?.times(rate)?.toInt() ?: 0
             val options = variant?.selectedOptions ?: emptyList()
             val color = options.find { it.name == "Color" }?.value ?: ""
             val size = options.find { it.name == "Size" }?.value ?: ""
@@ -59,13 +68,12 @@ fun OrderDetailsScreen(
                 size = size.toIntOrNull() ?: 0,
                 quantity = item.quantity,
                 lineId = order.id,
-                variantId = variant?.id ?: ""
+                variantId = variant?.id ?: "",
+                currencySymbol = currencySymbol.toString()
             )
         }
 
-
-
-        val totalAmount = order.totalPriceSet.shopMoney.amount
+        val totalAmount = order.totalPriceSet.shopMoney.amount.toString().toDoubleOrNull()?.times(rate)?.toInt() ?: 0
 
         LazyColumn(
             modifier = Modifier
@@ -130,18 +138,6 @@ fun OrderDetailsScreen(
     }
 }
 
-
-@Composable
-fun OrdersItemsList(itemsList:List<CartItem>){
-    LazyColumn(
-        modifier = Modifier.padding(top = 16.dp, end = 18.dp)
-    ){
-        items(itemsList.size){
-            OrderProductItem(item = itemsList[it])
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-    }
-}
 
 
 

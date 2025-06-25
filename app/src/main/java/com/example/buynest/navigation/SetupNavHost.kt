@@ -224,7 +224,8 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 backClicked = {
                     mainNavController.popBackStack()
                 },
-                orderViewModel = ordersViewModel
+                orderViewModel = ordersViewModel,
+                currencyViewModel = currencyViewModel
             )
         }
 
