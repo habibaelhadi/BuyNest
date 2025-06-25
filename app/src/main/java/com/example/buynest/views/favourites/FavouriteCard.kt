@@ -56,7 +56,9 @@ fun FavouriteCard(
     item: ProductsDetailsByIDsQuery.Node,
     onDelete: (String) -> Unit,
     viewModel: FavouritesViewModel,
-    navigateToProductInfo: (String) -> Unit
+    navigateToProductInfo: (String) -> Unit,
+    rate: Double,
+    currencySymbol: String
 ) {
     val imageUrl = item.onProduct?.featuredImage?.url.toString()
     val cleanedTitle = item?.onProduct?.title?.replace(Regex("\\(.*?\\)"), "")?.trim()
@@ -82,6 +84,9 @@ fun FavouriteCard(
         ?.price
         ?.amount
         ?.toString()
+        ?.toDoubleOrNull()
+        ?.times(rate)
+        ?.toInt() ?: 0
 
     val colorDot = mapColorNameToColor(color)
     val favoriteProducts by viewModel.favorite.collectAsState()
@@ -145,7 +150,7 @@ fun FavouriteCard(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "LE $price",
+                    text = "$price $currencySymbol",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = MainColor

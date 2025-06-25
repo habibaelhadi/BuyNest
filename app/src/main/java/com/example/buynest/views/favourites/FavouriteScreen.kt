@@ -61,6 +61,12 @@ fun FavouriteScreen(
 ) {
     val product by viewModel.productDetails.collectAsStateWithLifecycle()
     val user = FirebaseAuthObject.getAuth().currentUser
+    val rate by currencyViewModel.rate
+    val currencySymbol by currencyViewModel.currencySymbol
+
+    LaunchedEffect(Unit) {
+        currencyViewModel.loadCurrency()
+    }
 
     LaunchedEffect(product) {
         if (user != null){
@@ -98,7 +104,7 @@ fun FavouriteScreen(
                         if (productList.isEmpty())
                             NoDataLottie(false)
                         else{
-                            Favourites(productList,viewModel,navigateToProductInfo)
+                            Favourites(productList,viewModel,navigateToProductInfo,rate,currencySymbol.toString())
                         }
                     }
                 }
@@ -113,7 +119,9 @@ fun FavouriteScreen(
 fun Favourites(
     productList: List<ProductsDetailsByIDsQuery.Node?>?,
     viewModel: FavouritesViewModel,
-    navigateToProductInfo: (String) -> Unit
+    navigateToProductInfo: (String) -> Unit,
+    rate: Double,
+    currencySymbol: String
 ) {
     var itemToDelete by remember { mutableStateOf<ProductsDetailsByIDsQuery.Node?>(null) }
     var showConfirmDialog by remember { mutableStateOf(false) }
@@ -183,7 +191,9 @@ fun Favourites(
                             showConfirmDialog = true
                         },
                         viewModel,
-                        navigateToProductInfo
+                        navigateToProductInfo,
+                        rate,
+                        currencySymbol
                     )
                 },
                 modifier = Modifier.padding(horizontal = 8.dp)

@@ -113,6 +113,7 @@ fun CartScreen(
         PaymentConfiguration.init(context, BuildConfig.STRIPE_PUBLISHABLE_KEY)
         cartId?.let { cartViewModel.getCart(it) }
         addressViewModel.loadDefaultAddress(token)
+        currencyViewModel.loadCurrency()
     }
 
     LaunchedEffect(cartState) {
@@ -301,4 +302,4 @@ fun CartScreen(
             }
         }
     }
-        }
+}
