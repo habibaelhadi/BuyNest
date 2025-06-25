@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
@@ -56,6 +57,7 @@ import com.example.buynest.repository.cart.CartRepositoryImpl
 import com.example.buynest.repository.cart.datasource.CartDataSourceImpl
 import com.example.buynest.ui.theme.white
 import com.example.buynest.utils.SecureSharedPrefHelper
+import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.utils.constant.*
 import com.example.buynest.viewmodel.cart.CartManager
 import kotlinx.coroutines.delay
@@ -173,6 +175,10 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun CurvedNavBar(navController: NavHostController) {
+        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+        val currentIndex = ScreenMenuItem.menuItems.indexOfFirst { it.screen.route == currentRoute }
+        val initialIndex = if (currentIndex != -1) currentIndex else 0
+
         AndroidView(
             modifier = Modifier
                 .fillMaxWidth()
@@ -196,11 +202,10 @@ class MainActivity : ComponentActivity() {
                     layoutDirection = View.LAYOUT_DIRECTION_LTR
                     setMenuItems(cbnMenuItems.toTypedArray(), 0)
                     setOnMenuItemClickListener { cbnMenuItem, i ->
-                        routIndex.value = i
                         navController.popBackStack()
                         navController.navigate(ScreenMenuItem.menuItems[i].screen.route)
                     }
-                    setMenuItems(cbnMenuItems.toTypedArray(), routIndex.value)
+                    setMenuItems(cbnMenuItems.toTypedArray(), initialIndex)
                 }
             }
         )
