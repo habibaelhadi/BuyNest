@@ -78,6 +78,9 @@ fun CartScreen(
     val sheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
 
+    val rate by currencyViewModel.rate
+    val currencySymbol by currencyViewModel.currencySymbol
+
     val paymentViewModel = PaymentViewModel(
         repository = PaymentRepositoryImpl(PaymentDataSourceImpl(StripeClient.api))
     )
@@ -117,7 +120,7 @@ fun CartScreen(
             val node = edge.node
             val variant = node.merchandise.onProductVariant ?: return@mapNotNull null
             val product = variant.product
-            val price = variant.priceV2.amount.toString().toDoubleOrNull()?.toInt() ?: 0
+            val price = variant.priceV2.amount?.toString()?.toDoubleOrNull()?.times(rate)?.toInt() ?: 0
             val color = variant.selectedOptions.firstOrNull { it.name == "Color" }?.value ?: "Default"
             val size = variant.selectedOptions.firstOrNull { it.name == "Size" }?.value?.toIntOrNull() ?: 0
             val imageUrl = variant.image?.url?.toString() ?: ""
@@ -127,6 +130,7 @@ fun CartScreen(
                 lineId = node.id,
                 name = product.title,
                 price = price,
+                currencySymbol = currencySymbol.toString(),
                 color = color,
                 size = size,
                 imageUrl = imageUrl,
@@ -216,7 +220,7 @@ fun CartScreen(
         modifier = Modifier.padding(top = 8.dp),
         topBar = { CartTopBar(backClicked = onBackClicked) },
         bottomBar = {
-            BottomSection(totalPrice, Icons.Default.ArrowRightAlt, "Check Out") {
+            BottomSection(totalPrice, Icons.Default.ArrowRightAlt, "Check Out", currencySymbol) {
                 launchCheckoutFlow()
             }
         }
