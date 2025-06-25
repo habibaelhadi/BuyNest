@@ -117,7 +117,7 @@ fun ProductInfoScreen(
             if (response is UiResponseState.Success<*>) {
                 val product = (response as UiResponseState.Success<ProductDetailsByIDQuery.Data>).data.product
                 val selectedVariant = product?.variants?.edges
-                    ?.mapNotNull { it?.node }
+                    ?.mapNotNull { it.node }
                     ?.find { variant ->
                         val options = variant.selectedOptions.associate {
                             it.name.lowercase() to it.value.lowercase()
@@ -129,7 +129,7 @@ fun ProductInfoScreen(
 
                 val selectedVariantId = selectedVariant?.id
                 maxQuantity = selectedVariant?.quantityAvailable ?: 0
-
+                Log.i("TAG", "ProductInfoScreen:${selectedVariant} ")
 
                 val currentQuantity = quantity
                 BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart") {
