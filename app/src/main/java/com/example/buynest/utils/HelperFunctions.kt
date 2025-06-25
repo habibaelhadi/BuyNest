@@ -58,3 +58,15 @@ fun mapFromCategoryProduct(node: ProductsByHandleQuery.Node): UiProduct {
         price = node.variants.edges.firstOrNull()?.node?.price?.amount?.toString()?.toFloatOrNull()
     )
 }
+
+fun mapSizeFromTextToInteger(size: String): Int{
+    return when(size.uppercase()){
+        "XS"  -> 0
+        "S" -> 1
+        "M" -> 2
+        "L" -> 3
+        "XL" -> 4
+        "XXL" -> 5
+        else -> 1
+    }
+}
