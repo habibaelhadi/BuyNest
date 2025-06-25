@@ -138,7 +138,14 @@ fun OrderDetailsScreen(
 
             item {
                 Spacer(modifier = Modifier.height(16.dp))
-                PaymentDetails(totalAfterConverted,paymentMethod,totalBeforeConverted.toString(),discountConverted.toString())
+                PaymentDetails(
+                    totalAfterConverted,
+                    paymentMethod,
+                    totalBeforeConverted.toString(),
+                    discountConverted.toString(),
+                    rate,
+                    currencySymbol
+                )
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }

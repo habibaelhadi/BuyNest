@@ -16,8 +16,19 @@ import com.example.buynest.ui.theme.Gray
 import com.example.buynest.ui.theme.white
 
 @Composable
-fun PaymentDetails(totalAmount1: Any,PaymentWay: String,priceBeforeDiscount: String,discount: String) {
+fun PaymentDetails(
+    totalAmount1: Any,
+    PaymentWay: String,
+    priceBeforeDiscount: String,
+    discount: String,
+    rate: Double,
+    currencySymbol: String?
+) {
     val paymentWay = PaymentWay
+
+    val priceBeforeDiscount = priceBeforeDiscount.toString().toDoubleOrNull()?.times(rate)?.toInt()
+    val totalAmount1 = totalAmount1.toString().toDoubleOrNull()?.times(rate)?.toInt()
+
     Card (
         modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
         colors = CardDefaults.cardColors(white),
@@ -30,17 +41,17 @@ fun PaymentDetails(totalAmount1: Any,PaymentWay: String,priceBeforeDiscount: Str
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
-        Text("Total Price : $priceBeforeDiscount LE",
+        Text("Total Price : $priceBeforeDiscount $currencySymbol",
             modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 16.dp),
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
-        Text("Discount : $discount LE",
+        Text("Discount : $discount %",
             modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 16.dp),
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
-        Text("Total Price after Discount : $totalAmount1 LE",
+        Text("Total Price after Discount : $totalAmount1 $currencySymbol",
             modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 16.dp),
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
