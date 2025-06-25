@@ -36,8 +36,10 @@ fun CategoriesScreen(
     categoryViewModel: CategoryViewModel,
     currencyViewModel: CurrencyViewModel
     ) {
-    var selectedCategory by remember { mutableStateOf<String?>("Kid") }
-    var selectedSubcategory by remember { mutableStateOf<String?>(null) }
+    val selectedCategory by categoryViewModel.selectedCategory.collectAsStateWithLifecycle()
+    val selectedSubcategory by categoryViewModel.selectedSubcategory.collectAsStateWithLifecycle()
+
+
     var showFilter by remember { mutableStateOf(false) }
     val rate by currencyViewModel.rate
     val currencySymbol by currencyViewModel.currencySymbol
@@ -45,6 +47,17 @@ fun CategoriesScreen(
     val phenomenaBold = FontFamily(Font(R.font.phenomena_bold))
 
     val categoryProduct by categoryViewModel.categoryProducts.collectAsStateWithLifecycle()
+
+    val categories by sharedViewModel.category.collectAsStateWithLifecycle()
+
+    LaunchedEffect(categories) {
+        if (categories.isNotEmpty() && selectedCategory == null) {
+            val firstCategory = categories.first().title
+            categoryViewModel.setSelectedCategory(firstCategory)
+            categoryViewModel.setSelectedSubcategory("Accessories")
+            categoryViewModel.getCategoryProducts(firstCategory)
+        }
+    }
 
     LaunchedEffect(Unit) {
         currencyViewModel.loadCurrency()
@@ -132,11 +145,12 @@ fun CategoriesScreen(
             SideNavigation(
                 selectedItem = selectedCategory,
                 onItemSelected = { clicked ->
-                    selectedCategory = if (selectedCategory == clicked) null else clicked
-                    selectedSubcategory = null
+                    val newCategory = if (selectedCategory == clicked) null else clicked
+                    categoryViewModel.setSelectedCategory(newCategory)
+                    categoryViewModel.setSelectedSubcategory(null)
                 },
                 onSubcategorySelected = { sub ->
-                    selectedSubcategory = sub
+                    categoryViewModel.setSelectedSubcategory(sub)
                 },
                 selectedSubcategory = selectedSubcategory,
                 sharedViewModel = sharedViewModel

@@ -8,11 +8,27 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class CategoryViewModel(val repo : ICategoryRepo):ViewModel() {
-   private val _mutableCategoryProducts = MutableStateFlow<UiResponseState>(UiResponseState.Loading)
-    val categoryProducts = _mutableCategoryProducts
+    private val _mutableCategoryProducts = MutableStateFlow<UiResponseState>(UiResponseState.Loading)
+    var categoryProducts = _mutableCategoryProducts
 
-    fun getCategoryProducts(categoryName:String) {
+    private val _selectedCategory = MutableStateFlow<String?>(null)
+    val selectedCategory = _selectedCategory
+
+    private val _selectedSubcategory = MutableStateFlow<String?>(null)
+    val selectedSubcategory = _selectedSubcategory
+
+    fun setSelectedCategory(category: String?) {
+        _selectedCategory.value = category
+    }
+
+    fun setSelectedSubcategory(subcategory: String?) {
+        _selectedSubcategory.value = subcategory
+    }
+
+
+    fun getCategoryProducts(categoryName: String) {
         viewModelScope.launch {
+            _selectedCategory.value = categoryName
             repo.getProductByCategoryName(categoryName).collect {
                 try {
                     if (it != null) {
@@ -26,4 +42,6 @@ class CategoryViewModel(val repo : ICategoryRepo):ViewModel() {
             }
         }
     }
+
+
 }
