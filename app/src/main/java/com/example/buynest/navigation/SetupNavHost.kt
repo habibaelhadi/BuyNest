@@ -12,6 +12,8 @@ import androidx.navigation.compose.composable
 import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.viewmodel.address.AddressViewModel
 import com.example.buynest.viewmodel.cart.CartViewModel
+import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.discount.DiscountViewModel
 import com.example.buynest.viewmodel.orders.OrdersViewModel
 import com.example.buynest.viewmodel.shared.SharedViewModel
@@ -45,8 +47,10 @@ fun SetupNavHost(mainNavController: NavHostController) {
     val sharedViewModel: SharedViewModel = koinViewModel()
     val addressViewModel: AddressViewModel = koinViewModel()
     val cartViewModel: CartViewModel = koinViewModel()
+    val cagetoryViewModel: CategoryViewModel = koinViewModel()
     val ordersViewModel: OrdersViewModel = koinViewModel()
     val discountViewModel: DiscountViewModel = koinViewModel()
+    val currencyViewModel: CurrencyViewModel = koinViewModel()
 
     NavHost(
         navController = mainNavController, startDestination = startDestination
@@ -71,7 +75,8 @@ fun SetupNavHost(mainNavController: NavHostController) {
                     mainNavController.navigate(RoutesScreens.ProductInfo.route
                         .replace("{productId}", productId))
                 },
-                discountViewModel = discountViewModel
+                discountViewModel = discountViewModel,
+                currencyViewModel = currencyViewModel
             )
         }
 
@@ -92,7 +97,8 @@ fun SetupNavHost(mainNavController: NavHostController) {
                     },
                     onSearchClicked = {
                         mainNavController.navigate(RoutesScreens.Search.route)
-                    }
+                    },
+                    currencyViewModel = currencyViewModel
                 )
             }
         }
@@ -107,21 +113,25 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 navigateToProductInfo = { productId ->
                     mainNavController.navigate(RoutesScreens.ProductInfo.route
                         .replace("{productId}", productId))
-                }
+                },
+                currencyViewModel = currencyViewModel
             )
         }
         composable(RoutesScreens.Categories.route) {
-            CategoriesScreen(onCartClicked = {
+            CategoriesScreen(
+                onCartClicked = {
                 mainNavController.navigate(RoutesScreens.Cart.route)
-            },
+                },
                 onProductClicked = { productId ->
                     mainNavController.navigate(RoutesScreens.ProductInfo.route
                         .replace("{productId}", productId))
                 },
                 onSearchClicked = {
                     mainNavController.navigate(RoutesScreens.Search.route)
-                }
-                , sharedViewModel = sharedViewModel
+                },
+                sharedViewModel = sharedViewModel,
+                categoryViewModel = cagetoryViewModel,
+                currencyViewModel = currencyViewModel
             )
         }
         composable(RoutesScreens.Profile.route) {
@@ -184,6 +194,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 cartViewModel = cartViewModel,
                 addressViewModel = addressViewModel,
                 discountViewModel = discountViewModel,
+                currencyViewModel = currencyViewModel,
                 goTOAddress = {
                     mainNavController.navigate(RoutesScreens.Address.route)
                 }

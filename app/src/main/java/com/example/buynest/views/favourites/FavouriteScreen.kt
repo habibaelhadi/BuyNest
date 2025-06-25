@@ -44,6 +44,7 @@ import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.SearchBar
@@ -55,7 +56,8 @@ fun FavouriteScreen(
     onCartClicked:()->Unit,
     navigateToProductInfo: (String) -> Unit,
     onSearchClicked:()->Unit,
-    viewModel: FavouritesViewModel = koinViewModel()
+    viewModel: FavouritesViewModel = koinViewModel(),
+    currencyViewModel: CurrencyViewModel
 ) {
     val product by viewModel.productDetails.collectAsStateWithLifecycle()
     val user = FirebaseAuthObject.getAuth().currentUser

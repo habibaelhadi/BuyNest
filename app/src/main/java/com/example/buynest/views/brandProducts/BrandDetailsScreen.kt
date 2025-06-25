@@ -39,6 +39,7 @@ import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.ui.theme.*
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.viewmodel.brandproducts.BrandDetailsViewModel
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.ProductItem
 import com.example.buynest.views.component.SearchBar
@@ -54,7 +55,8 @@ fun BrandDetailsScreen(
     onProductClicked: (productId: String) -> Unit,
     onSearchClicked:()->Unit,
     brandProductsViewModel: BrandDetailsViewModel = koinViewModel(),
-    favViewModel: FavouritesViewModel = koinViewModel()
+    favViewModel: FavouritesViewModel = koinViewModel(),
+    currencyViewModel: CurrencyViewModel = koinViewModel()
 ) {
     val phenomenaFontFamily = FontFamily(Font(R.font.phenomena_bold))
 

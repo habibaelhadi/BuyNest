@@ -1,9 +1,12 @@
 package com.example.buynest.di
 
+import androidx.room.Room
 import com.example.buynest.BuildConfig
+import com.example.buynest.model.data.local.AppDatabase
+import com.example.buynest.model.data.local.CurrencyDao
 import com.example.buynest.model.data.remote.graphql.ApolloClient
-import com.example.buynest.model.data.remote.rest.IRemoteDataSource
-import com.example.buynest.model.data.remote.rest.RemoteDataSourceImpl
+import com.example.buynest.repository.payment.datasource.IPaymentDataSource
+import com.example.buynest.repository.payment.datasource.PaymentDataSourceImpl
 import com.example.buynest.model.data.remote.rest.StripeAPI
 import com.example.buynest.repository.address.AddressRepository
 import com.example.buynest.repository.address.AddressRepositoryImpl
@@ -27,6 +30,8 @@ import com.example.buynest.repository.category.CategoryRepoImpl
 import com.example.buynest.repository.category.ICategoryRepo
 import com.example.buynest.repository.currency.CurrencyRepositoryImpl
 import com.example.buynest.repository.currency.ICurrencyRepository
+import com.example.buynest.repository.currency.datasource.CurrencyDataSourceImpl
+import com.example.buynest.repository.currency.datasource.ICurrencyDataSource
 import com.example.buynest.repository.discount.DiscountRepository
 import com.example.buynest.repository.discount.DiscountRepositoryImpl
 import com.example.buynest.repository.discount.datasource.ShopifyDiscountDataSource
@@ -65,6 +70,17 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 val diModule = module {
+
+    single {
+        Room.databaseBuilder(
+            androidContext(),
+            AppDatabase::class.java,
+            "app_database"
+        ).fallbackToDestructiveMigration()
+            .build()
+    }
+    single<CurrencyDao> { get<AppDatabase>().currencyDao() }
+
     single (qualifier = named("CLIENT_APOLLO")){
         ApolloClient.createApollo(
             BASE_URL = CLIENT_BASE_URL,
@@ -112,7 +128,8 @@ val diModule = module {
     factory<IFirebaseDataSource> { FirebaseDataSourceImpl() }
     factory<ShopifyAuthRemoteDataSource> { ShopifyAuthRemoteDataSourceImpl(get(named("CLIENT_APOLLO"))) }
     factory<CartDataSource> { CartDataSourceImpl(get(named("CLIENT_APOLLO"))) }
-    factory<IRemoteDataSource> { RemoteDataSourceImpl(get()) }
+    factory<IPaymentDataSource> { PaymentDataSourceImpl(get()) }
+    factory<ICurrencyDataSource> { CurrencyDataSourceImpl(get())}
     factory<ShopifyDiscountDataSource> { ShopifyDiscountDataSourceImpl(get(named("ADMIN_APOLLO"))) }
 
 

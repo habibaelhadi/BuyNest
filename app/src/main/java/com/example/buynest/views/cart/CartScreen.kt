@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.buynest.BuildConfig
 import com.example.buynest.model.entity.CartItem
-import com.example.buynest.model.data.remote.rest.RemoteDataSourceImpl
+import com.example.buynest.repository.payment.datasource.PaymentDataSourceImpl
 import com.example.buynest.model.data.remote.rest.StripeClient
 import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.repository.payment.PaymentRepositoryImpl
@@ -52,6 +52,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.material3.rememberModalBottomSheetState
 import com.example.buynest.model.state.SheetType
 import com.example.buynest.utils.SharedPrefHelper
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
 
 
 @SuppressLint("ViewModelConstructorInComposable")
@@ -62,7 +63,8 @@ fun CartScreen(
     goTOAddress: () -> Unit,
     cartViewModel: CartViewModel,
     addressViewModel: AddressViewModel,
-    discountViewModel: DiscountViewModel
+    discountViewModel: DiscountViewModel,
+    currencyViewModel: CurrencyViewModel
 ) {
     val context = LocalContext.current
     val cartId = SecureSharedPrefHelper.getString(KEY_CART_ID)
@@ -81,7 +83,7 @@ fun CartScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val paymentViewModel = PaymentViewModel(
-        repository = PaymentRepositoryImpl(RemoteDataSourceImpl(StripeClient.api))
+        repository = PaymentRepositoryImpl(PaymentDataSourceImpl(StripeClient.api))
     )
     val paymentSheet = rememberPaymentSheet(
         paymentResultCallback = { result ->

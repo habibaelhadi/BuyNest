@@ -19,6 +19,7 @@ import com.example.buynest.R
 import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.ui.theme.*
 import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.shared.SharedViewModel
 import com.example.buynest.views.component.CategoryItem
 import com.example.buynest.views.component.Indicator
@@ -30,10 +31,11 @@ import org.koin.androidx.compose.koinViewModel
 fun CategoriesScreen(
     onCartClicked: () -> Unit,
     onProductClicked: (productId: String) -> Unit,
-    sharedViewModel: SharedViewModel,
     onSearchClicked: () -> Unit,
-    categoryViewModel: CategoryViewModel = koinViewModel()
-) {
+    sharedViewModel: SharedViewModel,
+    categoryViewModel: CategoryViewModel,
+    currencyViewModel: CurrencyViewModel
+    ) {
     var selectedCategory by remember { mutableStateOf<String?>("Kid") }
     var selectedSubcategory by remember { mutableStateOf<String?>(null) }
     var showFilter by remember { mutableStateOf(false) }
