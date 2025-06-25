@@ -113,6 +113,7 @@ fun ProductInfoScreen(
         }
         val actualId = "gid://shopify/Product/$productId"
         viewModel.getProductDetails(actualId)
+        currencyViewModel.loadCurrency()
     }
 
 
