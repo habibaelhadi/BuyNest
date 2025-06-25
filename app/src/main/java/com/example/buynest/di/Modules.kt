@@ -27,6 +27,10 @@ import com.example.buynest.repository.category.CategoryRepoImpl
 import com.example.buynest.repository.category.ICategoryRepo
 import com.example.buynest.repository.currency.CurrencyRepositoryImpl
 import com.example.buynest.repository.currency.ICurrencyRepository
+import com.example.buynest.repository.discount.DiscountRepository
+import com.example.buynest.repository.discount.DiscountRepositoryImpl
+import com.example.buynest.repository.discount.datasource.ShopifyDiscountDataSource
+import com.example.buynest.repository.discount.datasource.ShopifyDiscountDataSourceImpl
 import com.example.buynest.repository.favorite.FavoriteRepo
 import com.example.buynest.repository.favorite.FavoriteRepoImpl
 import com.example.buynest.repository.home.HomeRepository
@@ -44,6 +48,7 @@ import com.example.buynest.viewmodel.brandproducts.BrandDetailsViewModel
 import com.example.buynest.viewmodel.cart.CartViewModel
 import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
+import com.example.buynest.viewmodel.discount.DiscountViewModel
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.viewmodel.home.HomeViewModel
 import com.example.buynest.viewmodel.orders.OrdersViewModel
@@ -108,6 +113,8 @@ val diModule = module {
     factory<ShopifyAuthRemoteDataSource> { ShopifyAuthRemoteDataSourceImpl() }
     factory<CartDataSource> { CartDataSourceImpl(get(named("CLIENT_APOLLO"))) }
     factory<IRemoteDataSource> { RemoteDataSourceImpl(get()) }
+    factory<ShopifyDiscountDataSource> { ShopifyDiscountDataSourceImpl(get(named("ADMIN_APOLLO"))) }
+
 
     //repositories
     single<AddressRepository> { AddressRepositoryImpl(get()) }
@@ -125,6 +132,7 @@ val diModule = module {
     single<IOrderRepo> { OrderRepo(get(named("ADMIN_APOLLO"))) }
     single<IPaymentRepository> { PaymentRepositoryImpl(get()) }
     single<ProductDetailsRepository> { ProductDetailsRepositoryImpl() }
+    single<DiscountRepository> { DiscountRepositoryImpl(get()) }
 
     //viewModels
     viewModel { AddressViewModel(get()) }
@@ -146,4 +154,5 @@ val diModule = module {
     viewModel { ProductDetailsViewModel(get()) }
     viewModel { SharedViewModel() }
     viewModel { SearchViewModel(context = androidContext()) }
+    viewModel { DiscountViewModel(get()) }
 }

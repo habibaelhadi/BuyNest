@@ -59,6 +59,7 @@ android {
 }
 
 dependencies {
+    val koin_android_version = "4.0.2"
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -137,7 +138,6 @@ dependencies {
     //Zoomable
     implementation("me.saket.telephoto:zoomable-image-coil:0.16.0")
     //koin
-    val koin_android_version = "4.0.2"
     implementation("io.insert-koin:koin-android:$koin_android_version")
     implementation("io.insert-koin:koin-androidx-compose:$koin_android_version")
     implementation("io.insert-koin:koin-androidx-compose-navigation:$koin_android_version")
