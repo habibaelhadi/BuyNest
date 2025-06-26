@@ -1,10 +1,10 @@
 package com.example.buynest.repository.payment
 
-import com.example.buynest.model.remote.rest.IRemoteDataSource
+import com.example.buynest.repository.payment.datasource.IPaymentDataSource
 import com.google.gson.JsonObject
 import retrofit2.Response
 
-class PaymentRepositoryImpl(private val remoteDataSource: IRemoteDataSource) : IPaymentRepository {
+class PaymentRepositoryImpl(private val remoteDataSource: IPaymentDataSource) : IPaymentRepository {
 
     override  suspend fun createPaymentIntent(
         amount: Int,

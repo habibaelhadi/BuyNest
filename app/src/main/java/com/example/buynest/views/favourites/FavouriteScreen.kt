@@ -2,6 +2,7 @@ package com.example.buynest.views.favourites
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,26 +32,49 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.buynest.ProductsDetailsByIDsQuery
-import com.example.buynest.model.uistate.ResponseState
-import com.example.buynest.repository.favoriteRepo.FavoriteRepoImpl
+import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.R
+import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.LightGray2
+import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
+import com.example.buynest.utils.NetworkHelper
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.views.component.Indicator
+import com.example.buynest.views.component.NoInternetLottie
 import com.example.buynest.views.component.SearchBar
+import com.example.buynest.views.orders.phenomenaFontFamily
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun FavouriteScreen(onCartClicked:()->Unit) {
-    val viewModel: FavouritesViewModel = viewModel(
-        factory = FavouritesViewModel.FavouritesFactory(FavoriteRepoImpl())
-    )
+fun FavouriteScreen(
+    onCartClicked:()->Unit,
+    navigateToProductInfo: (String) -> Unit,
+    onSearchClicked:()->Unit,
+    viewModel: FavouritesViewModel = koinViewModel(),
+    currencyViewModel: CurrencyViewModel
+) {
     val product by viewModel.productDetails.collectAsStateWithLifecycle()
-    var showConfirmDialog by remember { mutableStateOf(false) }
+    val user = FirebaseAuthObject.getAuth().currentUser
+    val rate by currencyViewModel.rate
+    val currencySymbol by currencyViewModel.currencySymbol
 
-    LaunchedEffect(product) {
-        viewModel.getAllFavorites()
+    LaunchedEffect(Unit) {
+        currencyViewModel.loadCurrency()
+    }
+    val isConnected by NetworkHelper.isConnected.collectAsStateWithLifecycle()
+
+    LaunchedEffect(product,isConnected) {
+        if (user != null){
+            viewModel.getAllFavorites()
+        }
     }
 
 
@@ -62,20 +86,35 @@ fun FavouriteScreen(onCartClicked:()->Unit) {
     ) {
         Spacer(modifier = Modifier.height(8.dp))
         SearchBar(
-            onCartClicked = onCartClicked
+            onCartClicked = onCartClicked,
+            onSearchClicked = onSearchClicked
         )
         Spacer(modifier = Modifier.height(24.dp))
-        when (val result = product){
-            is ResponseState.Error -> {
-                Text(text = result.message)
-            }
-            ResponseState.Loading -> {
-                Indicator()
-            }
-            is ResponseState.Success<*> -> {
-                val data = result.data as? ProductsDetailsByIDsQuery.Data
-                val productList = data?.nodes
-                Favourites(productList,viewModel)
+        if (user == null){
+            NoDataLottie(true)
+        }else{
+            when (val result = product){
+                is UiResponseState.Error -> {
+                    NoInternetLottie()
+                }
+                UiResponseState.Loading -> {
+                    Indicator()
+                }
+                is UiResponseState.Success<*> -> {
+                    val data = result.data as? ProductsDetailsByIDsQuery.Data
+                    if (data == null) {
+                        NoInternetLottie()
+                    } else {
+                        val productList = data?.nodes
+                        if (productList != null) {
+                            if (productList.isEmpty())
+                                NoDataLottie(false)
+                            else {
+                                Favourites(productList, viewModel, navigateToProductInfo,rate,currencySymbol.toString())
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -84,7 +123,13 @@ fun FavouriteScreen(onCartClicked:()->Unit) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Favourites(productList: List<ProductsDetailsByIDsQuery.Node?>?, viewModel: FavouritesViewModel) {
+fun Favourites(
+    productList: List<ProductsDetailsByIDsQuery.Node?>?,
+    viewModel: FavouritesViewModel,
+    navigateToProductInfo: (String) -> Unit,
+    rate: Double,
+    currencySymbol: String
+) {
     var itemToDelete by remember { mutableStateOf<ProductsDetailsByIDsQuery.Node?>(null) }
     var showConfirmDialog by remember { mutableStateOf(false) }
 
@@ -100,7 +145,7 @@ fun Favourites(productList: List<ProductsDetailsByIDsQuery.Node?>?, viewModel: F
                     if (dismissValue == DismissValue.DismissedToStart || dismissValue == DismissValue.DismissedToEnd) {
                         itemToDelete = item
                         showConfirmDialog = true
-                        false // prevent automatic removal
+                        false
                     } else true
                 }
             )
@@ -152,7 +197,10 @@ fun Favourites(productList: List<ProductsDetailsByIDsQuery.Node?>?, viewModel: F
                             itemToDelete = item
                             showConfirmDialog = true
                         },
-                        viewModel
+                        viewModel,
+                        navigateToProductInfo,
+                        rate,
+                        currencySymbol
                     )
                 },
                 modifier = Modifier.padding(horizontal = 8.dp)
@@ -188,6 +236,39 @@ fun Favourites(productList: List<ProductsDetailsByIDsQuery.Node?>?, viewModel: F
                 }
             }
         )
+    }
+}
+
+@Composable
+fun NoDataLottie(isGuest: Boolean){
+    val composition by rememberLottieComposition(
+        spec = LottieCompositionSpec.RawRes(R.raw.no_data)
+    )
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = LottieConstants.IterateForever
+    )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(white),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        LottieAnimation(
+            composition = composition,
+            progress = { progress },
+            modifier = Modifier.height(300.dp)
+                .padding(bottom = 0.dp)
+        )
+        if (isGuest){
+            Text(
+                text = "Register to add",
+                fontFamily = phenomenaFontFamily,
+                fontSize = 20.sp,
+                color = MainColor
+            )
+        }
     }
 }
 

@@ -1,21 +1,15 @@
 package com.example.buynest.views.component
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -30,20 +24,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.R
+import com.example.buynest.admin.GetOrdersByEmailQuery
 import com.example.buynest.ui.theme.Gray
 import com.example.buynest.ui.theme.white
-import com.example.buynest.views.orders.Order
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun OrderItem(order: Order, gotoOrderDetails:()->Unit) {
+fun OrderItem(order: GetOrdersByEmailQuery.Node, gotoOrderDetails: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(white, RoundedCornerShape(16.dp))
             .border(2.dp, Gray, RoundedCornerShape(16.dp))
-            .clickable {
-                gotoOrderDetails()
-            }
+            .clickable { gotoOrderDetails() }
     ) {
         Box(
             modifier = Modifier
@@ -57,28 +52,62 @@ fun OrderItem(order: Order, gotoOrderDetails:()->Unit) {
                     .padding(start = 24.dp, top = 12.dp, bottom = 12.dp)
                     .size(50.dp)
                     .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop,
-
-                )
+                contentScale = ContentScale.Crop
+            )
         }
+
         Column(
             modifier = Modifier
                 .weight(7f)
                 .padding(16.dp, top = 20.dp)
         ) {
-            Text(text = "OrderID: ${order.id}", fontSize = 13.sp,
-                color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(
+                text = "Order ID: ${order.name}",
+                fontSize = 13.sp,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
+            )
+
             Spacer(modifier = Modifier.height(6.dp))
+
+            val dateTime = ZonedDateTime.parse(order.createdAt as CharSequence?)
+            val formattedDate = dateTime.toLocalDate()
+                .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy"))
+            val formattedTime = dateTime.toLocalTime()
+                .format(DateTimeFormatter.ofPattern("hh:mm a"))
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Filled.DateRange,
-                    contentDescription = "Delivery Date",
+                    contentDescription = "Date Icon",
                     modifier = Modifier.size(16.dp),
                     tint = Color.Black
                 )
                 Spacer(modifier = Modifier.width(6.dp))
-                Text(text = order.deliveryDate, fontSize = 13.sp, color = Color.Black)
+                Text(
+                    text = "Date: $formattedDate",
+                    fontSize = 13.sp,
+                    color = Color.Black
+                )
             }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Filled.AccessTime,
+                    contentDescription = "Time Icon",
+                    modifier = Modifier.size(16.dp),
+                    tint = Color.Black
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "Time: $formattedTime",
+                    fontSize = 13.sp,
+                    color = Color.Black
+                )
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
         }
     }

@@ -48,45 +48,35 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.R
-import com.example.buynest.repository.authenticationrepo.AuthenticationRepoImpl
-import com.example.buynest.repository.authenticationrepo.firebase.FirebaseRepository
-import com.example.buynest.repository.authenticationrepo.firebase.FirebaseRepositoryImpl
-import com.example.buynest.repository.authenticationrepo.firebase.datasource.FirebaseDataSourceImpl
-import com.example.buynest.repository.authenticationrepo.shopify.ShopifyAuthRepositoryImpl
-import com.example.buynest.repository.authenticationrepo.shopify.datasource.ShopifyAuthRemoteDataSource
-import com.example.buynest.repository.authenticationrepo.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
+import com.example.buynest.repository.authentication.AuthenticationRepoImpl
+import com.example.buynest.repository.authentication.firebase.FirebaseRepositoryImpl
+import com.example.buynest.repository.authentication.firebase.datasource.FirebaseDataSourceImpl
+import com.example.buynest.repository.authentication.shopify.ShopifyAuthRepositoryImpl
+import com.example.buynest.repository.authentication.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
+import com.example.buynest.utils.NetworkHelper
 import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.utils.strategies.GoogleAuthenticationStrategy
 import com.example.buynest.utils.strategies.LoginAuthenticationStrategy
 import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
 import com.example.buynest.views.authentication.CustomTextField
 import com.example.buynest.views.customsnackbar.CustomSnackbar
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LoginScreen(
     navigateToHome: () -> Unit,
     navigateToSignUp: () -> Unit,
-    navigateToForgotPassword: () -> Unit) {
+    navigateToForgotPassword: () -> Unit,
+    viewModel: AuthenticationViewModel = koinViewModel()
+) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val passwordVisible = remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     val activity = LocalActivity.current
     val context = LocalContext.current
-    val viewModel: AuthenticationViewModel = viewModel(
-        factory = AuthenticationViewModel.AuthenticationViewModelFactory(
-            AuthenticationRepoImpl(
-                FirebaseRepositoryImpl(
-                    FirebaseDataSourceImpl()
-                ),
-                ShopifyAuthRepositoryImpl(
-                    ShopifyAuthRemoteDataSourceImpl()
-                )
-            )
-        )
-    )
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -227,8 +217,13 @@ fun LoginScreen(
 
             Button(
                 onClick = {
-                    val strategy = LoginAuthenticationStrategy(email.value, password.value)
-                    viewModel.authenticate(strategy)
+                    if (!NetworkHelper.isConnected.value){
+                        snackbarMessage.value = "No internet connection"
+                    }else{
+                        snackbarMessage.value = ""
+                        val strategy = LoginAuthenticationStrategy(email.value, password.value)
+                        viewModel.authenticate(strategy)
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()

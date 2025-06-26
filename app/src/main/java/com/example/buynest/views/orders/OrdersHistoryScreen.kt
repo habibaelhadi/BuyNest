@@ -1,5 +1,7 @@
 package com.example.buynest.views.orders
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,47 +17,43 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.buynest.R
+import androidx.compose.runtime.getValue
+import com.example.buynest.admin.GetOrdersByEmailQuery
+import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.*
+import com.example.buynest.viewmodel.orders.OrdersViewModel
+import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.OrderItem
-
-data class Order(
-    val id: Int,
-    val deliveryDate: String,
-    val imageRes: Int
-)
-val pastOrders =
-    listOf(
-        Order(1001, "June 17, 2025", R.drawable.product),
-        Order(2521, "June 15, 2025", R.drawable.product),
-        Order(2545, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(101654, "June 17, 2025", R.drawable.product),
-        Order(25454, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-        Order(2, "June 15, 2025", R.drawable.product),
-    )
 
 val phenomenaFontFamily = FontFamily(
     Font(R.font.phenomena_bold)
 )
 
-
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrdersHistoryScreen(backClicked:()->Unit,gotoOrderDetails:()->Unit){
+fun OrdersHistoryScreen(
+    backClicked:()->Unit
+    ,gotoOrderDetails:()->Unit,
+    orderViewModel: OrdersViewModel
+){
+
+    val orderList by orderViewModel.orders.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        val email = FirebaseAuthObject.getAuth().currentUser?.email
+        orderViewModel.getAllOrders(email.toString())
+    }
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -84,18 +82,34 @@ fun OrdersHistoryScreen(backClicked:()->Unit,gotoOrderDetails:()->Unit){
                 }
             }
         )
-        AllOrdersList(pastOrders,gotoOrderDetails)
+        when(val result = orderList){
+            is UiResponseState.Error -> {
+                Text(result.message)
+            }
+            UiResponseState.Loading -> {
+                Indicator()
+            }
+            is UiResponseState.Success<*> -> {
+                val response = result.data as GetOrdersByEmailQuery.Data
+                val orders = response.orders.edges.map { it.node }
+                AllOrdersList(orders = orders, onOrderClick = {
+                    orderViewModel.setSelectedOrder(it)
+                    gotoOrderDetails()
+                })
+            }
+        }
     }
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AllOrdersList(orders:List<Order>,gotoOrderDetails:()->Unit){
+fun AllOrdersList(orders: List<GetOrdersByEmailQuery.Node>, onOrderClick: (GetOrdersByEmailQuery.Node) -> Unit){
         LazyColumn(
             modifier = Modifier.padding(top = 16.dp, end = 18.dp)
         ){
-            items(orders.size){
-                OrderItem(order = orders[it],gotoOrderDetails)
+            items(orders.size) {
+                OrderItem(order = orders[it], gotoOrderDetails = { onOrderClick(orders[it]) })
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }

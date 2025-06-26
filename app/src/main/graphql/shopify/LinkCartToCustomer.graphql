@@ -1,0 +1,23 @@
+mutation LinkCartToCustomer($cartId: ID!, $customerAccessToken: String!) {
+    cartBuyerIdentityUpdate(
+        cartId: $cartId,
+        buyerIdentity: {
+            customerAccessToken: $customerAccessToken
+        }
+    ) {
+        cart {
+            id
+            checkoutUrl
+            buyerIdentity {
+                customer {
+                    id
+                    email
+                }
+            }
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}

@@ -7,8 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.buynest.repository.FirebaseAuthObject
-import com.example.buynest.repository.authenticationrepo.AuthenticationRepo
-import com.example.buynest.repository.authenticationrepo.firebase.datasource.FirebaseDataSourceImpl
+import com.example.buynest.repository.authentication.AuthenticationRepo
 import com.example.buynest.utils.strategies.AuthenticationStrategy
 import com.example.buynest.utils.strategies.GoogleAuthenticationStrategy
 import com.example.buynest.utils.validators.GoogleValidator
@@ -30,22 +29,22 @@ class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewMo
             setNext(SignUpValidator())
         })
     }
-    private val mutableMessage = MutableSharedFlow<String>()
-    val message = mutableMessage.asSharedFlow()
+    private val _mutableMessage = MutableSharedFlow<String>()
+    val message = _mutableMessage.asSharedFlow()
 
     private lateinit var googleStrategy: GoogleAuthenticationStrategy
 
     fun resetPassword(email: String) {
         viewModelScope.launch {
             if (email.isEmpty()) {
-                mutableMessage.emit("Email cannot be empty")
+                _mutableMessage.emit("Email cannot be empty")
                 return@launch
             }
             val result = authRepo.sendResetPasswordEmail(email)
             if (result.isSuccess){
-                mutableMessage.emit("Success")
+                _mutableMessage.emit("Success")
             }else{
-               mutableMessage.emit(result.exceptionOrNull()?.message ?: "Unknown error")
+               _mutableMessage.emit(result.exceptionOrNull()?.message ?: "Unknown error")
             }
         }
     }
@@ -73,12 +72,12 @@ class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewMo
                 signInWithGoogle(account.idToken!!,context)
             } else {
                 viewModelScope.launch {
-                    mutableMessage.emit("Google Sign-In failed: ID token is null")
+                    _mutableMessage.emit("Google Sign-In failed: ID token is null")
                 }
             }
         } catch (e: ApiException) {
             viewModelScope.launch {
-                mutableMessage.emit("Google Sign-In failed: ${e.message}")
+                _mutableMessage.emit("Google Sign-In failed: ${e.message}")
             }
         }
     }
@@ -91,9 +90,9 @@ class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewMo
                 viewModelScope.launch {
                     if (task.isSuccessful) {
                         authRepo.saveGoogleUserToFireStore(context = context)
-                        mutableMessage.emit("Success")
+                        _mutableMessage.emit("Success")
                     } else {
-                        mutableMessage.emit(task.exception?.message ?: "Google Sign-In failed")
+                        _mutableMessage.emit(task.exception?.message ?: "Google Sign-In failed")
                     }
                 }
             }
@@ -103,14 +102,25 @@ class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewMo
         viewModelScope.launch {
             val validationResult = validationChain.handle(strategy)
             if (validationResult != null) {
-                mutableMessage.emit(validationResult)
+                _mutableMessage.emit(validationResult)
                 return@launch
             }
             val result = strategy.authenticate(authRepo)
             if (result.isSuccess) {
-                mutableMessage.emit("Success")
+                _mutableMessage.emit("Success")
             }else{
-                mutableMessage.emit(result.exceptionOrNull()?.message ?: "Unknown error")
+                _mutableMessage.emit(result.exceptionOrNull()?.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun logout(){
+        viewModelScope.launch {
+            val result = authRepo.logout()
+            if (result.isSuccess){
+                _mutableMessage.emit("Success")
+            }else{
+                _mutableMessage.emit(result.exceptionOrNull()?.message ?: "Unknown error")
             }
         }
     }

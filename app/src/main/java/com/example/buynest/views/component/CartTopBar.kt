@@ -39,16 +39,7 @@ fun CartTopBar(backClicked :()->Unit) {
                 )
             }
         },
-        actions = {
-            IconButton(onClick = { /* search logic */ }) {
-                Icon(
-                    Icons.Default.Search,
-                    contentDescription = null,
-                    tint = MainColor,
-                    modifier = Modifier.size(35.dp)
-                )
-            }
-        },
+        actions = {},
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White),
     )
 }

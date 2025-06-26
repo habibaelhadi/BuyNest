@@ -9,6 +9,7 @@
 
     <application
         android:allowBackup="true"
+        android:name=".application.MyApplication"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -29,5 +30,10 @@
             </intent-filter>
         </activity>
     </application>
+
+    <meta-data
+        android:name="com.google.android.geo.API_KEY"
+        android:value="@string/maps_api_key" />
+
 
 </manifest>

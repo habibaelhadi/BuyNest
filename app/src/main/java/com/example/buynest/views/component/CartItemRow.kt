@@ -19,11 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import coil.compose.rememberAsyncImagePainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.model.entity.CartItem
+import com.example.buynest.model.mapper.mapColorNameToColor
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
 
@@ -38,7 +39,7 @@ fun CartItemRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onItemClick(item) },
-    shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(16.dp),
         border = BorderStroke(1.dp, LightGray2)
     ) {
         Row(
@@ -46,10 +47,10 @@ fun CartItemRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(id = item.imageRes),
+                painter = rememberAsyncImagePainter(item.imageUrl),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(100.dp)
                     .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
@@ -64,13 +65,22 @@ fun CartItemRow(
                     color = MainColor
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "${item.price} ${item.currencySymbol}",
+                    fontWeight = FontWeight.Bold,
+                    color = MainColor
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Box(
                         modifier = Modifier
                             .size(10.dp)
-                            .background(Color.Red, shape = CircleShape)
+                            .background(mapColorNameToColor(item.color), shape = CircleShape)
                     )
                     Text(
                         text = "  ${item.color} | Size: ${item.size}",
@@ -79,30 +89,27 @@ fun CartItemRow(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    text = "EGP ${item.price}",
-                    fontWeight = FontWeight.Bold,
-                    color = MainColor
-                )
-            }
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                IconButton(
-                    onClick = { onDelete(item.id) },
-                    modifier = Modifier.align(Alignment.End)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.DeleteOutline,
-                        contentDescription = null,
-                        tint = MainColor
+                    QuantitySelector(
+                        quantity = item.quantity,
+                        onChange = { newQty -> onQuantityChange(item.id, newQty) },
+                        maxQuantity = item.maxQuantity
                     )
+
+                    IconButton(onClick = { onDelete(item.id) }) {
+                        Icon(
+                            imageVector = Icons.Default.DeleteOutline,
+                            contentDescription = null,
+                            tint = MainColor
+                        )
+                    }
                 }
-                QuantitySelector(
-                    quantity = item.quantity,
-                    onChange = { newQty -> onQuantityChange(item.id, newQty) }
-                )
             }
         }
     }

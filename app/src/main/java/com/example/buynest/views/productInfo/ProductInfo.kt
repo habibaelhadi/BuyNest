@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -57,74 +56,141 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.rememberAsyncImagePainter
+import androidx.lifecycle.viewModelScope
 import com.example.buynest.ProductDetailsByIDQuery
 import com.example.buynest.ProductsDetailsByIDsQuery
-import com.example.buynest.model.uistate.ResponseState
-import com.example.buynest.repository.favoriteRepo.FavoriteRepoImpl
-import com.example.buynest.repository.productDetails.ProductDetailsRepositoryImpl
+import com.example.buynest.model.mapper.mapSizeFromTextToInteger
+import com.example.buynest.model.mapper.toColorList
+import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.LightGray
 import com.example.buynest.ui.theme.MainColor
-import com.example.buynest.utils.toColorList
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.viewmodel.productInfo.ProductDetailsViewModel
 import com.example.buynest.views.component.BottomSection
 import com.example.buynest.views.component.ExpandableText
+import com.example.buynest.views.component.GuestAlertDialog
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.QuantitySelector
+import com.example.buynest.views.customsnackbar.CustomSnackbar
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.calculateCurrentOffsetForPage
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.launch
+import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
+import org.koin.androidx.compose.koinViewModel
 import kotlin.math.abs
 
 @Composable
 fun ProductInfoScreen(
     productId: String,
     backClicked :()->Unit,
-    navigateToCart :()->Unit
+    navigateToCart :()->Unit,
+    viewModel: ProductDetailsViewModel = koinViewModel(),
+    favViewModel: FavouritesViewModel = koinViewModel(),
+    currencyViewModel: CurrencyViewModel
 ){
-    val viewModel: ProductDetailsViewModel = viewModel(
-        factory = ProductDetailsViewModel.ProductInfoFactory(ProductDetailsRepositoryImpl())
-    )
 
     val response by viewModel.productDetails.collectAsStateWithLifecycle()
-    var totalPrice by remember { mutableIntStateOf(0) }
 
-    val favViewModel: FavouritesViewModel = viewModel(
-        factory = FavouritesViewModel.FavouritesFactory(FavoriteRepoImpl())
-    )
+    var snackbarMessage by remember { mutableStateOf<String?>(null) }
+    var totalPrice by remember { mutableIntStateOf(0) }
+    var selectedSize by remember { mutableStateOf<String?>(null) }
+    var selectedColor by remember { mutableStateOf<String?>(null) }
+    var quantity by remember { mutableIntStateOf(1) }
+    var maxQuantity by remember { mutableIntStateOf(1) }
+    val rate by currencyViewModel.rate
+    var actualPrice = (totalPrice*rate).toInt()
+    val currencySymbol by currencyViewModel.currencySymbol
+
+    val showGuestDialog = remember { mutableStateOf(false) }
+    val user = FirebaseAuthObject.getAuth().currentUser
 
     LaunchedEffect(Unit) {
+        if (user != null){
+            favViewModel.getAllFavorites()
+        }
         val actualId = "gid://shopify/Product/$productId"
         viewModel.getProductDetails(actualId)
-        favViewModel.getAllFavorites()
+        currencyViewModel.loadCurrency()
     }
 
 
     Scaffold (
         topBar = { ProductInfoTopBar(backClicked, navigateToCart) },
-        bottomBar = { BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart"){
-            //TODO: Add to cart
-        }}
+        bottomBar = {
+            if (response is UiResponseState.Success<*>) {
+                val product = (response as UiResponseState.Success<ProductDetailsByIDQuery.Data>).data.product
+
+                val selectedVariantId = product?.variants?.edges
+                    ?.mapNotNull { it.node }
+                    ?.find { variant ->
+                        val options = variant.selectedOptions.associate {
+                            it.name.lowercase() to it.value.lowercase()
+                        }
+
+                        Log.d("VariantDebug", "Options: $options")
+
+                        Log.i("VariantDebug", "selected size: $selectedSize ")
+                        val sizeMatch = selectedSize?.let { options["size"] == it } == true
+                        val colorMatch = selectedColor?.lowercase()?.let { options["color"] == it } == true
+
+                        Log.d("VariantDebug", "sizeMatch: $sizeMatch, colorMatch: $colorMatch")
+
+                        sizeMatch && colorMatch
+                    }?.id
+
+                maxQuantity = product?.variants?.edges?.get(0)?.node?.quantityAvailable ?: 1
+
+                val currentQuantity = quantity
+                BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart",currencySymbol) {
+                    if (selectedSize == null || selectedColor == null) {
+                        snackbarMessage = "Please select size and color before adding to cart"
+                        return@BottomSection
+                    }
+
+                    selectedVariantId?.let {
+                        viewModel.viewModelScope.launch {
+                            viewModel.addToCart(it, currentQuantity)
+                            snackbarMessage = "Item added to cart successfully"
+                        }
+                    } ?: run {
+                        snackbarMessage = "No matching variant found"
+                    }
+                }
+            }
+        }
     ) { innerPadding ->
         when (val result = response) {
-            is ResponseState.Error -> {
+            is UiResponseState.Error -> {
                 Text(text = result.message)
             }
-            ResponseState.Loading ->  {
+            UiResponseState.Loading ->  {
                 Indicator()
             }
-            is ResponseState.Success<*> -> {
-                val successData = result as ResponseState.Success<ProductDetailsByIDQuery.Data>
+            is UiResponseState.Success<*> -> {
+                val successData = result as UiResponseState.Success<ProductDetailsByIDQuery.Data>
                 val product = successData.data.product
                 ProductInfo(
                     innerPadding = innerPadding,
                     product = product,
                     onTotalChange = { updatedTotal -> totalPrice = updatedTotal },
-                    favViewModel = favViewModel
+                    favViewModel = favViewModel,
+                    onSizePicked = { selectedSize = it },
+                    onColorPicked = { selectedColor = it },
+                    quantity = quantity,
+                    onQuantityChanged = { quantity = it },
+                    availableQuantity = maxQuantity,
+                    rate = rate,
+                    currencySymbol = currencySymbol
                 )
             }
+        }
+    }
+    snackbarMessage?.let { message ->
+        CustomSnackbar(message = message) {
+            snackbarMessage = null
         }
     }
 }
@@ -135,21 +201,29 @@ fun ProductInfo(
     innerPadding: PaddingValues,
     product: ProductDetailsByIDQuery.Product?,
     onTotalChange: (Int) -> Unit,
-    favViewModel: FavouritesViewModel
+    favViewModel: FavouritesViewModel,
+    onSizePicked: (String) -> Unit,
+    onColorPicked: (String) -> Unit,
+    quantity: Int,
+    onQuantityChanged: (Int) -> Unit,
+    availableQuantity: Int,
+    rate: Double,
+    currencySymbol: String?
 ) {
+    Log.i("TAG", "ProductInfoScreen: ${product?.id} ")
     val scrollState = rememberScrollState()
     val media = product?.media?.edges
     val images = media?.map { it.node.previewImage?.url.toString() } ?: emptyList()
     val price = product?.variants?.edges?.get(0)?.node?.price?.amount.toString()
+    var actualPrice = (price.toDouble()*rate).toInt()
     val size = product?.options?.get(0)?.values
     val color = product?.options?.get(1)?.values
     val colorList = color?.toColorList()
-    var quantity by remember { mutableIntStateOf(1) }
     val id = product?.id.toString()
     val productName = product?.title.toString()
-    LaunchedEffect(key1 = quantity, key2 = price) {
-        val total = price.toDouble() * quantity
-        Log.d("UI", "Sending total: $total")
+
+    LaunchedEffect(key1 = quantity, key2 = actualPrice) {
+        val total = actualPrice.toDouble() * quantity
         onTotalChange(total.toInt())
     }
 
@@ -163,20 +237,165 @@ fun ProductInfo(
             if (product != null) {
                 ProductDetails(
                     title = product.title,
-                    price = price.toDouble(),
+                    price = actualPrice.toDouble(),
                     quantity = quantity,
+                    maxQuantity = availableQuantity,
                     description = product.description,
                     sizes = size,
                     colors = colorList,
-                    onQuantityChange = { _, newQty -> quantity = newQty },
-                    onColorSelected = { /* Handle color selection */ },
-                    onSizeSelected = { /* Handle size selection */ }
+                    onQuantityChange = { newQty -> onQuantityChanged(newQty) },
+                    onColorSelected = {
+                        onColorPicked(color?.getOrNull(colorList?.indexOf(it) ?: -1) ?: "")
+                    },
+                    onSizeSelected = { onSizePicked(it.toString()) },
+                    currencySymbol = currencySymbol,
+
                 )
             }
 
         }
     }
 }
+
+
+@Composable
+fun ProductDetails(
+    title: String,
+    price: Double,
+    quantity: Int,
+    description: String,
+    sizes: List<String>?,
+    colors: List<Color>?,
+    onQuantityChange: (Int) -> Unit,
+    onColorSelected: (Color) -> Unit = {},
+    onSizeSelected: (Int) -> Unit = {},
+    maxQuantity: Int,
+    currencySymbol: String?,
+) {
+    val selectedColor = remember { mutableStateOf(colors?.firstOrNull() ?: Color.Unspecified) }
+    val selectedSize = remember { mutableStateOf(sizes?.get(0) ?: "") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = MainColor,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "$currencySymbol $price",
+                fontSize = 18.sp,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            QuantitySelector(quantity, maxQuantity) { newQuantity ->
+                onQuantityChange(newQuantity)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = "Description",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = MainColor
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        ExpandableText(text = description)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        sizes?.takeIf { it.isNotEmpty() && it.firstOrNull() != "OS" }?.let {
+            Text(
+                text = "Size",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = MainColor
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                it.forEach { size ->
+                    val isSelected = if (size.contains(Regex("[XLMSxlms]"))) {
+                        mapSizeFromTextToInteger(selectedSize.value) == mapSizeFromTextToInteger(size)
+                    } else {
+                        selectedSize.value == size
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(if (isSelected) MainColor else LightGray)
+                            .clickable {
+                                if (size.contains(Regex("[XLMSxlms]"))) {
+                                    selectedSize.value = mapSizeFromTextToInteger(size).toString()
+                                    onSizeSelected(mapSizeFromTextToInteger(size))
+                                } else {
+                                    selectedSize.value = size
+                                    onSizeSelected(size.toInt())
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = size,
+                            color = if (isSelected) Color.White else Color.Black,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        colors?.takeIf { it.isNotEmpty() }?.let {
+            Text(
+                text = "Color",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = MainColor
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                it.forEach { color ->
+                    val isSelected = selectedColor.value == color
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(color)
+                            .border(
+                                width = if (isSelected) 2.dp else 1.dp,
+                                color = if (isSelected) MainColor else Color.Gray,
+                                shape = CircleShape
+                            )
+                            .clickable {
+                                selectedColor.value = color
+                                onColorSelected(color)
+                            }
+                    )
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun ProductImages(
@@ -190,6 +409,8 @@ fun ProductImages(
     var itemToDelete by remember { mutableStateOf<ProductsDetailsByIDsQuery.Node?>(null) }
     var showConfirmDialog by remember { mutableStateOf(false) }
     val pagerState = rememberPagerState(images.size)
+    val showGuestDialog = remember { mutableStateOf(false) }
+    val user = FirebaseAuthObject.getAuth().currentUser
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -223,8 +444,8 @@ fun ProductImages(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(20.dp))
                 ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(images[page]),
+                    ZoomableAsyncImage(
+                        model = images[page],
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -234,25 +455,30 @@ fun ProductImages(
                     )
 
                     IconButton(
-                        onClick = {
-                            if (isFav) {
-                            itemToDelete = ProductsDetailsByIDsQuery.Node(
-                                __typename = productName,
-                                onProduct = ProductsDetailsByIDsQuery.OnProduct(
-                                    id = productId,
-                                    title = productName,
-                                    vendor = "", productType = "", description = "",
-                                    featuredImage = null,
-                                    variants = ProductsDetailsByIDsQuery.Variants(emptyList()),
-                                    media = ProductsDetailsByIDsQuery.Media(emptyList()),
-                                    options = emptyList()
-                                )
-                            )
-                            showConfirmDialog = true
-                        } else {
-                            favViewModel.addToFavorite(productId)
-                        }
-                                  },
+                        onClick =
+                            {
+                                if (user == null) {
+                                    showGuestDialog.value = true
+                                }else{
+                                    if (isFav) {
+                                        itemToDelete = ProductsDetailsByIDsQuery.Node(
+                                            __typename = productName,
+                                            onProduct = ProductsDetailsByIDsQuery.OnProduct(
+                                                id = productId,
+                                                title = productName,
+                                                vendor = "", productType = "", description = "",
+                                                featuredImage = null,
+                                                variants = ProductsDetailsByIDsQuery.Variants(emptyList()),
+                                                media = ProductsDetailsByIDsQuery.Media(emptyList()),
+                                                options = emptyList()
+                                            )
+                                        )
+                                        showConfirmDialog = true
+                                    } else {
+                                        favViewModel.addToFavorite(productId)
+                                    }
+                                }
+                            },
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .padding(12.dp)
@@ -319,129 +545,12 @@ fun ProductImages(
             }
         )
     }
-}
 
-@Composable
-fun ProductDetails(
-    title: String,
-    price: Double,
-    quantity: Int,
-    description: String,
-    sizes: List<String>?,
-    colors: List<Color>?,
-    onQuantityChange: (Int, Int) -> Unit,
-    onColorSelected: (Color) -> Unit = {},
-    onSizeSelected: (Int) -> Unit = {},
-) {
-    val selectedColor = remember { mutableStateOf(colors?.firstOrNull() ?: Color.Unspecified) }
-    val selectedSize = remember { mutableStateOf(sizes?.get(0) ?: "") }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = title,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = MainColor,
-                modifier = Modifier.weight(1f)
-            )
+    GuestAlertDialog(
+        showDialog = showGuestDialog.value,
+        onDismiss = { showGuestDialog.value = false },
+        onConfirm = {
+            showGuestDialog.value = false
         }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "LE $price",
-                fontSize = 18.sp,
-                color = Color.Black,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            QuantitySelector(quantity) { newQuantity -> onQuantityChange(1, newQuantity) }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text(
-            text = "Description",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = MainColor
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        ExpandableText(text = description)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        sizes?.takeIf { it.isNotEmpty() && it.firstOrNull() != "OS" }?.let {
-            Text(
-                text = "Size",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = MainColor
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                it.forEach { size ->
-                    val isSelected = selectedSize.value == size
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(if (isSelected) MainColor else LightGray)
-                            .clickable {
-                                selectedSize.value = size
-                                onSizeSelected(size.toInt())
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = size,
-                            color = if (isSelected) Color.White else Color.Black,
-                            fontSize = 14.sp
-                        )
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        colors?.takeIf { it.isNotEmpty() }?.let {
-            Text(
-                text = "Color",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = MainColor
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                it.forEach { color ->
-                    val isSelected = selectedColor.value == color
-                    Box(
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(color)
-                            .border(
-                                width = if (isSelected) 2.dp else 1.dp,
-                                color = if (isSelected) MainColor else Color.Gray,
-                                shape = CircleShape
-                            )
-                            .clickable {
-                                selectedColor.value = color
-                                onColorSelected(color)
-                            }
-                    )
-                }
-            }
-        }
-    }
+    )
 }

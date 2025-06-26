@@ -11,14 +11,20 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,35 +33,41 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.ProductsByCollectionIDQuery
 import com.example.buynest.R
-import com.example.buynest.repository.homeRepository.HomeRepository
-import com.example.buynest.model.uistate.ResponseState
-import com.example.buynest.repository.favoriteRepo.FavoriteRepoImpl
+import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.ui.theme.*
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.viewmodel.brandproducts.BrandDetailsViewModel
-import com.example.buynest.viewmodel.brandproducts.BrandProductsFactory
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.ProductItem
 import com.example.buynest.views.component.SearchBar
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrandDetailsScreen(brandID:String,categoryName: String,onCartClicked:()->Unit,
-                       backClicked:()->Unit,onProductClicked:(productId:String)->Unit) {
-    val phenomenaFontFamily = FontFamily(
-        Font(R.font.phenomena_bold)
-    )
+fun BrandDetailsScreen(
+    brandID: String,
+    categoryName: String,
+    onCartClicked: () -> Unit,
+    backClicked: () -> Unit,
+    onProductClicked: (productId: String) -> Unit,
+    onSearchClicked:()->Unit,
+    brandProductsViewModel: BrandDetailsViewModel = koinViewModel(),
+    favViewModel: FavouritesViewModel = koinViewModel(),
+    currencyViewModel: CurrencyViewModel = koinViewModel()
+) {
+    val phenomenaFontFamily = FontFamily(Font(R.font.phenomena_bold))
 
-    val brandProductsViewModel: BrandDetailsViewModel = viewModel(
-        factory = BrandProductsFactory(HomeRepository())
-    )
     val brandProducts by brandProductsViewModel.brandProducts.collectAsStateWithLifecycle()
-    val favViewModel: FavouritesViewModel = viewModel(
-        factory = FavouritesViewModel.FavouritesFactory(FavoriteRepoImpl())
-    )
+    val filterExpanded = remember { mutableStateOf(false) }
+    val rate by currencyViewModel.rate
+    val currencySymbol by currencyViewModel.currencySymbol
+
+    LaunchedEffect(Unit) {
+        currencyViewModel.loadCurrency()
+    }
 
     LaunchedEffect(brandID) {
         val id = "gid://shopify/Collection/$brandID"
@@ -79,44 +91,100 @@ fun BrandDetailsScreen(brandID:String,categoryName: String,onCartClicked:()->Uni
                 )
             },
             navigationIcon = {
-                IconButton(onClick = {
-                    backClicked()
-                }) {
+                IconButton(onClick = backClicked) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = null,
                         tint = MainColor
                     )
                 }
+            },
+            actions = {
+                IconButton(onClick = { filterExpanded.value = !filterExpanded.value }) {
+                    Icon(
+                        imageVector = Icons.Default.FilterList,
+                        contentDescription = "Filter",
+                        tint = MainColor
+                    )
+                }
             }
         )
-        SearchBar(
-            onCartClicked = onCartClicked
-        )
+
+        SearchBar(onCartClicked = onCartClicked, onSearchClicked = onSearchClicked)
+
         Spacer(modifier = Modifier.height(24.dp))
+
         when (val result = brandProducts) {
-            is ResponseState.Error -> {
+            is UiResponseState.Error -> {
                 Text(text = result.message)
             }
-            ResponseState.Loading -> {
+
+            UiResponseState.Loading -> {
                 Indicator()
             }
-            is ResponseState.Success<*> -> {
+            is UiResponseState.Success<*> -> {
                 val data = result.data as? ProductsByCollectionIDQuery.Data
                 val productList = data?.collection?.products?.edges?.map { it.node }
-                ProductGrid(categoryName, onProductClicked, productList,favViewModel)
+                val prices = productList?.mapNotNull {
+                    it.variants.edges.firstOrNull()?.node?.price?.amount?.toString()?.toFloatOrNull()
+                }
+
+                val minPrice = prices?.minOrNull() ?: 0f
+                val maxPrice = prices?.maxOrNull() ?: 1000f
+
+                val selectedPrice = remember { mutableStateOf(maxPrice) }
+
+                if (filterExpanded.value) {
+                    Text(
+                        text = "Max Price: ${selectedPrice.value.toInt()}",
+                        color = MainColor,
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
+                    )
+
+                    Slider(
+                        value = selectedPrice.value,
+                        onValueChange = { selectedPrice.value = it },
+                        valueRange = minPrice..maxPrice,
+                        steps = 4,
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        colors = SliderDefaults.colors(
+                            thumbColor = MainColor,
+                            activeTrackColor = MainColor,
+                            inactiveTrackColor = Color.LightGray
+                        )
+                    )
+                }
+
+                val filteredProducts = productList?.filter {
+                    val price = it.variants.edges.firstOrNull()?.node?.price?.amount?.toString()?.toFloatOrNull()
+                    price != null && price <= selectedPrice.value
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                ProductGrid(
+                    onProductClicked = onProductClicked,
+                    bradProduct = filteredProducts,
+                    favViewModel = favViewModel,
+                    rate = rate,
+                    currencySymbol = currencySymbol.toString()
+                )
             }
         }
     }
 }
 
 
+
+
 @Composable
 fun ProductGrid(
-    screenName: String,
     onProductClicked: (productId: String) -> Unit,
     bradProduct: List<ProductsByCollectionIDQuery.Node>? = null,
-    favViewModel: FavouritesViewModel
+    favViewModel: FavouritesViewModel,
+    rate: Double,
+    currencySymbol: String
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -126,8 +194,7 @@ fun ProductGrid(
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ){
         items(bradProduct?.size ?: 0) {
-            ProductItem(onProductClicked, bradProduct?.get(it),favViewModel)
-
+            ProductItem(onProductClicked, bradProduct?.get(it),favViewModel,rate,currencySymbol)
         }
     }
 }

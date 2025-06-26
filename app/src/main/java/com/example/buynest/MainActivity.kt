@@ -7,7 +7,6 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,8 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,22 +40,31 @@ import com.example.buynest.navigation.SetupNavHost
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.buynest.model.data.remote.graphql.ApolloClient
 import com.example.buynest.navigation.RoutesScreens
+import com.example.buynest.navigation.ScreenMenuItem
+import com.example.buynest.repository.cart.CartRepositoryImpl
+import com.example.buynest.repository.cart.datasource.CartDataSourceImpl
 import com.example.buynest.ui.theme.white
+import com.example.buynest.utils.SecureSharedPrefHelper
+import com.example.buynest.utils.SharedPrefHelper
+import com.example.buynest.utils.constant.*
 import kotlinx.coroutines.delay
 
+val routIndex = MutableLiveData<Int>(0)
 class MainActivity : ComponentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
         setContent {
             var showSplash by remember { mutableStateOf(true) }
             Surface(
@@ -156,35 +162,43 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun CurvedNavBar(navController: NavHostController) {
-        AndroidView(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(80.dp)
-                .background(White),
-            factory = { context ->
-                CurvedBottomNavigationView(context).apply {
+        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+        val currentIndex = ScreenMenuItem.menuItems.indexOfFirst { it.screen.route == currentRoute }
+        val initialIndex = if (currentIndex != -1) currentIndex else 0
 
-                    unSelectedColor = White.toArgb()
-                    selectedColor = MainColor.toArgb()
-                    navBackgroundColor = MainColor.toArgb()
+        androidx.compose.runtime.key(initialIndex) {
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .background(White),
+                factory = { context ->
+                    CurvedBottomNavigationView(context).apply {
+                        unSelectedColor = White.toArgb()
+                        selectedColor = MainColor.toArgb()
+                        navBackgroundColor = MainColor.toArgb()
 
-                    val cbnMenuItems = ScreenMenuItem.menuItems.map { screen ->
-                        CbnMenuItem(
-                            icon = screen.icon,
-                            avdIcon = screen.selectedIcon,
-                            destinationId = screen.id
-                        )
-                    }
-                    layoutDirection = View.LAYOUT_DIRECTION_LTR
-                    setMenuItems(cbnMenuItems.toTypedArray(), 0)
-                    setOnMenuItemClickListener { cbnMenuItem, i ->
-                        navController.popBackStack()
-                        navController.navigate(ScreenMenuItem.menuItems[i].screen.route)
+                        val cbnMenuItems = ScreenMenuItem.menuItems.map { screen ->
+                            CbnMenuItem(
+                                icon = screen.icon,
+                                avdIcon = screen.selectedIcon,
+                                destinationId = screen.id
+                            )
+                        }
+
+                        layoutDirection = View.LAYOUT_DIRECTION_LTR
+                        setMenuItems(cbnMenuItems.toTypedArray(), initialIndex)
+
+                        setOnMenuItemClickListener { _, i ->
+                            navController.popBackStack()
+                            navController.navigate(ScreenMenuItem.menuItems[i].screen.route)
+                        }
                     }
                 }
-            }
-        )
+            )
+        }
     }
+
 
     private fun hideSystemUI() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

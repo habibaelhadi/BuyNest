@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -42,26 +41,34 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductsByCollectionIDQuery
 import com.example.buynest.ProductsDetailsByIDsQuery
+import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.MainColor
-import com.example.buynest.ui.theme.Yellow
 import com.example.buynest.ui.theme.white
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 
 @Composable
-fun ProductItem(onProductClicked: (productId: String) -> Unit, bradProduct: ProductsByCollectionIDQuery.Node?,favViewModel: FavouritesViewModel){
+fun ProductItem(
+    onProductClicked: (productId: String) -> Unit,
+    bradProduct: ProductsByCollectionIDQuery.Node?,
+    favViewModel: FavouritesViewModel,
+    rate: Double,
+    currencySymbol: String
+) {
     val productId = bradProduct?.id.toString()
     val numericId = productId.substringAfterLast("/")
-    Card (
-        modifier = Modifier
-            .width(200.dp)
-            .padding(6.dp),
+
+    Card(modifier = Modifier
+        .width(200.dp)
+        .padding(6.dp),
         border = BorderStroke(1.dp, MainColor.copy(0.5f)),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(4.dp),
-        onClick = {onProductClicked(numericId)}
-    ){
+        onClick = {
+            onProductClicked(numericId)
+        }) {
         val productImageUrl = bradProduct?.featuredImage?.url.toString()
-        val productPrice = bradProduct?.variants?.edges?.firstOrNull()?.node?.price?.amount.toString()
+        val finalPrice = bradProduct?.variants?.edges?.firstOrNull()?.node?.price?.amount
+            ?.toString()?.toDoubleOrNull()?.times(rate)?.toInt() ?: 0
 
         val cleanedTitle = bradProduct?.title?.replace(Regex("\\(.*?\\)"), "")?.trim()
         val parts = cleanedTitle?.split("|")?.map { it.trim() }
@@ -72,21 +79,26 @@ fun ProductItem(onProductClicked: (productId: String) -> Unit, bradProduct: Prod
         val isFav = favoriteProducts.contains(productId)
         var itemToDelete by remember { mutableStateOf<ProductsDetailsByIDsQuery.Node?>(null) }
         var showConfirmDialog by remember { mutableStateOf(false) }
+        val user = FirebaseAuthObject.getAuth().currentUser
+        val showGuestDialog = remember { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
-            favViewModel.getAllFavorites()
+            if (user != null) {
+                favViewModel.getAllFavorites()
+            }
         }
 
         Column(
-            modifier = Modifier.background(white)
+            modifier = Modifier
+                .background(white)
                 .height(240.dp)
-        ){
+        ) {
             Box(
                 modifier = Modifier
                     .height(140.dp)
                     .fillMaxWidth()
 
-            ){
+            ) {
                 Image(
                     painter = rememberAsyncImagePainter(productImageUrl),
                     contentDescription = null,
@@ -97,27 +109,32 @@ fun ProductItem(onProductClicked: (productId: String) -> Unit, bradProduct: Prod
                     modifier = Modifier
                         .padding(end = 8.dp, top = 8.dp)
                         .align(Alignment.TopEnd)
-                ){
+                ) {
                     IconButton(
                         onClick = {
-                            if (isFav) {
-                                itemToDelete = ProductsDetailsByIDsQuery.Node(
-                                    __typename = "Product",
-                                    onProduct = ProductsDetailsByIDsQuery.OnProduct(
-                                        id = productId,
-                                        title = productName,
-                                        vendor = "", productType = "", description = "",
-                                        featuredImage = null,
-                                        variants = ProductsDetailsByIDsQuery.Variants(emptyList()),
-                                        media = ProductsDetailsByIDsQuery.Media(emptyList()),
-                                        options = emptyList()
+                            if(user == null){
+                                showGuestDialog.value = true
+                            }else{
+                                if (isFav) {
+                                    itemToDelete = ProductsDetailsByIDsQuery.Node(
+                                        __typename = "Product",
+                                        onProduct = ProductsDetailsByIDsQuery.OnProduct(
+                                            id = productId,
+                                            title = productName,
+                                            vendor = "",
+                                            productType = "",
+                                            description = "",
+                                            featuredImage = null,
+                                            variants = ProductsDetailsByIDsQuery.Variants(emptyList()),
+                                            media = ProductsDetailsByIDsQuery.Media(emptyList()),
+                                            options = emptyList()
+                                        )
                                     )
-                                )
-                                showConfirmDialog = true
-                            } else {
-                                favViewModel.addToFavorite(productId)
+                                    showConfirmDialog = true
+                                } else {
+                                    favViewModel.addToFavorite(productId)
+                                }
                             }
-
                         },
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -135,7 +152,7 @@ fun ProductItem(onProductClicked: (productId: String) -> Unit, bradProduct: Prod
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = productName.toString(),
+                text = productName,
                 style = MaterialTheme.typography.titleMedium,
                 color = MainColor,
                 maxLines = 2,
@@ -143,35 +160,21 @@ fun ProductItem(onProductClicked: (productId: String) -> Unit, bradProduct: Prod
             )
             Spacer(modifier = Modifier.height(4.dp))
 
-            Row (
+            Row(
                 Modifier.padding(bottom = 16.dp, end = 8.dp)
-            ){
+            ) {
                 Text(
-                    text = productPrice,
+                    text =  "${finalPrice} $currencySymbol",
                     style = MaterialTheme.typography.titleSmall,
                     color = MainColor,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                IconButton(
-                    onClick = {},
-                    modifier = Modifier
-                        .background(MainColor, shape = CircleShape)
-                        .size(24.dp)
-                        .align(Alignment.CenterVertically)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = null,
-                        tint = white
-                    )
-                }
             }
         }
 
         if (showConfirmDialog && itemToDelete != null) {
-            AlertDialog(
-                onDismissRequest = { showConfirmDialog = false },
+            AlertDialog(onDismissRequest = { showConfirmDialog = false },
                 title = { Text("Confirm Deletion") },
                 text = { Text("Are you sure you want to delete '${itemToDelete?.__typename}' from favourites?") },
                 confirmButton = {
@@ -193,9 +196,15 @@ fun ProductItem(onProductClicked: (productId: String) -> Unit, bradProduct: Prod
                     }) {
                         Text("Cancel", color = Color.Gray)
                     }
-                }
-            )
+                })
         }
+        GuestAlertDialog(
+            showDialog = showGuestDialog.value,
+            onDismiss = { showGuestDialog.value = false },
+            onConfirm = {
+                showGuestDialog.value = false
+            }
+        )
     }
 }
 

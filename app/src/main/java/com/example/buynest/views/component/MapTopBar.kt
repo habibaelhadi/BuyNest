@@ -23,8 +23,7 @@ import com.example.buynest.ui.theme.MainColor
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapTopBar(
-    onBack: () -> Unit,
-    onSearchClick: () -> Unit
+    onBack: () -> Unit
 ) {
     TopAppBar(
         title = {
@@ -35,7 +34,6 @@ fun MapTopBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(end = 8.dp)
-                    .clickable { onSearchClick() }
             ) {
                 Row(
                     modifier = Modifier
@@ -47,13 +45,6 @@ fun MapTopBar(
                         contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Search for delivery address",
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontSize = 20.sp,
                     )
                 }
             }

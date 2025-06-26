@@ -1,7 +1,9 @@
 package com.example.buynest.views.component
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -24,10 +26,15 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.R
 import com.example.buynest.ui.theme.MainColor
-import com.example.buynest.ui.theme.white
+import com.example.buynest.utils.getCurrencySymbol
 
 @Composable
-fun ForYouSection(items: List<BrandsAndProductsQuery.Node>) {
+fun ForYouSection(
+    items: List<BrandsAndProductsQuery.Node>,
+    onProductClicked: (productId: String) -> Unit,
+    rate: Double,
+    currencySymbol: String
+) {
     Column(
         modifier = Modifier.padding(horizontal = 8.dp)
     ) {
@@ -39,6 +46,7 @@ fun ForYouSection(items: List<BrandsAndProductsQuery.Node>) {
             color = MainColor
         )
         Spacer(modifier = Modifier.height(8.dp))
+
         LazyRow {
             items(items) { item ->
                 val imageUrl = item.featuredImage?.url
@@ -51,15 +59,19 @@ fun ForYouSection(items: List<BrandsAndProductsQuery.Node>) {
                 }
 
                 val discountedPrice = priceDouble * 0.85
+                val convertedPrice = discountedPrice * rate
+                val convertedOriginalPrice = priceDouble * rate
 
                 val parts = item.title.split("|").map { it.trim() }
                 val productName = if (parts.size >= 2) parts[1] else item.title
+                val id = item.id.substringAfterLast("/")
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .padding(end = 16.dp)
                         .width(180.dp)
+                        .clickable { onProductClicked(id) }
                 ) {
                     Image(
                         painter = rememberAsyncImagePainter(imageUrl),
@@ -81,18 +93,16 @@ fun ForYouSection(items: List<BrandsAndProductsQuery.Node>) {
                         fontSize = 14.sp,
                         maxLines = 1,
                         modifier = Modifier.padding(start = 16.dp)
-
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    // Prices in the same line
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(horizontal = 8.dp)
                     ) {
                         Text(
-                            text = "%.2f LE".format(discountedPrice),
+                            text = "%.2f $currencySymbol".format(convertedPrice),
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp,
                             color = Color.Black
@@ -100,7 +110,7 @@ fun ForYouSection(items: List<BrandsAndProductsQuery.Node>) {
                         Spacer(modifier = Modifier.width(16.dp))
                         if (priceDouble > 0.0) {
                             Text(
-                                text = "%.2f LE".format(priceDouble),
+                                text = "%.2f $currencySymbol".format(convertedOriginalPrice),
                                 style = TextStyle(
                                     textDecoration = TextDecoration.LineThrough,
                                     fontSize = 12.sp

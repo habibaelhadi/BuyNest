@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextDecoration
@@ -36,39 +37,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.R
-import com.example.buynest.repository.authenticationrepo.AuthenticationRepoImpl
-import com.example.buynest.repository.authenticationrepo.firebase.FirebaseRepositoryImpl
-import com.example.buynest.repository.authenticationrepo.firebase.datasource.FirebaseDataSourceImpl
-import com.example.buynest.repository.authenticationrepo.shopify.ShopifyAuthRepositoryImpl
-import com.example.buynest.repository.authenticationrepo.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
+import com.example.buynest.repository.authentication.AuthenticationRepoImpl
+import com.example.buynest.repository.authentication.firebase.FirebaseRepositoryImpl
+import com.example.buynest.repository.authentication.firebase.datasource.FirebaseDataSourceImpl
+import com.example.buynest.repository.authentication.shopify.ShopifyAuthRepositoryImpl
+import com.example.buynest.repository.authentication.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
+import com.example.buynest.utils.NetworkHelper
 import com.example.buynest.utils.strategies.SignUpAuthenticationStrategy
 import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
 import com.example.buynest.views.authentication.CustomTextField
 import com.example.buynest.views.customsnackbar.CustomSnackbar
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SignUpScreen( navigateToLogin: () -> Unit) {
+fun SignUpScreen(
+    navigateToLogin: () -> Unit,
+    viewModel: AuthenticationViewModel = koinViewModel()
+) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val name = remember { mutableStateOf("") }
     val phone = remember { mutableStateOf("") }
     val passwordVisible = remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
-    val viewModel: AuthenticationViewModel = viewModel(
-        factory = AuthenticationViewModel.AuthenticationViewModelFactory(
-            AuthenticationRepoImpl(
-                FirebaseRepositoryImpl(
-                    FirebaseDataSourceImpl()
-                ),
-                ShopifyAuthRepositoryImpl(
-                    ShopifyAuthRemoteDataSourceImpl()
-                )
-            )
-        )
-    )
-
+    val context = LocalContext.current
     val snackbarMessage = remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
@@ -187,8 +181,12 @@ fun SignUpScreen( navigateToLogin: () -> Unit) {
 
             Button(
                 onClick = {
-                    val strategy = SignUpAuthenticationStrategy(name.value, phone.value,email.value, password.value)
-                    viewModel.authenticate(strategy)
+                    if (!NetworkHelper.isConnected.value){
+                        snackbarMessage.value = "No internet connection"
+                    }else{
+                        val strategy = SignUpAuthenticationStrategy(name.value, phone.value,email.value, password.value)
+                        viewModel.authenticate(strategy)
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()

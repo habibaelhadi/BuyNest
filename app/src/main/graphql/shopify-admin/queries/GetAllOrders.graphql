@@ -1,0 +1,51 @@
+query getOrdersByEmail($email: String!) {
+    orders(first: 100, query: $email) {
+        edges {
+            node {
+                id
+                name
+                email
+                createdAt
+                note
+
+                totalPriceSet {
+                    shopMoney {
+                        amount
+                        currencyCode
+                    }
+                }
+
+                lineItems(first: 100) {
+                    edges {
+                        node {
+                            title
+                            quantity
+
+                            variant {
+                                id
+                                price        # This returns a scalar (String/Float), no subfields allowed
+
+                                image {
+                                    url        # Image URL of the variant, can be null
+                                }
+
+                                selectedOptions {
+                                    name      # Should contain "Color", "Size", etc.
+                                    value
+                                }
+                            }
+                        }
+                    }
+                }
+
+                shippingAddress {
+                    name
+                    address1
+                    city
+                    country
+                    zip
+                }
+            }
+        }
+    }
+}

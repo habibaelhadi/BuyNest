@@ -3,27 +3,27 @@ package com.example.buynest.viewmodel.brandproducts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.buynest.repository.homeRepository.IHomeRepository
-import com.example.buynest.model.uistate.ResponseState
+import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.repository.home.IHomeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class BrandDetailsViewModel (val repo : IHomeRepository): ViewModel() {
-    private val _mutableBrandProducts = MutableStateFlow<ResponseState>(ResponseState.Loading)
+    private val _mutableBrandProducts = MutableStateFlow<UiResponseState>(UiResponseState.Loading)
     val brandProducts = _mutableBrandProducts
 
     fun getBrandProducts(Id: String) {
         viewModelScope.launch {
             repo.getBrandProducts(Id).collect {
                 try{
-                    _mutableBrandProducts.value = ResponseState.Loading
+                    _mutableBrandProducts.value = UiResponseState.Loading
                     if(it != null){
-                        _mutableBrandProducts.value = ResponseState.Success(it)
+                        _mutableBrandProducts.value = UiResponseState.Success(it)
                     }else{
-                        _mutableBrandProducts.value = ResponseState.Error("No data received.")
+                        _mutableBrandProducts.value = UiResponseState.Error("No data received.")
                     }
                 }catch(e : Exception){
-                    _mutableBrandProducts.value = ResponseState.Error(e.message.toString())
+                    _mutableBrandProducts.value = UiResponseState.Error(e.message.toString())
                 }
             }
         }

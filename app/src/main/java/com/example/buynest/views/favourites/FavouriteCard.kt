@@ -29,6 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,19 +39,26 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductsDetailsByIDsQuery
+import com.example.buynest.model.mapper.mapColorNameToColor
+import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
-import com.example.buynest.utils.mapColorNameToColor
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
+import com.example.buynest.views.component.GuestAlertDialog
+import kotlinx.coroutines.launch
 
 @Composable
 fun FavouriteCard(
     item: ProductsDetailsByIDsQuery.Node,
     onDelete: (String) -> Unit,
-    viewModel: FavouritesViewModel
+    viewModel: FavouritesViewModel,
+    navigateToProductInfo: (String) -> Unit,
+    rate: Double,
+    currencySymbol: String
 ) {
     val imageUrl = item.onProduct?.featuredImage?.url.toString()
     val cleanedTitle = item?.onProduct?.title?.replace(Regex("\\(.*?\\)"), "")?.trim()
@@ -61,21 +70,45 @@ fun FavouriteCard(
         ?.selectedOptions
         ?.firstOrNull { it.name.equals("Color", ignoreCase = true) }
         ?.value
+
+    val size = item.onProduct?.variants?.edges
+        ?.firstOrNull()
+        ?.node
+        ?.selectedOptions
+        ?.firstOrNull { it.name.equals("Size", ignoreCase = true) } //////////////////////////////////
+        ?.value
+
     val price = item.onProduct?.variants?.edges
         ?.firstOrNull()
         ?.node
         ?.price
         ?.amount
         ?.toString()
+        ?.toDoubleOrNull()
+        ?.times(rate)
+        ?.toInt() ?: 0
+
     val colorDot = mapColorNameToColor(color)
     val favoriteProducts by viewModel.favorite.collectAsState()
     val isFav = favoriteProducts.contains(item.onProduct?.id)
+    val id = item.onProduct?.id
+    val numericId = id?.substringAfterLast("/")
+    val user = FirebaseAuthObject.getAuth().currentUser
+    val showGuestDialog = remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         border = BorderStroke(2.dp, LightGray2),
-        colors = cardColors(containerColor = white)
+        colors = cardColors(containerColor = white),
+        onClick = {
+            if (user == null){
+                showGuestDialog.value = true
+            }else{
+                navigateToProductInfo(numericId?:"")
+            }
+        }
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -117,7 +150,7 @@ fun FavouriteCard(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "LE $price",
+                    text = "$price $currencySymbol",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = MainColor
@@ -145,7 +178,13 @@ fun FavouriteCard(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Button(
-                    onClick = {},
+                    onClick = {
+                        item.onProduct?.variants?.edges?.firstOrNull()?.node?.id?.let { variantId ->
+                            viewModel.viewModelScope.launch {
+                                viewModel.addToCart(variantId, 1)
+                            }
+                        }
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MainColor,
                         contentColor = white
@@ -160,4 +199,12 @@ fun FavouriteCard(
             }
         }
     }
+
+    GuestAlertDialog(
+        showDialog = showGuestDialog.value,
+        onDismiss = { showGuestDialog.value = false },
+        onConfirm = {
+            showGuestDialog.value = false
+        }
+    )
 }

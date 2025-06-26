@@ -10,12 +10,9 @@ class SharedViewModel : ViewModel() {
     private val _mutableCategory = MutableStateFlow<List<BrandsAndProductsQuery.Node3>>(emptyList())
     val category = _mutableCategory.asStateFlow()
 
-    fun setCategories(categories: List<BrandsAndProductsQuery.Node3>){
-        _mutableCategory.value = categories
-        Log.i("TAG", "setCategories: ${_mutableCategory.value}")
+    fun setCategories(categories: List<BrandsAndProductsQuery.Node3>) {
+        if (categories.isNotEmpty()) {
+            _mutableCategory.value = categories
+        }
     }
-//    fun getCategories():List<BrandsAndProductsQuery.Node3>{
-//        Log.i("TAG", "getCategories: ${category.value}")
-//        return category.value
-//    }
 }

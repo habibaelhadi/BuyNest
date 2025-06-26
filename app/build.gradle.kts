@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    kotlin("plugin.serialization") version "2.1.10"
+    id("com.google.devtools.ksp")
     id("com.google.gms.google-services")
     id("com.apollographql.apollo3").version("3.8.6")
 }
@@ -30,6 +32,10 @@ android {
         buildConfigField("String", "STRIPE_PUBLISHABLE_KEY", properties.getProperty("STRIPE_PUBLISHABLE_KEY"))
         buildConfigField("String", "STRIPE_SECRET_KEY", properties.getProperty("STRIPE_SECRET_KEY"))
         buildConfigField("String", "CRUUENCY_API_KEY", properties.getProperty("CRUUENCY_API_KEY"))
+        buildConfigField("String", "PLACES_API_KEY", properties.getProperty("PLACES_API_KEY"))
+        buildConfigField("String", "Admin_ACCESS_TOKEN", properties.getProperty("Admin_ACCESS_TOKEN"))
+        resValue ("string", "maps_api_key", properties.getProperty("PLACES_API_KEY"))
+
     }
 
     buildTypes {
@@ -55,6 +61,8 @@ android {
 }
 
 dependencies {
+    val koin_android_version = "4.0.2"
+    val room_version = "2.6.1"
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -118,14 +126,43 @@ dependencies {
     // OkHttp (with logging)
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    //room
+    implementation("androidx.room:room-runtime:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
     // Kotlin Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     //coil for image
     implementation(libs.coil.compose)
+    // EncryptedSharedPreferences
+    implementation ("androidx.security:security-crypto:1.1.0-alpha03")
     // OpenStreetMap
     implementation("org.osmdroid:osmdroid-android:6.1.16")
-
-
+    // Google Places API
+    implementation("com.google.android.libraries.places:places:3.4.0")
+    //flow layout
+    implementation (libs.accompanist.flowlayout)
+    //Zoomable
+    implementation("me.saket.telephoto:zoomable-image-coil:0.16.0")
+    //koin
+    implementation("io.insert-koin:koin-android:$koin_android_version")
+    implementation("io.insert-koin:koin-androidx-compose:$koin_android_version")
+    implementation("io.insert-koin:koin-androidx-compose-navigation:$koin_android_version")
+    implementation("io.insert-koin:koin-androidx-navigation:$koin_android_version")
+    //koin test dependencies
+    testImplementation("io.insert-koin:koin-test-junit4")
+    testImplementation("io.insert-koin:koin-android-test")
+    //test dependencies
+    androidTestImplementation ("io.mockk:mockk-android:1.13.17")
+    androidTestImplementation ("io.mockk:mockk-agent:1.13.17")
+    testImplementation("io.mockk:mockk-android:1.13.17")
+    testImplementation("io.mockk:mockk-agent:1.13.17")
+    testImplementation ("androidx.test:core-ktx:1.6.1")
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.0")
+    androidTestImplementation ("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation ("androidx.test:core-ktx:1.6.1")
+    androidTestImplementation ("androidx.test.espresso:espresso-core:3.5.1")
+    testImplementation ("org.robolectric:robolectric:4.11")
 }
 
 apollo {

@@ -1,16 +1,23 @@
 package com.example.buynest.navigation
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.buynest.utils.SharedPrefHelper
+import com.example.buynest.viewmodel.address.AddressViewModel
+import com.example.buynest.viewmodel.cart.CartViewModel
+import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
+import com.example.buynest.viewmodel.currency.CurrencyViewModel
+import com.example.buynest.viewmodel.discount.DiscountViewModel
+import com.example.buynest.viewmodel.orders.OrdersViewModel
 import com.example.buynest.viewmodel.shared.SharedViewModel
+import com.example.buynest.viewmodel.sreachMap.SearchViewModel
 import com.example.buynest.views.address.AddressScreen
 import com.example.buynest.views.authentication.forgotpassword.ForgotPasswordScreen
 import com.example.buynest.views.authentication.login.LoginScreen
@@ -26,15 +33,24 @@ import com.example.buynest.views.orderdetails.OrderDetailsScreen
 import com.example.buynest.views.orders.OrdersHistoryScreen
 import com.example.buynest.views.productInfo.ProductInfoScreen
 import com.example.buynest.views.profile.ProfileScreen
+import com.example.buynest.views.search.SearchScreen
 import com.example.buynest.views.settings.SettingsScreen
+import org.koin.androidx.compose.koinViewModel
 
+@SuppressLint("ViewModelConstructorInComposable")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SetupNavHost(mainNavController: NavHostController) {
     val context = LocalContext.current
     val isLoggedIn = SharedPrefHelper.getLogIn(context)
     val startDestination = if (isLoggedIn) RoutesScreens.Home.route else RoutesScreens.Login.route
-    val sharedViewModel: SharedViewModel = viewModel()
+    val sharedViewModel: SharedViewModel = koinViewModel()
+    val addressViewModel: AddressViewModel = koinViewModel()
+    val cartViewModel: CartViewModel = koinViewModel()
+    val cagetoryViewModel: CategoryViewModel = koinViewModel()
+    val ordersViewModel: OrdersViewModel = koinViewModel()
+    val discountViewModel: DiscountViewModel = koinViewModel()
+    val currencyViewModel: CurrencyViewModel = koinViewModel()
 
     NavHost(
         navController = mainNavController, startDestination = startDestination
@@ -50,8 +66,17 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 onCardClicked = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
+                },
+                onSearchClicked = {
+                    mainNavController.navigate(RoutesScreens.Search.route)
                 }
-                , sharedViewModel
+                , sharedViewModel,
+                onProductClicked = { productId ->
+                    mainNavController.navigate(RoutesScreens.ProductInfo.route
+                        .replace("{productId}", productId))
+                },
+                discountViewModel = discountViewModel,
+                currencyViewModel = currencyViewModel
             )
         }
 
@@ -69,7 +94,11 @@ fun SetupNavHost(mainNavController: NavHostController) {
                     onProductClicked = { productId ->
                         mainNavController.navigate(RoutesScreens.ProductInfo.route
                             .replace("{productId}", productId))
-                    }
+                    },
+                    onSearchClicked = {
+                        mainNavController.navigate(RoutesScreens.Search.route)
+                    },
+                    currencyViewModel = currencyViewModel
                 )
             }
         }
@@ -77,18 +106,32 @@ fun SetupNavHost(mainNavController: NavHostController) {
             FavouriteScreen(
                 onCartClicked = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
-                }
+                },
+                onSearchClicked = {
+                    mainNavController.navigate(RoutesScreens.Search.route)
+                },
+                navigateToProductInfo = { productId ->
+                    mainNavController.navigate(RoutesScreens.ProductInfo.route
+                        .replace("{productId}", productId))
+                },
+                currencyViewModel = currencyViewModel
             )
         }
         composable(RoutesScreens.Categories.route) {
-            CategoriesScreen(onCartClicked = {
+            CategoriesScreen(
+                onCartClicked = {
                 mainNavController.navigate(RoutesScreens.Cart.route)
-            },
+                },
                 onProductClicked = { productId ->
                     mainNavController.navigate(RoutesScreens.ProductInfo.route
                         .replace("{productId}", productId))
-                }
-                , sharedViewModel
+                },
+                onSearchClicked = {
+                    mainNavController.navigate(RoutesScreens.Search.route)
+                },
+                sharedViewModel = sharedViewModel,
+                categoryViewModel = cagetoryViewModel,
+                currencyViewModel = currencyViewModel
             )
         }
         composable(RoutesScreens.Profile.route) {
@@ -112,9 +155,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
             })
         }
         composable(RoutesScreens.SignUp.route) {
-            SignUpScreen{
+            SignUpScreen( navigateToLogin = {
                 mainNavController.popBackStack()
-            }
+            })
         }
         composable(RoutesScreens.Settings.route) {
             SettingsScreen(
@@ -126,6 +169,9 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 gotoAddressScreen = {
                     mainNavController.navigate(RoutesScreens.Address.route)
+                },
+                gotoLoginScreen = {
+                    mainNavController.navigate(RoutesScreens.Login.route)
                 }
             )
         }
@@ -136,13 +182,21 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 onMapClicked = {
                     mainNavController.navigate(RoutesScreens.Map.route)
-                }
+                },
+                addressViewModel = addressViewModel
             )
         }
         composable(RoutesScreens.Cart.route) {
             CartScreen(
                 onBackClicked = {
                     mainNavController.popBackStack()
+                },
+                cartViewModel = cartViewModel,
+                addressViewModel = addressViewModel,
+                discountViewModel = discountViewModel,
+                currencyViewModel = currencyViewModel,
+                goTOAddress = {
+                    mainNavController.navigate(RoutesScreens.Address.route)
                 }
             )
         }
@@ -153,6 +207,7 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 }
             )
         }
+
         composable(RoutesScreens.OrdersHistory.route) {
             OrdersHistoryScreen(
                 backClicked = {
@@ -160,19 +215,24 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 gotoOrderDetails ={
                     mainNavController.navigate(RoutesScreens.OrderDetails.route)
-                }
+                },
+                orderViewModel = ordersViewModel
             )
         }
         composable(RoutesScreens.OrderDetails.route) {
             OrderDetailsScreen(
                 backClicked = {
                     mainNavController.popBackStack()
-                }
+                },
+                orderViewModel = ordersViewModel,
+                currencyViewModel = currencyViewModel
             )
         }
+
+
         composable(
             route = RoutesScreens.ProductInfo.route,
-            ){ backStackEntry ->
+        ){ backStackEntry ->
             val productId = backStackEntry.arguments?.getString("productId")
             ProductInfoScreen(
                 backClicked = {
@@ -181,7 +241,8 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 navigateToCart = {
                     mainNavController.navigate(RoutesScreens.Cart.route)
                 },
-                productId = productId ?: ""
+                productId = productId ?: "",
+                currencyViewModel = currencyViewModel
             )
         }
         composable(RoutesScreens.Map.route) {
@@ -191,7 +252,8 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 },
                 onMapSearchClicked = {
                     mainNavController.navigate(RoutesScreens.MapSearch.route)
-                }
+                },
+                addressViewModel = addressViewModel
             )
         }
         composable(RoutesScreens.MapSearch.route) {
@@ -199,9 +261,20 @@ fun SetupNavHost(mainNavController: NavHostController) {
                 onBack = {
                     mainNavController.popBackStack()
                 },
-                onPlaceSelected = { geoPoint, name ->
-                    Log.d("MapSearchScreen", "Selected place: $name, $geoPoint")
+                onPlaceSelected = { latLng, address ->
+                    Log.d("MapSearchScreen", "Selected location: $latLng, $address")
+                },
+                searchViewModel = SearchViewModel(context)
+            )
+        }
+        composable(RoutesScreens.Search.route) {
+            SearchScreen(
+                onBackClicked = {
                     mainNavController.popBackStack()
+                },
+                onProductClicked = { productId ->
+                    mainNavController.navigate(RoutesScreens.ProductInfo.route
+                        .replace("{productId}", productId))
                 }
             )
         }
