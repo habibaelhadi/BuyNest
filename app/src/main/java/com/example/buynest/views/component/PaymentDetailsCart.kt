@@ -46,7 +46,7 @@ fun PaymentDetails(
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
-        Text("Discount : $discount %",
+        Text("Discount : $discount $currencySymbol",
             modifier = Modifier.padding(top = 16.dp, start = 16.dp, bottom = 16.dp),
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold

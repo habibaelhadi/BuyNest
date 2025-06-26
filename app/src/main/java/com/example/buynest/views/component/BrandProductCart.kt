@@ -170,17 +170,6 @@ fun ProductItem(
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                IconButton(
-                    onClick = {},
-                    modifier = Modifier
-                        .background(MainColor, shape = CircleShape)
-                        .size(24.dp)
-                        .align(Alignment.CenterVertically)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add, contentDescription = null, tint = white
-                    )
-                }
             }
         }
 
