@@ -212,6 +212,7 @@ fun CartScreen(
                                 activeSheet = SheetType.None
                             }
                             draftOrderId?.data?.draftOrderCreate?.draftOrder?.id?.let { orderId ->
+                                Log.i("TAG", "CartScreen: $orderId ")
                                 cartViewModel.completeOrder(orderId)
                                 cartItems.forEach {
                                     cartViewModel.removeItemFromCart(
