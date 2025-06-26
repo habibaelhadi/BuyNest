@@ -50,6 +50,7 @@ import com.example.buynest.utils.constant.*
 import com.example.buynest.viewmodel.address.AddressViewModel
 import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
 import com.example.buynest.viewmodel.brandproducts.BrandDetailsViewModel
+import com.example.buynest.viewmodel.cart.CartUseCase
 import com.example.buynest.viewmodel.cart.CartViewModel
 import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
@@ -121,12 +122,15 @@ val diModule = module {
         get<Retrofit>().create(StripeAPI::class.java)
     }
 
+    // use case
+    factory { CartUseCase(get()) }
+
     //data source
     factory<ShopifyAddressDataSource> {
         ShopifyAddressDataSourceImpl(get(named("CLIENT_APOLLO")))
     }
     factory<IFirebaseDataSource> { FirebaseDataSourceImpl() }
-    factory<ShopifyAuthRemoteDataSource> { ShopifyAuthRemoteDataSourceImpl(get(named("CLIENT_APOLLO"))) }
+    factory<ShopifyAuthRemoteDataSource> { ShopifyAuthRemoteDataSourceImpl(get(named("CLIENT_APOLLO")),get<CartUseCase>())}
     factory<CartDataSource> { CartDataSourceImpl(get(named("CLIENT_APOLLO"))) }
     factory<IPaymentDataSource> { PaymentDataSourceImpl(get()) }
     factory<ICurrencyDataSource> { CurrencyDataSourceImpl(get())}
@@ -164,11 +168,11 @@ val diModule = module {
         repository = get(),
         context = androidContext()
     )}
-    viewModel { FavouritesViewModel(get()) }
+    viewModel { FavouritesViewModel(get(),get()) }
     viewModel { HomeViewModel(get()) }
     viewModel { OrdersViewModel(get()) }
     viewModel { PaymentViewModel(get()) }
-    viewModel { ProductDetailsViewModel(get()) }
+    viewModel { ProductDetailsViewModel(get(),get()) }
     viewModel { SharedViewModel() }
     viewModel { SearchViewModel(context = androidContext()) }
     viewModel { DiscountViewModel(get()) }

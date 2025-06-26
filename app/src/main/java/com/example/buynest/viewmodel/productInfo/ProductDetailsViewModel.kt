@@ -9,11 +9,14 @@ import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.repository.productDetails.ProductDetailsRepository
 import com.example.buynest.utils.AppConstants.KEY_CART_ID
 import com.example.buynest.utils.SecureSharedPrefHelper
-import com.example.buynest.viewmodel.cart.CartManager
+import com.example.buynest.viewmodel.cart.CartUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-class ProductDetailsViewModel(val repository: ProductDetailsRepository): ViewModel() {
+class ProductDetailsViewModel(
+    val repository: ProductDetailsRepository,
+    val cartUseCase: CartUseCase
+): ViewModel() {
 
     private val _mutableProductDetails = MutableStateFlow<UiResponseState>(UiResponseState.Loading)
     val productDetails = _mutableProductDetails
@@ -43,7 +46,7 @@ class ProductDetailsViewModel(val repository: ProductDetailsRepository): ViewMod
 
         if (cartId == null) {
             Log.i("CartInfo", "No cart ID found. Creating new cart.")
-            val createResponse: ApolloResponse<CreateCartMutation.Data> = CartManager.createCart()
+            val createResponse: ApolloResponse<CreateCartMutation.Data> = cartUseCase.createCart()
             cartId = createResponse.data?.cartCreate?.cart?.id
 
             if (cartId == null) {
@@ -53,7 +56,7 @@ class ProductDetailsViewModel(val repository: ProductDetailsRepository): ViewMod
 
             SecureSharedPrefHelper.putString(KEY_CART_ID, cartId)
         }
-        val response = CartManager.addOrUpdateCartItem(cartId, variantId, quantity)
+        val response = cartUseCase.addOrUpdateCartItem(cartId, variantId, quantity)
         if (response.hasErrors()) {
             Log.e("CartError", "Failed to add item: ${response.errors}")
         } else {

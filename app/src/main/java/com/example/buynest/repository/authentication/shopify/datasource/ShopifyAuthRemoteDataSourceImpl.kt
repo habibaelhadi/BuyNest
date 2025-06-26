@@ -3,12 +3,9 @@ package com.example.buynest.repository.authentication.shopify.datasource
 import android.util.Log
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Optional
-import com.example.buynest.BuildConfig
 import com.example.buynest.CreateCustomerMutation
 import com.example.buynest.CustomerAccessTokenCreateMutation
 import com.example.buynest.LoginCustomerMutation
-import com.example.buynest.repository.cart.CartRepositoryImpl
-import com.example.buynest.repository.cart.datasource.CartDataSourceImpl
 import com.example.buynest.type.CustomerAccessTokenCreateInput
 import com.example.buynest.type.CustomerCreateInput
 import com.example.buynest.utils.AppConstants.KEY_CART_ID
@@ -16,10 +13,12 @@ import com.example.buynest.utils.AppConstants.KEY_CHECKOUT_URL
 import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_ID
 import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_TOKEN
 import com.example.buynest.utils.SecureSharedPrefHelper
-import com.example.buynest.utils.constant.*
-import com.example.buynest.viewmodel.cart.CartManager
+import com.example.buynest.viewmodel.cart.CartUseCase
 
-class ShopifyAuthRemoteDataSourceImpl(private val client: ApolloClient): ShopifyAuthRemoteDataSource {
+class ShopifyAuthRemoteDataSourceImpl(
+    private val client: ApolloClient,
+    private val cartUseCase: CartUseCase
+): ShopifyAuthRemoteDataSource {
 
     override suspend fun signUpCustomer(
         firstName: String,
@@ -81,8 +80,7 @@ class ShopifyAuthRemoteDataSourceImpl(private val client: ApolloClient): Shopify
             Log.i("TAG", "Saved Customer Token: $accessToken")
 
             // Create cart
-            CartManager.setup(CartRepositoryImpl(CartDataSourceImpl(client)))
-            val cartResponse = CartManager.createCart()
+            val cartResponse = cartUseCase.createCart()
             val cart = cartResponse.data?.cartCreate?.cart
 
             if (cart != null) {
@@ -93,7 +91,7 @@ class ShopifyAuthRemoteDataSourceImpl(private val client: ApolloClient): Shopify
                 Log.i("TAG", "Saved Checkout URL: ${cart.checkoutUrl}")
 
                 // Link cart to customer
-                CartManager.linkCartToCustomer(cart.id, accessToken)
+                cartUseCase.linkCartToCustomer(cart.id, accessToken)
                 Log.i("TAG", "Linked cart to customer")
             } else {
                 Log.w("TAG", "Cart creation returned null")
@@ -129,7 +127,7 @@ class ShopifyAuthRemoteDataSourceImpl(private val client: ApolloClient): Shopify
                 SecureSharedPrefHelper.putString(KEY_CART_ID,cartId)
                 Log.i("TAG", "Secure Shared: ${SecureSharedPrefHelper.getString(KEY_CUSTOMER_TOKEN)}")
                 Log.i("TAG", "Shopify -- Secure Shared: ${SecureSharedPrefHelper.getString(KEY_CART_ID)}")
-                CartManager.linkCartToCustomer(cartId, token.accessToken)
+                cartUseCase.linkCartToCustomer(cartId, token.accessToken)
                 Result.success(token)
             } else {
                 Log.i("TAG", "else loginCustomer: $errors")
