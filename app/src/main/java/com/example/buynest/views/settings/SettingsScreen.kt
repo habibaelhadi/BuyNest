@@ -12,14 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Payment
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -41,15 +34,12 @@ import com.example.buynest.R
 import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
-import com.example.buynest.utils.NetworkHelper
 import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
-import com.example.buynest.views.component.CountryOptionBottomSheet
 import com.example.buynest.views.component.CurrencyOptionBottomSheet
 import com.example.buynest.views.component.GuestAlertDialog
 import com.example.buynest.views.component.PaymentOptionBottomSheet
 import com.example.buynest.views.component.SettingsCard
-import com.example.buynest.views.customsnackbar.CustomSnackbar
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -64,8 +54,6 @@ fun SettingsScreen(
     val phenomenaBold = FontFamily(Font(R.font.phenomena_bold))
     val showSheet = remember { mutableStateOf(false) }
     val selectedPayment = remember { mutableStateOf(SharedPrefHelper.getPaymentMethod(context)) }
-    val showCountrySheet = remember { mutableStateOf(false) }
-    val selectedCountry = remember { mutableStateOf(SharedPrefHelper.getCountry(context)) }
     val showCurrencySheet = remember { mutableStateOf(false) }
     val selectedCurrency = remember { mutableStateOf(SharedPrefHelper.getCurrency(context)) }
     val launchEmailIntent = remember { mutableStateOf(false) }
@@ -73,7 +61,6 @@ fun SettingsScreen(
     val user = FirebaseAuthObject.getAuth().currentUser
     val buttonText = if (user == null) "Login" else "Log out"
     val showGuestDialog = remember { mutableStateOf(false) }
-    val snackbarMessage = remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         authViewModel.message.collect { message ->
@@ -91,12 +78,7 @@ fun SettingsScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 24.dp)
     ) {
-
-        if (snackbarMessage.value != null) {
-            CustomSnackbar(message = snackbarMessage.value!!) {
-                snackbarMessage.value = null
-            }
-        }
+        Spacer(modifier = Modifier.height(24.dp))
 
         Text(
             "BuyNest",
@@ -108,67 +90,48 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
 
-        SettingsCard("Youssef Fayad", icon = Icons.Default.Person, bold = true, onClick = {
-            if (user == null) {
-                showGuestDialog.value = true
-            } else {
-                gotoProfileScreen()
-            }
-        })
+        SettingsCard(user?.displayName.toString(), icon = Icons.Default.Person, bold = true,
+            onClick = {
+                if (user == null){
+                    showGuestDialog.value = true
+                }else{
+                    gotoProfileScreen()
+                }
+            })
         Spacer(modifier = Modifier.height(12.dp))
 
-        SettingsCard("Address Book", Icons.Default.Home, onClick = {
-            if (!NetworkHelper.isConnected.value){
-                snackbarMessage.value = "No internet connection"
-            }else {
-                if (user == null) {
+        SettingsCard("Address Book", Icons.Default.Home,
+            onClick = {
+                if (user == null){
                     showGuestDialog.value = true
-                } else {
+                }else{
                     gotoAddressScreen()
                 }
-            }
-        })
+            })
 
-        SettingsCard("Orders History", Icons.Default.History, onClick = {
-            if (!NetworkHelper.isConnected.value){
-                snackbarMessage.value = "No internet connection"
-            }else {
-                if (user == null) {
+        SettingsCard("Orders History", Icons.Default.History,
+            onClick = {
+                if (user == null){
                     showGuestDialog.value = true
-                } else {
+                }else{
                     gotoOrdersHistoryScreen()
                 }
-            }
-        })
+            })
+        Spacer(modifier = Modifier.height(12.dp))
 
-        SettingsCard("Payment Option", Icons.Default.Payment, onClick = {
-            if (!NetworkHelper.isConnected.value){
-                snackbarMessage.value = "No internet connection"
-            }else {
-                if (user == null) {
+        SettingsCard("Payment Option", Icons.Default.Payment,
+            onClick = {
+                if (user == null){
                     showGuestDialog.value = true
-                } else {
+                }else{
                     showSheet.value = true
                 }
             }
-        })
-        Spacer(modifier = Modifier.height(12.dp))
+        )
 
-        SettingsCard("Country/Region", Icons.Default.Public, onClick = {
-            if (!NetworkHelper.isConnected.value){
-                snackbarMessage.value = "No internet connection"
-            }else {
-                if (user == null) {
-                    showGuestDialog.value = true
-                } else {
-                    showCountrySheet.value = true
-                }
-            }
-        })
-        SettingsCard(
-            "Currency",
-            Icons.Default.AttachMoney,
-            onClick = { showCurrencySheet.value = true })
+        SettingsCard("Currency", Icons.Default.AttachMoney,
+            onClick = { showCurrencySheet.value = true }
+        )
         Spacer(modifier = Modifier.height(12.dp))
 
 
@@ -176,24 +139,23 @@ fun SettingsScreen(
             launchEmailIntent.value = true
         }
 
-        SettingsCard("About", Icons.Default.Info, onClick = { showAboutDialog.value = true })
+        SettingsCard("About", Icons.Default.Info,
+            onClick = { showAboutDialog.value = true }
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = {
-                if (!NetworkHelper.isConnected.value){
-                    snackbarMessage.value = "No internet connection"
-                }else {
-                    if (user == null) {
-                        gotoLoginScreen()
-                    } else {
-                        authViewModel.logout()
-                    }
+                if (user == null){
+                    gotoLoginScreen()
+                }else{
+                    authViewModel.logout()
                 }
             },
             colors = ButtonDefaults.buttonColors(
-                containerColor = MainColor, contentColor = white
+                containerColor = MainColor,
+                contentColor = white
             ),
             shape = RoundedCornerShape(6.dp),
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -204,28 +166,24 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         if (showSheet.value) {
-            PaymentOptionBottomSheet(selectedOption = selectedPayment.value,
+            PaymentOptionBottomSheet(
+                selectedOption = selectedPayment.value,
                 onDismiss = { showSheet.value = false },
                 onSelectOption = {
                     selectedPayment.value = it
                     SharedPrefHelper.savePaymentMethod(context, it)
-                })
-        }
-        if (showCountrySheet.value) {
-            CountryOptionBottomSheet(selectedCountry = selectedCountry.value,
-                onDismiss = { showCountrySheet.value = false },
-                onSelect = {
-                    selectedCountry.value = it
-                    SharedPrefHelper.saveCountry(context, it)
-                })
+                }
+            )
         }
         if (showCurrencySheet.value) {
-            CurrencyOptionBottomSheet(selectedCurrency = selectedCurrency.value,
+            CurrencyOptionBottomSheet(
+                selectedCurrency = selectedCurrency.value,
                 onDismiss = { showCurrencySheet.value = false },
                 onSelect = {
                     selectedCurrency.value = it
                     SharedPrefHelper.saveCurrency(context, it)
-                })
+                }
+            )
         }
         if (launchEmailIntent.value) {
             LaunchedEffect(Unit) {
@@ -251,7 +209,8 @@ fun SettingsScreen(
         }
 
         if (showAboutDialog.value) {
-            AlertDialog(onDismissRequest = { showAboutDialog.value = false },
+            AlertDialog(
+                onDismissRequest = { showAboutDialog.value = false },
                 title = { Text("About BuyNest") },
                 text = {
                     Text("BuyNest is a shopping app that provides high-quality products with smooth delivery and excellent service.\n\nVersion 1.0.0")
@@ -260,13 +219,16 @@ fun SettingsScreen(
                     TextButton(onClick = { showAboutDialog.value = false }) {
                         Text("OK", color = MainColor)
                     }
-                })
+                }
+            )
         }
     }
 
-    GuestAlertDialog(showDialog = showGuestDialog.value,
+    GuestAlertDialog(
+        showDialog = showGuestDialog.value,
         onDismiss = { showGuestDialog.value = false },
         onConfirm = {
             showGuestDialog.value = false
-        })
+        }
+    )
 }
