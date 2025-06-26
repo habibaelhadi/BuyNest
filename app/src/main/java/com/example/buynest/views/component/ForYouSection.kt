@@ -26,7 +26,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.R
 import com.example.buynest.ui.theme.MainColor
-import com.example.buynest.utils.getCurrencySymbol
 
 @Composable
 fun ForYouSection(

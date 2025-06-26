@@ -49,29 +49,12 @@ class CartViewModel(
     private val _orderResponse = MutableStateFlow<ApolloResponse<CreateDraftOrderMutation.Data>?>(null)
     val orderResponse: StateFlow<ApolloResponse<CreateDraftOrderMutation.Data>?> = _orderResponse
 
-//    fun createCart() {
-//        viewModelScope.launch {
-//            _createCartResponse.value = repository.createCart()
-//        }
-//    }
-
-//    fun linkCartToCustomer(cartId: String, token: String) {
-//        viewModelScope.launch {
-//            _linkCartResponse.value = repository.linkCart(cartId, token)
-//        }
-//    }
 
     fun getCart(cartId: String) {
         viewModelScope.launch {
             _cartResponse.value = repository.getCart(cartId)
         }
     }
-
-//    fun addItemToCart(cartId: String, variantId: String, quantity: Int) {
-//        viewModelScope.launch {
-//            _addItemResponse.value = repository.addItem(cartId, variantId, quantity)
-//        }
-//    }
 
     fun removeItemFromCart(cartId: String, lineId: String) {
         viewModelScope.launch {
