@@ -67,7 +67,7 @@ import com.example.buynest.ProductsByHandleQuery
 import com.example.buynest.model.entity.UiProduct
 import com.example.buynest.utils.mapFromBrandProduct
 import com.example.buynest.utils.mapFromCategoryProduct
-import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
+import com.example.buynest.viewmodel.category.CategoryViewModel
 import com.example.buynest.views.orders.phenomenaFontFamily
 import org.koin.androidx.compose.koinViewModel
 

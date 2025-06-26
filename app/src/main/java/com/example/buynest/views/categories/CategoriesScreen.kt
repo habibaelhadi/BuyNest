@@ -18,14 +18,13 @@ import com.example.buynest.ProductsByHandleQuery
 import com.example.buynest.R
 import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.ui.theme.*
-import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
+import com.example.buynest.viewmodel.category.CategoryViewModel
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.shared.SharedViewModel
 import com.example.buynest.views.component.CategoryItem
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.component.SideNavigation
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CategoriesScreen(

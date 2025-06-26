@@ -12,7 +12,7 @@ import androidx.navigation.compose.composable
 import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.viewmodel.address.AddressViewModel
 import com.example.buynest.viewmodel.cart.CartViewModel
-import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
+import com.example.buynest.viewmodel.category.CategoryViewModel
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.discount.DiscountViewModel
 import com.example.buynest.viewmodel.orders.OrdersViewModel

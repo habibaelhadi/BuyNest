@@ -1,4 +1,4 @@
-package com.example.buynest.viewmodel.categoryViewModel
+package com.example.buynest.viewmodel.category
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

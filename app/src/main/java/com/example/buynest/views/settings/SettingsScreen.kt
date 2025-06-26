@@ -1,7 +1,6 @@
 package com.example.buynest.views.settings
 
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -21,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -32,19 +30,12 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.R
 import com.example.buynest.repository.FirebaseAuthObject
-import com.example.buynest.repository.authentication.AuthenticationRepoImpl
-import com.example.buynest.repository.authentication.firebase.FirebaseRepositoryImpl
-import com.example.buynest.repository.authentication.firebase.datasource.FirebaseDataSourceImpl
-import com.example.buynest.repository.authentication.shopify.ShopifyAuthRepositoryImpl
-import com.example.buynest.repository.authentication.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
-import com.example.buynest.views.component.CountryOptionBottomSheet
 import com.example.buynest.views.component.CurrencyOptionBottomSheet
 import com.example.buynest.views.component.GuestAlertDialog
 import com.example.buynest.views.component.PaymentOptionBottomSheet
