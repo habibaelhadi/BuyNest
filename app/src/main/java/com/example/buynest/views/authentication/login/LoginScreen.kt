@@ -55,6 +55,7 @@ import com.example.buynest.repository.authentication.shopify.ShopifyAuthReposito
 import com.example.buynest.repository.authentication.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
+import com.example.buynest.utils.NetworkHelper
 import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.utils.strategies.GoogleAuthenticationStrategy
 import com.example.buynest.utils.strategies.LoginAuthenticationStrategy
@@ -216,8 +217,13 @@ fun LoginScreen(
 
             Button(
                 onClick = {
-                    val strategy = LoginAuthenticationStrategy(email.value, password.value)
-                    viewModel.authenticate(strategy)
+                    if (!NetworkHelper.isConnected.value){
+                        snackbarMessage.value = "No internet connection"
+                    }else{
+                        snackbarMessage.value = ""
+                        val strategy = LoginAuthenticationStrategy(email.value, password.value)
+                        viewModel.authenticate(strategy)
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()

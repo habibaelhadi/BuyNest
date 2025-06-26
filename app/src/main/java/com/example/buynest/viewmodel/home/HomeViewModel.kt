@@ -1,9 +1,11 @@
 package com.example.buynest.viewmodel.home
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.buynest.repository.home.IHomeRepository
 import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.utils.NetworkHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -11,7 +13,7 @@ class HomeViewModel (val repository: IHomeRepository) : ViewModel() {
     private val _mutableBrand = MutableStateFlow<UiResponseState>(UiResponseState.Loading)
     val brand = _mutableBrand
 
-    fun getBrands() {
+    fun getBrands(context: Context) {
         viewModelScope.launch {
             repository.getBrands().collect {
                 try {

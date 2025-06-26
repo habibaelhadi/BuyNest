@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -41,6 +42,7 @@ import com.example.buynest.repository.authentication.shopify.ShopifyAuthReposito
 import com.example.buynest.repository.authentication.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
+import com.example.buynest.utils.NetworkHelper
 import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
 import com.example.buynest.views.authentication.CustomTextField
 import com.example.buynest.views.customsnackbar.CustomSnackbar
@@ -53,6 +55,7 @@ fun ForgotPasswordScreen(
 ) {
     var email by remember { mutableStateOf("") }
     val snackbarMessage = remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
 
     LaunchedEffect(snackbarMessage.value) {
         if (snackbarMessage.value == "Success") {
@@ -72,11 +75,14 @@ fun ForgotPasswordScreen(
             .background(MainColor)
             .imePadding()
     ) {
+        if (snackbarMessage.value != null) {
+            CustomSnackbar(message = snackbarMessage.value!!) {
+                snackbarMessage.value = null
+            }
+        }
+
         IconButton(
-            onClick = {
-                Log.i("TAG", "ForgotPasswordScreen: ****************")
-                onBackToLogin()
-                      },
+            onClick = { onBackToLogin() },
             modifier = Modifier
                 .padding(top = 64.dp, start = 12.dp)
                 .align(Alignment.TopStart)
@@ -112,12 +118,6 @@ fun ForgotPasswordScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            if (snackbarMessage.value != null) {
-                CustomSnackbar(message = snackbarMessage.value!!) {
-                    snackbarMessage.value = null
-                }
-            }
-
             Text(
                 text = "Enter your email to reset your password",
                 fontSize = 16.sp,
@@ -135,7 +135,14 @@ fun ForgotPasswordScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
-                onClick = { viewModel.resetPassword(email) },
+                onClick =
+                {
+                    if (!NetworkHelper.isConnected.value){
+                        snackbarMessage.value = "No internet connection"
+                    }else{
+                        viewModel.resetPassword(email)
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)

@@ -50,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -65,9 +66,11 @@ import com.example.buynest.views.component.Indicator
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.ProductsByHandleQuery
 import com.example.buynest.model.entity.UiProduct
+import com.example.buynest.utils.NetworkHelper
 import com.example.buynest.utils.mapFromBrandProduct
 import com.example.buynest.utils.mapFromCategoryProduct
 import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
+import com.example.buynest.views.component.NoInternetLottie
 import com.example.buynest.views.orders.phenomenaFontFamily
 import org.koin.androidx.compose.koinViewModel
 
@@ -92,9 +95,11 @@ fun SearchScreen(
     var filteredProducts by remember { mutableStateOf<List<UiProduct>?>(null) }
     val filterExpanded = remember { mutableStateOf(false) }
     val selectedPrice = remember { mutableFloatStateOf(1000f) }
+    val context = LocalContext.current
+    val isConnected by NetworkHelper.isConnected.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        homeViewModel.getBrands()
+    LaunchedEffect(Unit,isConnected) {
+        homeViewModel.getBrands(context = context)
     }
 
     LaunchedEffect(searchQuery, uiProducts, selectedPrice.floatValue) {
@@ -178,7 +183,7 @@ fun SearchScreen(
 
         when (val result = brands) {
             is UiResponseState.Error -> {
-                Text(text = result.message)
+                NoInternetLottie()
             }
             UiResponseState.Loading -> {
                 Indicator()

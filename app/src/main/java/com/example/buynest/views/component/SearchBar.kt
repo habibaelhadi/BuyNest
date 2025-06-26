@@ -26,19 +26,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.Gray
 import com.example.buynest.ui.theme.MainColor
+import com.example.buynest.utils.NetworkHelper
+import com.example.buynest.views.customsnackbar.CustomSnackbar
 import com.example.buynest.views.home.phenomenaBold
 
 @Composable
 fun SearchBar(onCartClicked: () -> Unit, onSearchClicked: () -> Unit) {
     val showGuestDialog = remember { mutableStateOf(false) }
     val user = FirebaseAuthObject.getAuth().currentUser
+    val snackbarMessage = remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
     Column {
-        Spacer(modifier = Modifier.height(20.dp))
         Text("BuyNest", fontSize = 20.sp,
             fontFamily = phenomenaBold, color = MainColor
         )
@@ -72,10 +76,14 @@ fun SearchBar(onCartClicked: () -> Unit, onSearchClicked: () -> Unit) {
             IconButton(
                 onClick =
                 {
-                    if (user == null){
-                        showGuestDialog.value = true
-                    }else{
-                        onCartClicked()
+                    if (!NetworkHelper.isConnected.value){
+                        snackbarMessage.value = "No internet connection"
+                    }else {
+                        if (user == null) {
+                            showGuestDialog.value = true
+                        } else {
+                            onCartClicked()
+                        }
                     }
                 },
                 modifier = Modifier.weight(3F)
@@ -86,6 +94,12 @@ fun SearchBar(onCartClicked: () -> Unit, onSearchClicked: () -> Unit) {
                     modifier = Modifier.size(35.dp),
                 )
             }
+        }
+    }
+
+    if (snackbarMessage.value != null) {
+        CustomSnackbar(message = snackbarMessage.value!!) {
+            snackbarMessage.value = null
         }
     }
 
