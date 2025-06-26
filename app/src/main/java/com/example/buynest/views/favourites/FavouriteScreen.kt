@@ -44,9 +44,11 @@ import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
+import com.example.buynest.utils.NetworkHelper
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.views.component.Indicator
+import com.example.buynest.views.component.NoInternetLottie
 import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.orders.phenomenaFontFamily
 import org.koin.androidx.compose.koinViewModel
@@ -61,8 +63,9 @@ fun FavouriteScreen(
 ) {
     val product by viewModel.productDetails.collectAsStateWithLifecycle()
     val user = FirebaseAuthObject.getAuth().currentUser
+    val isConnected by NetworkHelper.isConnected.collectAsStateWithLifecycle()
 
-    LaunchedEffect(product) {
+    LaunchedEffect(product,isConnected) {
         if (user != null){
             viewModel.getAllFavorites()
         }
@@ -86,19 +89,23 @@ fun FavouriteScreen(
         }else{
             when (val result = product){
                 is UiResponseState.Error -> {
-                    Text(text = result.message)
+                    NoInternetLottie()
                 }
                 UiResponseState.Loading -> {
                     Indicator()
                 }
                 is UiResponseState.Success<*> -> {
                     val data = result.data as? ProductsDetailsByIDsQuery.Data
-                    val productList = data?.nodes
-                    if (productList != null) {
-                        if (productList.isEmpty())
-                            NoDataLottie(false)
-                        else{
-                            Favourites(productList,viewModel,navigateToProductInfo)
+                    if (data == null) {
+                        NoInternetLottie()
+                    } else {
+                        val productList = data?.nodes
+                        if (productList != null) {
+                            if (productList.isEmpty())
+                                NoDataLottie(false)
+                            else {
+                                Favourites(productList, viewModel, navigateToProductInfo)
+                            }
                         }
                     }
                 }

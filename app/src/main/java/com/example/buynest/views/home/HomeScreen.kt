@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.R
 import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.utils.NetworkHelper
 import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.utils.getCurrencyName
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
@@ -34,8 +36,10 @@ import com.example.buynest.viewmodel.shared.SharedViewModel
 import com.example.buynest.views.component.AdsSection
 import com.example.buynest.views.component.ForYouSection
 import com.example.buynest.views.component.Indicator
+import com.example.buynest.views.component.NoInternetLottie
 import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.component.TopBrandsSection
+import com.google.android.play.integrity.internal.c
 import org.koin.androidx.compose.koinViewModel
 
 val phenomenaBold = FontFamily(
@@ -54,13 +58,15 @@ fun HomeScreen(
     currencyViewModel: CurrencyViewModel
 ) {
     val activity = LocalActivity.current
-    val brands by homeViewModel.brand.collectAsStateWithLifecycle()
+    val brands by homeViewModel.brand.collectAsStateWithLifecycle(initialValue = UiResponseState.Loading)
     val offers by discountViewModel.offers.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     val rate by currencyViewModel.rate
     val currencySymbol by currencyViewModel.currencySymbol
+    val isConnected by NetworkHelper.isConnected.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        homeViewModel.getBrands()
+    LaunchedEffect(isConnected) {
+        homeViewModel.getBrands(context = context)
         discountViewModel.loadDiscounts()
         currencyViewModel.loadCurrency()
     }
@@ -80,21 +86,57 @@ fun HomeScreen(
             onSearchClicked = onSearchClicked
         )
         Spacer(modifier = Modifier.height(24.dp))
-        AdsSection(offers = offers)
-        Spacer(modifier = Modifier.height(24.dp))
+
+
         when (val result = brands) {
             is UiResponseState.Error -> {
-                Text(text = result.message)
+                Log.i("TAG", "Error lottie: ${result.message}")
+                NoInternetLottie()
+                return@Column
             }
+
             UiResponseState.Loading -> {
                 Indicator()
             }
+
             is UiResponseState.Success<*> -> {
-                val (brandList, productList) = result.data as Pair<List<BrandsAndProductsQuery.Node3>, List<BrandsAndProductsQuery.Node>>
-                TopBrandsSection(items = brandList.dropLast(4), onCategoryClick = onCategoryClick)
-                sharedViewModel.setCategories(brandList.subList(12,16))
-                Spacer(modifier = Modifier.height(24.dp))
-                ForYouSection(items = productList.drop(10),onProductClicked, rate, currencySymbol.toString())
+                val data = result.data
+                if (data is Pair<*, *>) {
+                    val brandList = data.first as? List<BrandsAndProductsQuery.Node3>
+                    val productList = data.second as? List<BrandsAndProductsQuery.Node>
+
+                    if (brandList.isNullOrEmpty() || productList.isNullOrEmpty()) {
+                        Log.e("TAG", "Empty or null brand/product list")
+                        NoInternetLottie()
+                        return@Column
+                    }
+
+                    AdsSection(offers = offers)
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    if (brandList.size >= 16) {
+                        TopBrandsSection(
+                            items = brandList.dropLast(4),
+                            onCategoryClick = onCategoryClick
+                        )
+                        sharedViewModel.setCategories(brandList.subList(12, 16))
+                    } else {
+                        Text("Not enough brand data")
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    ForYouSection(
+                        items = productList.drop(10),
+                        onProductClicked = onProductClicked,
+                        rate = rate,
+                        currencySymbol = currencySymbol.toString()
+                    )
+                } else {
+                    Log.e("TAG", "Invalid data or null: ${data?.javaClass?.name}")
+                    NoInternetLottie()
+                }
+
             }
         }
     }

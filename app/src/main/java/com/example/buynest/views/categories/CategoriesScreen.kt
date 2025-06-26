@@ -18,11 +18,13 @@ import com.example.buynest.ProductsByHandleQuery
 import com.example.buynest.R
 import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.ui.theme.*
+import com.example.buynest.utils.NetworkHelper
 import com.example.buynest.viewmodel.categoryViewModel.CategoryViewModel
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.shared.SharedViewModel
 import com.example.buynest.views.component.CategoryItem
 import com.example.buynest.views.component.Indicator
+import com.example.buynest.views.component.NoInternetLottie
 import com.example.buynest.views.component.SearchBar
 import com.example.buynest.views.component.SideNavigation
 import org.koin.androidx.compose.koinViewModel
@@ -49,8 +51,9 @@ fun CategoriesScreen(
     val categoryProduct by categoryViewModel.categoryProducts.collectAsStateWithLifecycle()
 
     val categories by sharedViewModel.category.collectAsStateWithLifecycle()
+    val isConnected by NetworkHelper.isConnected.collectAsStateWithLifecycle()
 
-    LaunchedEffect(categories) {
+    LaunchedEffect(categories,isConnected) {
         if (categories.isNotEmpty() && selectedCategory == null) {
             val firstCategory = categories.first().title
             categoryViewModel.setSelectedCategory(firstCategory)
@@ -63,7 +66,7 @@ fun CategoriesScreen(
         currencyViewModel.loadCurrency()
     }
 
-    LaunchedEffect(selectedCategory) {
+    LaunchedEffect(selectedCategory,isConnected) {
         if (selectedCategory != null) {
             categoryViewModel.getCategoryProducts(selectedCategory!!)
         }
@@ -167,28 +170,41 @@ fun CategoriesScreen(
 
                 when (val result = categoryProduct) {
                     is UiResponseState.Error ->{
-                        Text(text = result.message)
+                        NoInternetLottie()
                     }
                     UiResponseState.Loading -> {
                         Indicator()
                     }
                     is UiResponseState.Success<*> -> {
                         val data = result.data as ProductsByHandleQuery.Data
-                        val productEdges = data.collectionByHandle?.products?.edges
+                        if (data == null) {
+                            NoInternetLottie()
+                        } else {
+                            val productEdges = data.collectionByHandle?.products?.edges
 
-                        val filteredEdges = productEdges?.filter { edge ->
-                            val amount = edge.node.variants.edges.firstOrNull()?.node?.price?.amount
-                            val price = when (amount) {
-                                is String -> amount.toFloatOrNull()
-                                is Number -> amount.toFloat()
-                                else -> 0f
+                            val filteredEdges = productEdges?.filter { edge ->
+                                val amount =
+                                    edge.node.variants.edges.firstOrNull()?.node?.price?.amount
+                                val price = when (amount) {
+                                    is String -> amount.toFloatOrNull()
+                                    is Number -> amount.toFloat()
+                                    else -> 0f
+                                }
+
+                                (selectedSubcategory == null ||
+                                        edge.node.productType.contains(
+                                            selectedSubcategory!!,
+                                            ignoreCase = true
+                                        )) &&
+                                        price!! <= maxPrice
                             }
-
-                            (selectedSubcategory == null ||
-                                    edge.node.productType.contains(selectedSubcategory!!, ignoreCase = true)) &&
-                                    price!! <= maxPrice
+                            CategoryProducts(
+                                onProductClicked,
+                                filteredEdges,
+                                rate,
+                                currencySymbol.toString()
+                            )
                         }
-                        CategoryProducts(onProductClicked, filteredEdges, rate, currencySymbol.toString())
                     }
                 }
             }
