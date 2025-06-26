@@ -142,10 +142,10 @@ val diModule = module {
         shopifyRepository = get()
     ) }
     single<CartRepository> { CartRepositoryImpl(get()) }
-    single<ICategoryRepo> { CategoryRepoImpl() }
+    single<ICategoryRepo> { CategoryRepoImpl(get(named("CLIENT_APOLLO"))) }
     single<ICurrencyRepository> { CurrencyRepositoryImpl(get()) }
     single<FavoriteRepo> { FavoriteRepoImpl() }
-    single<IHomeRepository> { HomeRepository() }
+    single<IHomeRepository> { HomeRepository(get(named("CLIENT_APOLLO"))) }
     single<IOrderRepo> { OrderRepo(get(named("ADMIN_APOLLO"))) }
     single<IPaymentRepository> { PaymentRepositoryImpl(get()) }
     single<ProductDetailsRepository> { ProductDetailsRepositoryImpl() }

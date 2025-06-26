@@ -1,39 +1,27 @@
 package com.example.buynest.repository.home
 
+import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.api.ApolloResponse
 import com.example.buynest.BrandsAndProductsQuery
-import com.example.buynest.BuildConfig
 import com.example.buynest.ProductsByCollectionIDQuery
-import com.example.buynest.model.data.remote.graphql.ApolloClient
-import com.example.buynest.utils.constant.CLIENT_BASE_URL
-import com.example.buynest.utils.constant.CLIENT_HEADER
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
-class HomeRepository : IHomeRepository {
+class HomeRepository(private val response: ApolloClient) : IHomeRepository {
     override fun getBrands(): Flow<BrandsAndProductsQuery.Data?> = flow {
-        val response = ApolloClient.createApollo(
-            BASE_URL = CLIENT_BASE_URL,
-            ACCESS_TOKEN = BuildConfig.SHOPIFY_ACCESS_TOKEN,
-            Header = CLIENT_HEADER
-        )
-            .query(BrandsAndProductsQuery())
-            .execute()
+        val result: ApolloResponse<BrandsAndProductsQuery.Data> =
+            response.query(BrandsAndProductsQuery()).execute()
 
-        emit(response.data)
+        emit(result.data)
+
     }.catch {
         emit(null)
     }
 
-    override fun getBrandProducts(id: String): Flow<ProductsByCollectionIDQuery.Data?>  = flow {
-        val response = ApolloClient.createApollo(
-            BASE_URL = CLIENT_BASE_URL,
-            ACCESS_TOKEN = BuildConfig.SHOPIFY_ACCESS_TOKEN,
-            Header = CLIENT_HEADER
-        )
-            .query(ProductsByCollectionIDQuery(id))
-            .execute()
-        emit(response.data)
+    override fun getBrandProducts(id: String): Flow<ProductsByCollectionIDQuery.Data?> = flow {
+        val result = response.query(ProductsByCollectionIDQuery(id)).execute()
+        emit(result.data)
     }.catch {
         emit(null)
     }
