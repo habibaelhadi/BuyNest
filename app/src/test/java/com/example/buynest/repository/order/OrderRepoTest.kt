@@ -105,7 +105,6 @@ class OrderRepoTest {
 
         val emissions = mutableListOf<GetOrdersByEmailQuery.Data>()
         orderRepo.getAllOrders(email).catch {
-            // Optionally assert log or fallback
         }.collect {
             emissions.add(it)
         }

@@ -152,7 +152,7 @@ val diModule = module {
     single<IHomeRepository> { HomeRepository(get(named("CLIENT_APOLLO"))) }
     single<IOrderRepo> { OrderRepo(get(named("ADMIN_APOLLO"))) }
     single<IPaymentRepository> { PaymentRepositoryImpl(get()) }
-    single<ProductDetailsRepository> { ProductDetailsRepositoryImpl() }
+    single<ProductDetailsRepository> { ProductDetailsRepositoryImpl(get(named("CLIENT_APOLLO"))) }
     single<DiscountRepository> { DiscountRepositoryImpl(get()) }
 
     //viewModels

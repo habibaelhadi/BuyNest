@@ -27,13 +27,11 @@ class CategoryRepoImplTest {
 
     @Test
     fun `getProductByCategoryName should return data when successful`() = runTest {
-        // Given
         val fakeCategoryName = "electronics"
         val mockData = mockk<ProductsByHandleQuery.Data>(relaxed = true)
         val query = ProductsByHandleQuery(fakeCategoryName)
         val uuid = com.benasher44.uuid.uuid4()
 
-        // Use builder to construct a real ApolloResponse
         val response = ApolloResponse.Builder(
             operation = query,
             requestUuid = uuid,
@@ -42,10 +40,8 @@ class CategoryRepoImplTest {
 
         coEvery { apolloClient.query(query).execute() } returns response
 
-        // When
         val result = repo.getProductByCategoryName(fakeCategoryName).first()
 
-        // Then
         assertNotNull(result)
         assertEquals(mockData, result)
     }
