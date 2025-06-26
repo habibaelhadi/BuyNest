@@ -59,12 +59,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.example.buynest.ProductDetailsByIDQuery
 import com.example.buynest.ProductsDetailsByIDsQuery
+import com.example.buynest.model.mapper.mapSizeFromTextToInteger
+import com.example.buynest.model.mapper.toColorList
 import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.LightGray
 import com.example.buynest.ui.theme.MainColor
-import com.example.buynest.utils.mapSizeFromTextToInteger
-import com.example.buynest.utils.toColorList
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.viewmodel.productInfo.ProductDetailsViewModel
@@ -122,20 +122,26 @@ fun ProductInfoScreen(
         bottomBar = {
             if (response is UiResponseState.Success<*>) {
                 val product = (response as UiResponseState.Success<ProductDetailsByIDQuery.Data>).data.product
-                val selectedVariant = product?.variants?.edges
+
+                val selectedVariantId = product?.variants?.edges
                     ?.mapNotNull { it.node }
                     ?.find { variant ->
                         val options = variant.selectedOptions.associate {
                             it.name.lowercase() to it.value.lowercase()
                         }
-                        val sizeMatch = selectedSize?.lowercase()?.let { options["size"] == it } ?: false
-                        val colorMatch = selectedColor?.lowercase()?.let { options["color"] == it } ?: false
-                        sizeMatch && colorMatch
-                    }
 
-                val selectedVariantId = selectedVariant?.id
-                maxQuantity = selectedVariant?.quantityAvailable ?: 0
-                Log.i("TAG", "ProductInfoScreen variant id :${selectedVariant?.id} ")
+                        Log.d("VariantDebug", "Options: $options")
+
+                        Log.i("VariantDebug", "selected size: $selectedSize ")
+                        val sizeMatch = selectedSize?.let { options["size"] == it } == true
+                        val colorMatch = selectedColor?.lowercase()?.let { options["color"] == it } == true
+
+                        Log.d("VariantDebug", "sizeMatch: $sizeMatch, colorMatch: $colorMatch")
+
+                        sizeMatch && colorMatch
+                    }?.id
+
+                maxQuantity = product?.variants?.edges?.get(0)?.node?.quantityAvailable ?: 1
 
                 val currentQuantity = quantity
                 BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart",currencySymbol) {
@@ -242,7 +248,8 @@ fun ProductInfo(
                         onColorPicked(color?.getOrNull(colorList?.indexOf(it) ?: -1) ?: "")
                     },
                     onSizeSelected = { onSizePicked(it.toString()) },
-                    currencySymbol = currencySymbol
+                    currencySymbol = currencySymbol,
+
                 )
             }
 
@@ -250,163 +257,6 @@ fun ProductInfo(
     }
 }
 
-@Composable
-fun ProductImages(
-    images: List<String>,
-    favViewModel: FavouritesViewModel,
-    productId: String,
-    productName: String
-){
-    val favoriteProducts by favViewModel.favorite.collectAsState()
-    val isFav = favoriteProducts.contains(productId)
-    var itemToDelete by remember { mutableStateOf<ProductsDetailsByIDsQuery.Node?>(null) }
-    var showConfirmDialog by remember { mutableStateOf(false) }
-    val pagerState = rememberPagerState(images.size)
-    val showGuestDialog = remember { mutableStateOf(false) }
-    val user = FirebaseAuthObject.getAuth().currentUser
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ){
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-            HorizontalPager(
-                count = images.size,
-                state = pagerState,
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                itemSpacing = 8.dp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp)
-            ) { page ->
-
-                val pageOffset = calculateCurrentOffsetForPage(page)
-                val absOffset = abs(pageOffset)
-
-                val scale = lerp(0.85f, 1f, 1f - absOffset.coerceIn(0f, 1f))
-                val alpha = lerp(0.4f, 1f, 1f - absOffset.coerceIn(0f, 1f))
-                val imageOffsetX = (pageOffset * 60).dp
-
-                Box(
-                    modifier = Modifier
-                        .graphicsLayer {
-                            scaleY = scale
-                            scaleX = scale
-                            this.alpha = alpha
-                        }
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(20.dp))
-                ) {
-                    ZoomableAsyncImage(
-                        model = images[page],
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .offset(x = imageOffsetX)
-                            .fillMaxSize()
-                            .alpha(0.85f)
-                    )
-
-                    IconButton(
-                        onClick =
-                        {
-                            if (user == null) {
-                                showGuestDialog.value = true
-                            }else{
-                                if (isFav) {
-                                    itemToDelete = ProductsDetailsByIDsQuery.Node(
-                                        __typename = productName,
-                                        onProduct = ProductsDetailsByIDsQuery.OnProduct(
-                                            id = productId,
-                                            title = productName,
-                                            vendor = "", productType = "", description = "",
-                                            featuredImage = null,
-                                            variants = ProductsDetailsByIDsQuery.Variants(emptyList()),
-                                            media = ProductsDetailsByIDsQuery.Media(emptyList()),
-                                            options = emptyList()
-                                        )
-                                    )
-                                    showConfirmDialog = true
-                                } else {
-                                    favViewModel.addToFavorite(productId)
-                                }
-                            }
-                        },
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(12.dp)
-                            .background(Color.White.copy(alpha = 0.7f), shape = CircleShape)
-                            .size(36.dp)
-                    ) {
-                        Icon(
-                            imageVector = if (isFav) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                            contentDescription = "Favorite",
-                            tint = MainColor
-                        )
-                    }
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                repeat(images.size) { index ->
-                    val selected = pagerState.currentPage == index
-                    val dotAlpha by animateFloatAsState(
-                        targetValue = if (selected) 1f else 0.5f,
-                        animationSpec = tween(300)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .padding(4.dp)
-                            .size(if (selected) 10.dp else 8.dp)
-                            .clip(CircleShape)
-                            .background(MainColor.copy(alpha = dotAlpha))
-                    )
-                }
-            }
-        }
-    }
-
-    if (showConfirmDialog && itemToDelete != null) {
-        AlertDialog(
-            onDismissRequest = { showConfirmDialog = false },
-            title = { Text("Confirm Deletion") },
-            text = { Text("Are you sure you want to delete '${itemToDelete?.__typename}' from favourites?") },
-            confirmButton = {
-                TextButton(onClick = {
-                    itemToDelete?.onProduct?.id?.let { id ->
-                        favViewModel.removeFromFavorite(id)
-                        favViewModel.getAllFavorites()
-                    }
-                    showConfirmDialog = false
-                    itemToDelete = null
-                }) {
-                    Text("Delete", color = Color.Red)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showConfirmDialog = false
-                    itemToDelete = null
-                }) {
-                    Text("Cancel", color = Color.Gray)
-                }
-            }
-        )
-    }
-
-    GuestAlertDialog(
-        showDialog = showGuestDialog.value,
-        onDismiss = { showGuestDialog.value = false },
-        onConfirm = {
-            showGuestDialog.value = false
-        }
-    )
-}
 
 @Composable
 fun ProductDetails(
@@ -485,7 +335,7 @@ fun ProductDetails(
                     val isSelected = if (size.contains(Regex("[XLMSxlms]"))) {
                         mapSizeFromTextToInteger(selectedSize.value) == mapSizeFromTextToInteger(size)
                     } else {
-                        selectedSize.value.equals(size, ignoreCase = true)
+                        selectedSize.value == size
                     }
                     Box(
                         modifier = Modifier
@@ -493,8 +343,13 @@ fun ProductDetails(
                             .clip(CircleShape)
                             .background(if (isSelected) MainColor else LightGray)
                             .clickable {
-                                selectedSize.value = size
-                                onSizeSelected(mapSizeFromTextToInteger(size))
+                                if (size.contains(Regex("[XLMSxlms]"))) {
+                                    selectedSize.value = mapSizeFromTextToInteger(size).toString()
+                                    onSizeSelected(mapSizeFromTextToInteger(size))
+                                } else {
+                                    selectedSize.value = size
+                                    onSizeSelected(size.toInt())
+                                }
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -539,4 +394,163 @@ fun ProductDetails(
             }
         }
     }
+}
+
+
+@Composable
+fun ProductImages(
+    images: List<String>,
+    favViewModel: FavouritesViewModel,
+    productId: String,
+    productName: String
+){
+    val favoriteProducts by favViewModel.favorite.collectAsState()
+    val isFav = favoriteProducts.contains(productId)
+    var itemToDelete by remember { mutableStateOf<ProductsDetailsByIDsQuery.Node?>(null) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    val pagerState = rememberPagerState(images.size)
+    val showGuestDialog = remember { mutableStateOf(false) }
+    val user = FirebaseAuthObject.getAuth().currentUser
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ){
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+            HorizontalPager(
+                count = images.size,
+                state = pagerState,
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                itemSpacing = 8.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp)
+            ) { page ->
+
+                val pageOffset = calculateCurrentOffsetForPage(page)
+                val absOffset = abs(pageOffset)
+
+                val scale = lerp(0.85f, 1f, 1f - absOffset.coerceIn(0f, 1f))
+                val alpha = lerp(0.4f, 1f, 1f - absOffset.coerceIn(0f, 1f))
+                val imageOffsetX = (pageOffset * 60).dp
+
+                Box(
+                    modifier = Modifier
+                        .graphicsLayer {
+                            scaleY = scale
+                            scaleX = scale
+                            this.alpha = alpha
+                        }
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(20.dp))
+                ) {
+                    ZoomableAsyncImage(
+                        model = images[page],
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .offset(x = imageOffsetX)
+                            .fillMaxSize()
+                            .alpha(0.85f)
+                    )
+
+                    IconButton(
+                        onClick =
+                            {
+                                if (user == null) {
+                                    showGuestDialog.value = true
+                                }else{
+                                    if (isFav) {
+                                        itemToDelete = ProductsDetailsByIDsQuery.Node(
+                                            __typename = productName,
+                                            onProduct = ProductsDetailsByIDsQuery.OnProduct(
+                                                id = productId,
+                                                title = productName,
+                                                vendor = "", productType = "", description = "",
+                                                featuredImage = null,
+                                                variants = ProductsDetailsByIDsQuery.Variants(emptyList()),
+                                                media = ProductsDetailsByIDsQuery.Media(emptyList()),
+                                                options = emptyList()
+                                            )
+                                        )
+                                        showConfirmDialog = true
+                                    } else {
+                                        favViewModel.addToFavorite(productId)
+                                    }
+                                }
+                            },
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(12.dp)
+                            .background(Color.White.copy(alpha = 0.7f), shape = CircleShape)
+                            .size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isFav) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = "Favorite",
+                            tint = MainColor
+                        )
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                repeat(images.size) { index ->
+                    val selected = pagerState.currentPage == index
+                    val dotAlpha by animateFloatAsState(
+                        targetValue = if (selected) 1f else 0.5f,
+                        animationSpec = tween(300)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .size(if (selected) 10.dp else 8.dp)
+                            .clip(CircleShape)
+                            .background(MainColor.copy(alpha = dotAlpha))
+                    )
+                }
+            }
+        }
+    }
+
+    if (showConfirmDialog && itemToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("Confirm Deletion") },
+            text = { Text("Are you sure you want to delete '${itemToDelete?.__typename}' from favourites?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    itemToDelete?.onProduct?.id?.let { id ->
+                        favViewModel.removeFromFavorite(id)
+                        favViewModel.getAllFavorites()
+                    }
+                    showConfirmDialog = false
+                    itemToDelete = null
+                }) {
+                    Text("Delete", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showConfirmDialog = false
+                    itemToDelete = null
+                }) {
+                    Text("Cancel", color = Color.Gray)
+                }
+            }
+        )
+    }
+
+    GuestAlertDialog(
+        showDialog = showGuestDialog.value,
+        onDismiss = { showGuestDialog.value = false },
+        onConfirm = {
+            showGuestDialog.value = false
+        }
+    )
 }

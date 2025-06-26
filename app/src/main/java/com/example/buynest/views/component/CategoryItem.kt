@@ -31,11 +31,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductsByHandleQuery
-import com.example.buynest.repository.FirebaseAuthObject
+import com.example.buynest.model.mapper.mapColorNameToColor
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
-import com.example.buynest.utils.mapColorNameToColor
 
 @Composable
 fun CategoryItem(

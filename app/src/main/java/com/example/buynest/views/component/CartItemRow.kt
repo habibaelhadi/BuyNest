@@ -24,9 +24,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.model.entity.CartItem
+import com.example.buynest.model.mapper.mapColorNameToColor
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
-import com.example.buynest.utils.mapColorNameToColor
 
 @Composable
 fun CartItemRow(
