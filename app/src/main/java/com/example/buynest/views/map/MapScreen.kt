@@ -6,8 +6,10 @@ import android.util.Log
 import androidx.compose.foundation.background
 import com.example.buynest.R
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
@@ -93,12 +95,19 @@ fun MapScreen(
     Scaffold(
         modifier = Modifier.statusBarsPadding(),
         topBar = {
-            MapTopBar(
-                onBack = backClicked,
-                onSearchClick = {
-                    onMapSearchClicked()
-                }
-            )
+            IconButton(
+                onClick = backClicked,
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(start = 8.dp)
+                    .clip(CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White
+                )
+            }
         }
     ) { padding ->
         Box(
@@ -153,6 +162,7 @@ fun MapScreen(
                         ) {
                             Text("Confirm and add details", fontSize = 16.sp)
                         }
+                        Spacer(modifier = Modifier.height(20.dp))
                     }
                 }
                 if (currentStep == 2) {

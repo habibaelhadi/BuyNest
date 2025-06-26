@@ -107,9 +107,13 @@ fun CartScreen(
             }
         }
     )
-    var originalTotal by remember { mutableIntStateOf(0) }
-    var totalPrice by remember { mutableIntStateOf(0) }
     var discount by remember { mutableStateOf(0.0) }
+    val originalTotal by remember(cartItems) {
+        derivedStateOf { cartItems.sumOf { it.price * it.quantity } }
+    }
+    val totalPrice by remember(originalTotal, discount) {
+        derivedStateOf { (originalTotal * (1 - discount)).toInt() }
+    }
 
     LaunchedEffect(Unit) {
         PaymentConfiguration.init(context, BuildConfig.STRIPE_PUBLISHABLE_KEY)
@@ -146,8 +150,6 @@ fun CartScreen(
             )
         } ?: emptyList()
 
-        originalTotal = cartItems.sumOf { it.price * it.quantity }
-        totalPrice = (originalTotal * (1 - discount)).toInt()
     }
 
     fun launchCheckoutFlow() {
@@ -176,8 +178,6 @@ fun CartScreen(
                 SheetType.Coupon -> CouponSheet(
                     onValidCoupon = { coupon ->
                         discount = discountViewModel.applyCoupon(coupon)
-                        originalTotal = cartItems.sumOf { it.price * it.quantity }
-                        totalPrice = (originalTotal * (1 - discount)).toInt()
                         activeSheet = SheetType.Address
                     },
                     checkCoupon = { discountViewModel.isCouponValid(it) },
@@ -306,8 +306,6 @@ fun CartScreen(
                                 cartItems = cartItems.map {
                                     if (it.id == id) it.copy(quantity = qty) else it
                                 }
-                                originalTotal = cartItems.sumOf { it.price * it.quantity }
-                                totalPrice = (originalTotal * (1 - discount)).toInt()
                             },
                             onDelete = { id ->
                                 itemToDelete = cartItems.find { it.id == id }

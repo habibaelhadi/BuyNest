@@ -64,8 +64,6 @@ fun SettingsScreen(
     val phenomenaBold = FontFamily(Font(R.font.phenomena_bold))
     val showSheet = remember { mutableStateOf(false) }
     val selectedPayment = remember { mutableStateOf(SharedPrefHelper.getPaymentMethod(context)) }
-    val showCountrySheet = remember { mutableStateOf(false) }
-    val selectedCountry = remember { mutableStateOf(SharedPrefHelper.getCountry(context)) }
     val showCurrencySheet = remember { mutableStateOf(false) }
     val selectedCurrency = remember { mutableStateOf(SharedPrefHelper.getCurrency(context)) }
     val launchEmailIntent = remember { mutableStateOf(false) }
@@ -108,7 +106,7 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
 
-        SettingsCard("Youssef Fayad", icon = Icons.Default.Person, bold = true, onClick = {
+        SettingsCard(user?.displayName.toString() ?: "Guest", icon = Icons.Default.Person, bold = true, onClick = {
             if (user == null) {
                 showGuestDialog.value = true
             } else {
@@ -140,6 +138,8 @@ fun SettingsScreen(
                 }
             }
         })
+        Spacer(modifier = Modifier.height(12.dp))
+
 
         SettingsCard("Payment Option", Icons.Default.Payment, onClick = {
             if (!NetworkHelper.isConnected.value){
@@ -152,23 +152,9 @@ fun SettingsScreen(
                 }
             }
         })
-        Spacer(modifier = Modifier.height(12.dp))
-
-        SettingsCard("Country/Region", Icons.Default.Public, onClick = {
-            if (!NetworkHelper.isConnected.value){
-                snackbarMessage.value = "No internet connection"
-            }else {
-                if (user == null) {
-                    showGuestDialog.value = true
-                } else {
-                    showCountrySheet.value = true
-                }
-            }
+        SettingsCard("Currency", Icons.Default.AttachMoney, onClick = {
+            showCurrencySheet.value = true
         })
-        SettingsCard(
-            "Currency",
-            Icons.Default.AttachMoney,
-            onClick = { showCurrencySheet.value = true })
         Spacer(modifier = Modifier.height(12.dp))
 
 
@@ -209,14 +195,6 @@ fun SettingsScreen(
                 onSelectOption = {
                     selectedPayment.value = it
                     SharedPrefHelper.savePaymentMethod(context, it)
-                })
-        }
-        if (showCountrySheet.value) {
-            CountryOptionBottomSheet(selectedCountry = selectedCountry.value,
-                onDismiss = { showCountrySheet.value = false },
-                onSelect = {
-                    selectedCountry.value = it
-                    SharedPrefHelper.saveCountry(context, it)
                 })
         }
         if (showCurrencySheet.value) {

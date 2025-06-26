@@ -3,21 +3,18 @@ package com.example.buynest.viewmodel.favorites
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.buynest.BuildConfig
-import com.example.buynest.model.data.remote.graphql.ApolloClient
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.cart.CartRepositoryImpl
-import com.example.buynest.repository.cart.datasource.CartDataSourceImpl
 import com.example.buynest.repository.favorite.FavoriteRepo
 import com.example.buynest.utils.AppConstants.KEY_CART_ID
 import com.example.buynest.utils.SecureSharedPrefHelper
-import com.example.buynest.utils.constant.CLIENT_BASE_URL
-import com.example.buynest.utils.constant.CLIENT_HEADER
-import com.example.buynest.viewmodel.cart.CartManager
+import com.example.buynest.viewmodel.cart.CartUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-class FavouritesViewModel(val repo: FavoriteRepo): ViewModel() {
+class FavouritesViewModel(
+    val repo: FavoriteRepo,
+    val cartUseCase: CartUseCase
+): ViewModel() {
     private val _mutableFavorite = MutableStateFlow<List<String>>(emptyList())
     val favorite = _mutableFavorite
     private val _productDetails = MutableStateFlow<UiResponseState>(UiResponseState.Loading)
@@ -72,13 +69,7 @@ class FavouritesViewModel(val repo: FavoriteRepo): ViewModel() {
     suspend fun addToCart(variantId: String, quantity: Int) {
         val cartId = SecureSharedPrefHelper.getString(KEY_CART_ID)
         if (cartId != null) {
-            val apolloClient = ApolloClient.createApollo(
-                BASE_URL = CLIENT_BASE_URL,
-                ACCESS_TOKEN = BuildConfig.SHOPIFY_ACCESS_TOKEN,
-                Header = CLIENT_HEADER
-            )
-            CartManager.setup(CartRepositoryImpl(cartDataSource = CartDataSourceImpl(apolloClient)))
-            val response = CartManager.addOrUpdateCartItem(cartId, variantId, quantity)
+            val response = cartUseCase.addOrUpdateCartItem(cartId, variantId, quantity)
             if (response.hasErrors()) {
                 Log.e("CartError", "Failed to add item: ${response.errors}")
             } else {

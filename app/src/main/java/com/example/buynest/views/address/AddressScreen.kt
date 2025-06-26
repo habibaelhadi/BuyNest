@@ -130,7 +130,7 @@ fun AddressScreen(
                     } else {
                         LazyColumn {
                             itemsIndexed(addressList) { _, address ->
-                                val labelType = address.address2?.split("-")?.firstOrNull()?.trim()?.lowercase() ?: "other"
+                                val labelType = address.address2?.split("-")?.firstOrNull()?.trim()?.lowercase() ?: " "
                                 val landmark = address.address2?.split("-")?.lastOrNull()?.trim()
                                 val label = labelType.replaceFirstChar { it.uppercase() }
 

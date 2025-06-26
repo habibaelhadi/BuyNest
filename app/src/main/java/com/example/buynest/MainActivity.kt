@@ -56,7 +56,6 @@ import com.example.buynest.ui.theme.white
 import com.example.buynest.utils.SecureSharedPrefHelper
 import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.utils.constant.*
-import com.example.buynest.viewmodel.cart.CartManager
 import kotlinx.coroutines.delay
 
 val routIndex = MutableLiveData<Int>(0)
@@ -65,15 +64,6 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
-        val apolloClient = ApolloClient.createApollo(
-            BASE_URL = CLIENT_BASE_URL,
-            ACCESS_TOKEN = BuildConfig.SHOPIFY_ACCESS_TOKEN,
-            Header = CLIENT_HEADER
-        )
-
-        CartManager.setup(CartRepositoryImpl(CartDataSourceImpl(apolloClient)))
 
         setContent {
             var showSplash by remember { mutableStateOf(true) }

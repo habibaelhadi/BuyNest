@@ -25,7 +25,7 @@ fun PaymentOptionBottomSheet(
     onDismiss: () -> Unit,
     onSelectOption: (String) -> Unit
 ) {
-    val options = listOf("Credit Card", "PayPal", "Cash on Delivery")
+    val options = listOf("Credit Card", "Cash on Delivery")
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -49,6 +49,7 @@ fun PaymentOptionBottomSheet(
                 ) {
                     Text(option)
                 }
+                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     }
