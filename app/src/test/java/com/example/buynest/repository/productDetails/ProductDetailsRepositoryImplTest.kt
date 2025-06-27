@@ -32,7 +32,6 @@ class ProductDetailsRepositoryImplTest {
 
     @Test
     fun `getProductDetails should return data when successful`() = runTest {
-        // Given
         val productId = "gid://shopify/Product/123"
         val query = ProductDetailsByIDQuery(productId)
 
@@ -45,15 +44,12 @@ class ProductDetailsRepositoryImplTest {
             data = mockData
         ).build()
 
-        // Mock query().execute()
         val apolloCall = mockk<ApolloCall<ProductDetailsByIDQuery.Data>>()
         coEvery { apolloCall.execute() } returns response
         every { apolloClient.query(query) } returns apolloCall
 
-        // When
         val result = repository.getProductDetails(productId).first()
 
-        // Then
         assertNotNull(result)
         assertEquals(mockData, result)
     }

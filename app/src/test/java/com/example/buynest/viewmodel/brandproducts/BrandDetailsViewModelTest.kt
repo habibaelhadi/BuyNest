@@ -50,6 +50,25 @@ class BrandDetailsViewModelTest {
         println("Final state: $finalState")
         assertTrue("Expected Success, but got: $finalState", finalState is UiResponseState.Success<*>)
     }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `getBrandProducts should emit Error on exception`() = runTest {
+        val fakeId = "123"
+        val errorMessage = "Something went wrong"
+
+        coEvery { repo.getBrandProducts(fakeId) } returns flow {
+            throw RuntimeException(errorMessage)
+        }
+
+        viewModel.getBrandProducts(fakeId)
+
+        advanceUntilIdle()
+
+        val finalState = viewModel.brandProducts.value
+        println("Final state: $finalState")
+
+        assertTrue("Expected Error state, but got: $finalState", finalState is UiResponseState.Error)
+    }
 
 
 }

@@ -32,6 +32,7 @@ class CategoryViewModelTest {
         viewModel = CategoryViewModel(repo)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `getCategoryProducts should emit Success state and update selected category`() = runTest {
         val fakeCategory = "Shoes"
@@ -49,6 +50,7 @@ class CategoryViewModelTest {
         assertEquals(fakeData, (state as UiResponseState.Success<*>).data)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `getCategoryProducts should emit Error state on null result`() = runTest {
         val fakeCategory = "Accessories"

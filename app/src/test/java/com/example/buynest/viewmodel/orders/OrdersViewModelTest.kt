@@ -31,7 +31,6 @@ class OrdersViewModelTest {
     fun `getAllOrders should emit Success when data is received`() = runTest {
         val email = "test@example.com"
 
-        // Mock GraphQL structure
         val mockData = mockk<GetOrdersByEmailQuery.Data>()
         val mockEdge = mockk<GetOrdersByEmailQuery.Edge>()
         val mockNode = mockk<GetOrdersByEmailQuery.Node>()
