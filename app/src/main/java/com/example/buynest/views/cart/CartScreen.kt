@@ -56,6 +56,8 @@ import com.stripe.android.paymentsheet.rememberPaymentSheet
 import kotlinx.coroutines.launch
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.views.component.Indicator
+import com.example.buynest.views.component.NoInternetLottie
+import com.example.buynest.views.favourites.NoDataLottie
 
 
 @SuppressLint("ViewModelConstructorInComposable")
@@ -235,6 +237,7 @@ fun CartScreen(
                                     )
                                 }
                             )
+                            activeSheet = SheetType.None
                         }
                     }
                 )
@@ -270,73 +273,81 @@ fun CartScreen(
             }
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .padding(paddingValues)
-        ) {
-            items(cartItems, key = { it.id }) { item ->
-                val dismissState = rememberDismissState(
-                    confirmStateChange = {
-                        if (it == DismissValue.DismissedToEnd || it == DismissValue.DismissedToStart) {
-                            itemToDelete = item
-                            showConfirmDialog = true
-                            false
-                        } else true
-                    }
-                )
-                SwipeToDismiss(
-                    state = dismissState,
-                    directions = setOf(DismissDirection.StartToEnd, DismissDirection.EndToStart),
-                    background = {
-                        val alignment = when (dismissState.dismissDirection) {
-                            DismissDirection.StartToEnd -> Alignment.CenterStart
-                            DismissDirection.EndToStart -> Alignment.CenterEnd
-                            null -> Alignment.Center
-                        }
+        if (cartItems.isEmpty()){
+            NoDataLottie(false)
+        }else {
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Transparent)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = alignment
-                        ) {
-                            Card(
-                                modifier = Modifier.fillMaxSize(),
-                                shape = RoundedCornerShape(16.dp),
-                                border = BorderStroke(1.dp, LightGray2),
-                                backgroundColor = if (dismissState.dismissDirection != null) Color.Red else Color.LightGray
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(paddingValues)
+            ) {
+                items(cartItems, key = { it.id }) { item ->
+                    val dismissState = rememberDismissState(
+                        confirmStateChange = {
+                            if (it == DismissValue.DismissedToEnd || it == DismissValue.DismissedToStart) {
+                                itemToDelete = item
+                                showConfirmDialog = true
+                                false
+                            } else true
+                        }
+                    )
+                    SwipeToDismiss(
+                        state = dismissState,
+                        directions = setOf(
+                            DismissDirection.StartToEnd,
+                            DismissDirection.EndToStart
+                        ),
+                        background = {
+                            val alignment = when (dismissState.dismissDirection) {
+                                DismissDirection.StartToEnd -> Alignment.CenterStart
+                                DismissDirection.EndToStart -> Alignment.CenterEnd
+                                null -> Alignment.Center
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Transparent)
+                                    .padding(horizontal = 20.dp),
+                                contentAlignment = alignment
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(20.dp),
-                                    contentAlignment = alignment
+                                Card(
+                                    modifier = Modifier.fillMaxSize(),
+                                    shape = RoundedCornerShape(16.dp),
+                                    border = BorderStroke(1.dp, LightGray2),
+                                    backgroundColor = if (dismissState.dismissDirection != null) Color.Red else Color.LightGray
                                 ) {
-                                    Text("Delete", color = Color.White, fontSize = 20.sp)
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(20.dp),
+                                        contentAlignment = alignment
+                                    ) {
+                                        Text("Delete", color = Color.White, fontSize = 20.sp)
+                                    }
                                 }
                             }
+                        },
+                        dismissContent = {
+                            CartItemRow(
+                                item = item,
+                                onQuantityChange = { id, qty ->
+                                    cartItems = cartItems.map {
+                                        if (it.id == id) it.copy(quantity = qty) else it
+                                    }
+                                },
+                                onDelete = { id ->
+                                    itemToDelete = cartItems.find { it.id == id }
+                                    showConfirmDialog = true
+                                },
+                                onItemClick = {}
+                            )
                         }
-                    },
-                    dismissContent = {
-                        CartItemRow(
-                            item = item,
-                            onQuantityChange = { id, qty ->
-                                cartItems = cartItems.map {
-                                    if (it.id == id) it.copy(quantity = qty) else it
-                                }
-                            },
-                            onDelete = { id ->
-                                itemToDelete = cartItems.find { it.id == id }
-                                showConfirmDialog = true
-                            },
-                            onItemClick = {}
-                        )
-                    }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
         }
     }
