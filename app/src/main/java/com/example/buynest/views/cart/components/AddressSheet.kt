@@ -69,4 +69,5 @@ fun AddressSheet(
             Text("Proceed to Payment")
         }
     }
+    Spacer(Modifier.height(16.dp))
 }

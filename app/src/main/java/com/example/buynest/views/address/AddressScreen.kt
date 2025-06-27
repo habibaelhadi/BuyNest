@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.unit.dp
 import com.example.buynest.model.entity.AddressModel
@@ -21,10 +22,11 @@ import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_OFFICE
 import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_TOKEN
 import com.example.buynest.utils.SecureSharedPrefHelper
 import com.example.buynest.viewmodel.address.AddressViewModel
+import com.example.buynest.views.address.component.SettingsBottomSheet
 import com.example.buynest.views.component.AddressItem
 import com.example.buynest.views.component.EditAddressSheet
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
 
 @Composable
 fun AddressScreen(
@@ -35,6 +37,9 @@ fun AddressScreen(
     val uiState by addressViewModel.addressUiState.collectAsState()
     val defaultAddress by addressViewModel.defaultAddress.collectAsState()
     val editingAddress by addressViewModel.editingAddress.collectAsState()
+
+    val selectedAddressForSettings = remember { mutableStateOf<AddressModel?>(null) }
+    val showDeleteConfirmDialog = remember { mutableStateOf(false) }
 
     val bottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val coroutineScope = rememberCoroutineScope()
@@ -49,22 +54,54 @@ fun AddressScreen(
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
         sheetContent = {
-            editingAddress?.let { addr ->
-                EditAddressSheet(
-                    initialAddress = addr,
-                    onDismiss = {
-                        coroutineScope.launch { bottomSheetState.hide() }
-                        addressViewModel.stopEditingAddress()
-                    },
-                    onSave = { updatedInput ->
-                        editingAddress?.id?.let { addressId ->
-                            addressViewModel.updateAddress(token, addressId, updatedInput)
+            when {
+                editingAddress != null -> {
+                    EditAddressSheet(
+                        initialAddress = editingAddress!!,
+                        onDismiss = {
+                            coroutineScope.launch { bottomSheetState.hide() }
+                            addressViewModel.stopEditingAddress()
+                        },
+                        onSave = { updatedInput ->
+                            addressViewModel.updateAddress(token, editingAddress!!.id!!, updatedInput)
+                            coroutineScope.launch { bottomSheetState.hide() }
+                            addressViewModel.stopEditingAddress()
                         }
-                        coroutineScope.launch { bottomSheetState.hide() }
-                        addressViewModel.stopEditingAddress()
-                    }
-                )
-            } ?: Box(modifier = Modifier.height(1.dp))
+                    )
+                }
+
+                selectedAddressForSettings.value != null -> {
+                    SettingsBottomSheet(
+                        onEdit = {
+                            selectedAddressForSettings.value?.let {
+                                coroutineScope.launch {
+                                    bottomSheetState.hide()
+                                    addressViewModel.startEditingAddress(it)
+                                    bottomSheetState.show()
+                                }
+                            }
+                        },
+                        onDelete = {
+                            coroutineScope.launch {
+                                bottomSheetState.hide()
+                                // Delay showing dialog until sheet is hidden
+                                while (bottomSheetState.isVisible) {
+                                    delay(10)
+                                }
+                                showDeleteConfirmDialog.value = true
+                            }
+                        },
+                        onDismiss = {
+                            coroutineScope.launch {
+                                bottomSheetState.hide()
+                                selectedAddressForSettings.value = null
+                            }
+                        }
+                    )
+                }
+
+                else -> Box(modifier = Modifier.height(1.dp))
+            }
         }
     ) {
         Scaffold(
@@ -80,13 +117,10 @@ fun AddressScreen(
                             .padding(horizontal = 4.dp)
                     ) {
                         IconButton(
-                            onClick = { onBackClicked() },
+                            onClick = onBackClicked,
                             modifier = Modifier.align(Alignment.CenterStart)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Back"
-                            )
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                         }
                         Text(
                             text = "Addresses",
@@ -105,7 +139,7 @@ fun AddressScreen(
                         .padding(16.dp)
                 ) {
                     Button(
-                        onClick = { onMapClicked() },
+                        onClick = onMapClicked,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp),
@@ -145,8 +179,7 @@ fun AddressScreen(
                                         val landmark = address.address2?.split("-")?.lastOrNull()?.trim().takeUnless { it.isNullOrEmpty() } ?: "-"
                                         val label = labelType.replaceFirstChar { it.uppercase() }
 
-                                        val isSameId =
-                                            defaultAddress?.id?.normalizedId() == address.id?.normalizedId()
+                                        val isSameId = defaultAddress?.id?.normalizedId() == address.id?.normalizedId()
 
                                         AddressItem(
                                             label = label,
@@ -166,8 +199,8 @@ fun AddressScreen(
                                                 Log.d("AddressScreen", "Setting default address ID: ${address.id}")
                                                 addressViewModel.setDefaultAddress(token, address.id ?: "")
                                             },
-                                            onEdit = {
-                                                addressViewModel.startEditingAddress(address)
+                                            onSettingsClick = {
+                                                selectedAddressForSettings.value = address
                                                 coroutineScope.launch { bottomSheetState.show() }
                                             }
                                         )
@@ -179,8 +212,36 @@ fun AddressScreen(
                 }
             }
         )
+
+        if (showDeleteConfirmDialog.value && selectedAddressForSettings.value != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDeleteConfirmDialog.value = false
+                },
+                title = { Text("Delete Address") },
+                text = { Text("Are you sure you want to delete this address?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        selectedAddressForSettings.value?.let {
+                            addressViewModel.deleteAddress(token, it.id ?: "")
+                            addressViewModel.loadAddresses(token)
+                        }
+                        selectedAddressForSettings.value = null
+                        showDeleteConfirmDialog.value = false
+                    }) {
+                        Text("Delete", color = MaterialTheme.colors.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showDeleteConfirmDialog.value = false
+                    }) {
+                        Text("Cancel", color = Color.Gray)
+                    }
+                }
+            )
+        }
     }
 }
 
 private fun String.normalizedId(): String = this.substringBefore("?")
-
