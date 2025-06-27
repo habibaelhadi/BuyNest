@@ -25,6 +25,7 @@ import com.example.buynest.viewmodel.address.AddressViewModel
 import com.example.buynest.views.address.component.SettingsBottomSheet
 import com.example.buynest.views.component.AddressItem
 import com.example.buynest.views.component.EditAddressSheet
+import com.example.buynest.views.favourites.NoDataLottie
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -171,7 +172,7 @@ fun AddressScreen(
                             val addressList = state.data as? List<AddressModel> ?: emptyList()
 
                             if (addressList.isEmpty()) {
-                                Text("No addresses found", modifier = Modifier.align(Alignment.CenterHorizontally))
+                                NoDataLottie(false)
                             } else {
                                 LazyColumn {
                                     itemsIndexed(addressList) { _, address ->

@@ -13,9 +13,6 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="addToFavorite_returns_success()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="FavoriteRepoImplTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
