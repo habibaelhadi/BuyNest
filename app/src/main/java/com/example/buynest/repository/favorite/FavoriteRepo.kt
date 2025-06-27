@@ -1,6 +1,7 @@
 package com.example.buynest.repository.favorite
 
 import com.example.buynest.ProductsDetailsByIDsQuery
+import com.example.buynest.model.state.FirebaseResponse
 import kotlinx.coroutines.flow.Flow
 
 interface FavoriteRepo {
@@ -8,4 +9,5 @@ interface FavoriteRepo {
     suspend fun removeFromFavorite(productId: String): Result<Unit>
     suspend fun getAllFavorites(): Result<List<String>>
     fun getProductsByIds(productId: List<String>): Flow<ProductsDetailsByIDsQuery.Data?>
+    fun setFirebaseResponse(response: FirebaseResponse)
 }

@@ -58,6 +58,18 @@ android {
         compose = true
         buildConfig = true
     }
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md",
+                "META-INF/LICENSE.txt",
+                "META-INF/NOTICE.md",
+                "META-INF/NOTICE.txt",
+                "META-INF/DEPENDENCIES"
+            )
+        }
+    }
 }
 
 dependencies {
@@ -165,7 +177,7 @@ dependencies {
     androidTestImplementation ("androidx.test:core-ktx:1.6.1")
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.5.1")
     testImplementation ("org.robolectric:robolectric:4.11")
-
+    testImplementation("app.cash.turbine:turbine:1.0.0")
 }
 
 apollo {
