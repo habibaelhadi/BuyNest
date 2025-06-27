@@ -102,4 +102,5 @@ fun CouponSheet(
             Text("Apply")
         }
     }
+    Spacer(Modifier.height(16.dp))
 }

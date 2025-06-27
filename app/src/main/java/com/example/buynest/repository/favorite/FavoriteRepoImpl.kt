@@ -97,4 +97,6 @@ class FavoriteRepoImpl: FavoriteRepo {
     }.catch {
         emit(null)
     }
+
+    override fun setFirebaseResponse(response: FirebaseResponse) = FavFirebase.setFirebaseResponse(response)
 }
