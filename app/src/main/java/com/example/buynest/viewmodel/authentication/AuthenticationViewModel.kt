@@ -124,10 +124,4 @@ class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewMo
             }
         }
     }
-
-    class AuthenticationViewModelFactory(private val repo: AuthenticationRepo): ViewModelProvider.Factory{
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return AuthenticationViewModel(repo) as T
-        }
-    }
 }
