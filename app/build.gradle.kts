@@ -165,6 +165,7 @@ dependencies {
     testImplementation("io.insert-koin:koin-test-junit4:3.5.3")
     testImplementation("io.insert-koin:koin-test:3.5.3")
     testImplementation ("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("app.cash.turbine:turbine:1.0.0")
     //test dependencies
     androidTestImplementation ("io.mockk:mockk-android:1.13.17")
     androidTestImplementation ("io.mockk:mockk-agent:1.13.17")

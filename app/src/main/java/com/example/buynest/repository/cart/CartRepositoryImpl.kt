@@ -25,7 +25,4 @@ class CartRepositoryImpl(
     override suspend fun removeItem(cartId: String, lineId: String): ApolloResponse<RemoveItemFromCartMutation.Data> =
         cartDataSource.removeItem(cartId, lineId)
 
-//    override suspend fun updateQuantity(cartId: String, lineId: String, quantity: Int): ApolloResponse<UpdateCartItemQuantityMutation.Data> =
-//        cartDataSource.updateQuantity(cartId, lineId, quantity)
-
 }

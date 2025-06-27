@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.unit.dp
+import com.example.buynest.model.entity.AddressModel
+import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_FRIEND
 import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_HOME
@@ -30,9 +32,8 @@ fun AddressScreen(
     onMapClicked: () -> Unit,
     addressViewModel: AddressViewModel
 ) {
-    val addressList by addressViewModel.addresses.collectAsState()
+    val uiState by addressViewModel.addressUiState.collectAsState()
     val defaultAddress by addressViewModel.defaultAddress.collectAsState()
-    val error by addressViewModel.error.collectAsState()
     val editingAddress by addressViewModel.editingAddress.collectAsState()
 
     val bottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -117,49 +118,61 @@ fun AddressScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    if (error != null) {
-                        Text(
-                            text = error ?: "",
-                            color = MaterialTheme.colors.error,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                    }
+                    when (val state = uiState) {
+                        is UiResponseState.Loading -> {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator(color = MainColor)
+                            }
+                        }
 
-                    if (addressList.isEmpty()) {
-                        Text("No addresses found", modifier = Modifier.align(Alignment.CenterHorizontally))
-                    } else {
-                        LazyColumn {
-                            itemsIndexed(addressList) { _, address ->
-                                val labelType = address.address2?.split("-")?.firstOrNull()?.trim()?.lowercase() ?: " "
-                                val landmark = address.address2?.split("-")?.lastOrNull()?.trim()
-                                val label = labelType.replaceFirstChar { it.uppercase() }
+                        is UiResponseState.Error -> {
+                            Text(
+                                text = state.message,
+                                color = MaterialTheme.colors.error,
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            )
+                        }
 
-                                val isSameId = defaultAddress?.id?.normalizedId() == address.id?.normalizedId()
+                        is UiResponseState.Success<*> -> {
+                            val addressList = state.data as? List<AddressModel> ?: emptyList()
 
-                                AddressItem(
-                                    label = label,
-                                    icon = when (label) {
-                                        ADDRESS_TYPE_HOME -> Icons.Default.Home
-                                        ADDRESS_TYPE_OFFICE -> Icons.Default.Work
-                                        ADDRESS_TYPE_FRIEND -> Icons.Default.Person
-                                        else -> Icons.Default.LocationOn
-                                    },
-                                    address = address.address1 ?: "",
-                                    phone = address.phone ?: "",
-                                    receiverName = address.firstName ?: "",
-                                    landmark = landmark,
-                                    isSelected = isSameId,
-                                    isDefault = isSameId,
-                                    onSetDefault = {
-                                        Log.d("AddressScreen", "Setting default address ID: ${address.id}")
-                                        addressViewModel.setDefaultAddress(token, address.id ?: "")
-                                    },
-                                    onEdit = {
-                                        addressViewModel.startEditingAddress(address)
-                                        coroutineScope.launch { bottomSheetState.show() }
+                            if (addressList.isEmpty()) {
+                                Text("No addresses found", modifier = Modifier.align(Alignment.CenterHorizontally))
+                            } else {
+                                LazyColumn {
+                                    itemsIndexed(addressList) { _, address ->
+                                        val labelType = address.address2?.split("-")?.firstOrNull()?.trim()?.lowercase() ?: " "
+                                        val landmark = address.address2?.split("-")?.lastOrNull()?.trim().takeUnless { it.isNullOrEmpty() } ?: "-"
+                                        val label = labelType.replaceFirstChar { it.uppercase() }
+
+                                        val isSameId =
+                                            defaultAddress?.id?.normalizedId() == address.id?.normalizedId()
+
+                                        AddressItem(
+                                            label = label,
+                                            icon = when (label) {
+                                                ADDRESS_TYPE_HOME -> Icons.Default.Home
+                                                ADDRESS_TYPE_OFFICE -> Icons.Default.Work
+                                                ADDRESS_TYPE_FRIEND -> Icons.Default.Person
+                                                else -> Icons.Default.LocationOn
+                                            },
+                                            address = address.address1 ?: "",
+                                            phone = address.phone ?: "",
+                                            receiverName = address.firstName ?: "",
+                                            landmark = landmark,
+                                            isSelected = isSameId,
+                                            isDefault = isSameId,
+                                            onSetDefault = {
+                                                Log.d("AddressScreen", "Setting default address ID: ${address.id}")
+                                                addressViewModel.setDefaultAddress(token, address.id ?: "")
+                                            },
+                                            onEdit = {
+                                                addressViewModel.startEditingAddress(address)
+                                                coroutineScope.launch { bottomSheetState.show() }
+                                            }
+                                        )
                                     }
-                                )
-
+                                }
                             }
                         }
                     }

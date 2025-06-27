@@ -214,6 +214,7 @@ fun MapScreen(
                                 name = it
                                 nameError = null
                             },
+                            singleLine = true,
                             label = { Text("Receiver's name") },
                             modifier = Modifier.fillMaxWidth(),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -233,6 +234,7 @@ fun MapScreen(
                                 phone = it
                                 phoneError = null
                             },
+                            singleLine = true,
                             label = { Text("Receiver's phone") },
                             modifier = Modifier.fillMaxWidth(),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -250,6 +252,7 @@ fun MapScreen(
                             value = landmark,
                             onValueChange = { landmark = it },
                             label = { Text("Nearby Landmark (optional)") },
+                            singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 focusedBorderColor = MainColor,
