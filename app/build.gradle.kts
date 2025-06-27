@@ -150,9 +150,8 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose-navigation:$koin_android_version")
     implementation("io.insert-koin:koin-androidx-navigation:$koin_android_version")
     //koin test dependencies
-    testImplementation("io.insert-koin:koin-test-junit4")
-    testImplementation("io.insert-koin:koin-android-test")
-    testImplementation ("org.koin:koin-test:3.5.3")
+    testImplementation("io.insert-koin:koin-test-junit4:3.5.3")
+    testImplementation("io.insert-koin:koin-test:3.5.3")
     testImplementation ("androidx.arch.core:core-testing:2.2.0")
     //test dependencies
     androidTestImplementation ("io.mockk:mockk-android:1.13.17")
@@ -165,7 +164,7 @@ dependencies {
     androidTestImplementation ("androidx.test:core-ktx:1.6.1")
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.5.1")
     testImplementation ("org.robolectric:robolectric:4.11")
-
+    testImplementation("app.cash.turbine:turbine:1.0.0")
 }
 
 apollo {
