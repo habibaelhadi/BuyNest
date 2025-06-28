@@ -32,6 +32,7 @@ import com.example.buynest.GetCartQuery
 import com.example.buynest.repository.payment.datasource.PaymentDataSourceImpl
 import com.example.buynest.model.data.remote.rest.StripeClient
 import com.example.buynest.model.entity.CartItem
+import com.example.buynest.model.mapper.mapSizeFromTextToInteger
 import com.example.buynest.model.state.SheetType
 import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.repository.FirebaseAuthObject
@@ -57,6 +58,7 @@ import kotlinx.coroutines.launch
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.NoInternetLottie
+import com.example.buynest.views.customsnackbar.CustomSnackbar
 import com.example.buynest.views.favourites.NoDataLottie
 
 
@@ -88,6 +90,7 @@ fun CartScreen(
 
     val rate by currencyViewModel.rate
     val currencySymbol by currencyViewModel.currencySymbol
+    var snackbarMessage by remember { mutableStateOf<String?>(null) }
 
     val paymentViewModel = PaymentViewModel(
         repository = PaymentRepositoryImpl(PaymentDataSourceImpl(StripeClient.api))
@@ -137,7 +140,8 @@ fun CartScreen(
                 val product = variant.product
                 val price = variant.priceV2.amount?.toString()?.toDoubleOrNull()?.times(rate)?.toInt() ?: 0
                 val color = variant.selectedOptions.firstOrNull { it.name == "Color" }?.value ?: "Default"
-                val size = variant.selectedOptions.firstOrNull { it.name == "Size" }?.value?.toIntOrNull() ?: 0
+                val sizeText = variant.selectedOptions.firstOrNull { it.name.equals("Size", ignoreCase = true) }?.value.orEmpty()
+                val size = mapSizeFromTextToInteger(sizeText) ?: 0
                 val imageUrl = variant.image?.url?.toString() ?: ""
                 val maxQuantity = variant.quantityAvailable?.toInt() ?: 0
                 CartItem(
@@ -342,12 +346,20 @@ fun CartScreen(
                                     itemToDelete = cartItems.find { it.id == id }
                                     showConfirmDialog = true
                                 },
-                                onItemClick = {}
+                                onItemClick = {},
+                                onLimitReached = {
+                                    snackbarMessage = "Oops! That’s the maximum quantity available"
+                                }
                             )
                         }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
+            }
+        }
+        snackbarMessage?.let { message ->
+            CustomSnackbar (message = message) {
+                snackbarMessage = null
             }
         }
     }

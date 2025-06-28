@@ -77,6 +77,7 @@ import com.example.buynest.views.customsnackbar.CustomSnackbar
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.calculateCurrentOffsetForPage
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import org.koin.androidx.compose.koinViewModel
@@ -133,7 +134,15 @@ fun ProductInfoScreen(
                         Log.d("VariantDebug", "Options: $options")
 
                         Log.i("VariantDebug", "selected size: $selectedSize ")
-                        val sizeMatch = selectedSize?.let { options["size"] == it } == true
+
+                        val selected = selectedSize?.lowercase()?.trim()
+                        val option = options["size"]?.lowercase()?.trim()
+
+                        val selectedSizeMapped = mapSizeFromTextToInteger(selected ?: "")
+                        val optionSizeMapped = mapSizeFromTextToInteger(option ?: "")
+
+                        val sizeMatch = selectedSizeMapped == optionSizeMapped
+
                         val colorMatch = selectedColor?.lowercase()?.let { options["color"] == it } == true
 
                         Log.d("VariantDebug", "sizeMatch: $sizeMatch, colorMatch: $colorMatch")
@@ -145,18 +154,18 @@ fun ProductInfoScreen(
 
                 val currentQuantity = quantity
                 BottomSection(totalPrice, Icons.Default.AddShoppingCart, "Add to Cart",currencySymbol) {
-                    if (selectedSize == null || selectedColor == null) {
-                        snackbarMessage = "Please select size and color before adding to cart"
+                    if (selectedSize.isNullOrBlank() || selectedColor.isNullOrBlank()) {
+                        snackbarMessage = "Pick your perfect size and color to continue \uD83D\uDE0A"
                         return@BottomSection
                     }
 
                     selectedVariantId?.let {
                         viewModel.viewModelScope.launch {
                             viewModel.addToCart(it, currentQuantity)
-                            snackbarMessage = "Item added to cart successfully"
+                            snackbarMessage = "Great! Item added to your cart \uD83C\uDF89"
                         }
                     } ?: run {
-                        snackbarMessage = "No matching variant found"
+                        snackbarMessage = "Sorry, This color isn’t available in the selected size"
                     }
                 }
             }
@@ -172,6 +181,17 @@ fun ProductInfoScreen(
             is UiResponseState.Success<*> -> {
                 val successData = result as UiResponseState.Success<ProductDetailsByIDQuery.Data>
                 val product = successData.data.product
+
+                val rawSizes = product?.options?.getOrNull(0)?.values ?: emptyList()
+                val rawColors = product?.options?.getOrNull(1)?.values ?: emptyList()
+
+                val sizes = if (rawSizes.isEmpty()) listOf("1") else rawSizes
+                val colors = if (rawColors.isEmpty()) listOf("1") else rawColors
+
+                // Auto-select if only one option
+                if (sizes.size == 1) selectedSize = sizes[0]
+                if (colors.size == 1) selectedColor = colors[0]
+
                 ProductInfo(
                     innerPadding = innerPadding,
                     product = product,
@@ -183,7 +203,10 @@ fun ProductInfoScreen(
                     onQuantityChanged = { quantity = it },
                     availableQuantity = maxQuantity,
                     rate = rate,
-                    currencySymbol = currencySymbol
+                    currencySymbol = currencySymbol,
+                    onLimitReached = {
+                        snackbarMessage = "Oops! That’s the maximum quantity available"
+                    }
                 )
             }
         }
@@ -208,7 +231,8 @@ fun ProductInfo(
     onQuantityChanged: (Int) -> Unit,
     availableQuantity: Int,
     rate: Double,
-    currencySymbol: String?
+    currencySymbol: String?,
+    onLimitReached: () -> Unit
 ) {
     Log.i("TAG", "ProductInfoScreen: ${product?.id} ")
     val scrollState = rememberScrollState()
@@ -249,7 +273,7 @@ fun ProductInfo(
                     },
                     onSizeSelected = { onSizePicked(it.toString()) },
                     currencySymbol = currencySymbol,
-
+                    onLimitReached = onLimitReached
                 )
             }
 
@@ -271,6 +295,7 @@ fun ProductDetails(
     onSizeSelected: (Int) -> Unit = {},
     maxQuantity: Int,
     currencySymbol: String?,
+    onLimitReached: () -> Unit
 ) {
     val selectedColor = remember { mutableStateOf(colors?.firstOrNull() ?: Color.Unspecified) }
     val selectedSize = remember { mutableStateOf(sizes?.get(0) ?: "") }
@@ -304,9 +329,12 @@ fun ProductDetails(
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.weight(1f))
-            QuantitySelector(quantity, maxQuantity) { newQuantity ->
-                onQuantityChange(newQuantity)
-            }
+            QuantitySelector(
+                quantity = quantity,
+                maxQuantity = maxQuantity,
+                onChange = { newQuantity -> onQuantityChange(newQuantity) },
+                onLimitReached = onLimitReached
+            )
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -331,25 +359,25 @@ fun ProductDetails(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                it.forEach { size ->
-                    val isSelected = if (size.contains(Regex("[XLMSxlms]"))) {
+                sizes?.forEach { size ->
+                    val selectedIsMapped = selectedSize.value.matches(Regex("(?i)XS|S|M|L|XL|XXL"))
+                    val sizeIsMapped = size.matches(Regex("(?i)XS|S|M|L|XL|XXL"))
+
+                    val isSelected = if (selectedIsMapped && sizeIsMapped) {
                         mapSizeFromTextToInteger(selectedSize.value) == mapSizeFromTextToInteger(size)
                     } else {
                         selectedSize.value == size
                     }
+
                     Box(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
                             .background(if (isSelected) MainColor else LightGray)
                             .clickable {
-                                if (size.contains(Regex("[XLMSxlms]"))) {
-                                    selectedSize.value = mapSizeFromTextToInteger(size).toString()
-                                    onSizeSelected(mapSizeFromTextToInteger(size))
-                                } else {
-                                    selectedSize.value = size
-                                    onSizeSelected(size.toInt())
-                                }
+                                selectedSize.value = size
+                                val selectedInt = size.toIntOrNull() ?: mapSizeFromTextToInteger(size)
+                                onSizeSelected(selectedInt)
                             },
                         contentAlignment = Alignment.Center
                     ) {

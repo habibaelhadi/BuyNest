@@ -33,7 +33,8 @@ fun CartItemRow(
     item: CartItem,
     onQuantityChange: (Int, Int) -> Unit,
     onDelete: (Int) -> Unit,
-    onItemClick: (CartItem) -> Unit
+    onItemClick: (CartItem) -> Unit,
+    onLimitReached: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -99,7 +100,8 @@ fun CartItemRow(
                     QuantitySelector(
                         quantity = item.quantity,
                         onChange = { newQty -> onQuantityChange(item.id, newQty) },
-                        maxQuantity = item.maxQuantity
+                        maxQuantity = item.maxQuantity,
+                        onLimitReached = onLimitReached
                     )
 
                     IconButton(onClick = { onDelete(item.id) }) {
