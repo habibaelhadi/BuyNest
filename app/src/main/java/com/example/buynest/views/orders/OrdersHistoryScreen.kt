@@ -29,11 +29,12 @@ import com.example.buynest.R
 import androidx.compose.runtime.getValue
 import com.example.buynest.admin.GetOrdersByEmailQuery
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.FirebaseAuthObject
+import com.example.buynest.model.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.*
 import com.example.buynest.viewmodel.orders.OrdersViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.OrderItem
+import com.example.buynest.views.favourites.NoDataLottie
 
 val phenomenaFontFamily = FontFamily(
     Font(R.font.phenomena_bold)
@@ -92,10 +93,14 @@ fun OrdersHistoryScreen(
             is UiResponseState.Success<*> -> {
                 val response = result.data as GetOrdersByEmailQuery.Data
                 val orders = response.orders.edges.map { it.node }
-                AllOrdersList(orders = orders, onOrderClick = {
-                    orderViewModel.setSelectedOrder(it)
-                    gotoOrderDetails()
-                })
+                if (orders.isEmpty()){
+                    NoDataLottie(false)
+                }else {
+                    AllOrdersList(orders = orders, onOrderClick = {
+                        orderViewModel.setSelectedOrder(it)
+                        gotoOrderDetails()
+                    })
+                }
             }
         }
     }

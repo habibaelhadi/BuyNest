@@ -4,10 +4,9 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.buynest.repository.FirebaseAuthObject
-import com.example.buynest.repository.authentication.AuthenticationRepo
+import com.example.buynest.model.repository.FirebaseAuthObject
+import com.example.buynest.model.repository.authentication.AuthenticationRepo
 import com.example.buynest.utils.strategies.AuthenticationStrategy
 import com.example.buynest.utils.strategies.GoogleAuthenticationStrategy
 import com.example.buynest.utils.validators.GoogleValidator
@@ -122,12 +121,6 @@ class AuthenticationViewModel(private val authRepo: AuthenticationRepo) : ViewMo
             }else{
                 _mutableMessage.emit(result.exceptionOrNull()?.message ?: "Unknown error")
             }
-        }
-    }
-
-    class AuthenticationViewModelFactory(private val repo: AuthenticationRepo): ViewModelProvider.Factory{
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return AuthenticationViewModel(repo) as T
         }
     }
 }

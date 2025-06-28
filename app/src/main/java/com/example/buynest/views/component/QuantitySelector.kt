@@ -24,7 +24,9 @@ import com.example.buynest.ui.theme.MainColor
 fun QuantitySelector(
     quantity: Int,
     maxQuantity: Int,
-    onChange: (Int) -> Unit) {
+    onChange: (Int) -> Unit,
+    onLimitReached: () -> Unit
+    ){
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -45,6 +47,8 @@ fun QuantitySelector(
             onClick = {
                 if (quantity < maxQuantity) {
                     onChange(quantity + 1)
+                }else{
+                    onLimitReached()
                 }
             }
         ) {

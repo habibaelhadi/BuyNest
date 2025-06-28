@@ -1,6 +1,6 @@
 package com.example.buynest.utils.strategies
 
-import com.example.buynest.repository.authentication.AuthenticationRepo
+import com.example.buynest.model.repository.authentication.AuthenticationRepo
 
 class LoginAuthenticationStrategy(
      val email: String,

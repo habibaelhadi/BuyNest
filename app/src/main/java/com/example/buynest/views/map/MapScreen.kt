@@ -1,10 +1,12 @@
 package com.example.buynest.views.map
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import com.example.buynest.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.apollographql.apollo3.api.Optional
+import com.example.buynest.R
 import com.example.buynest.type.MailingAddressInput
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_FRIEND
@@ -34,8 +37,10 @@ import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_OTHER
 import com.example.buynest.utils.AppConstants.KEY_CUSTOMER_TOKEN
 import com.example.buynest.utils.SecureSharedPrefHelper
 import com.example.buynest.viewmodel.address.AddressViewModel
-import com.example.buynest.views.component.MapTopBar
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
 import org.osmdroid.config.Configuration
@@ -44,6 +49,8 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import java.util.Locale
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +61,26 @@ fun MapScreen(
 ) {
     val context = LocalContext.current
 
+    val hasLocationPermission = remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        hasLocationPermission.value = granted
+    }
+
     LaunchedEffect(Unit) {
+        if (!hasLocationPermission.value) {
+            permissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
         Configuration.getInstance().load(
             context.applicationContext,
             context.getSharedPreferences("osm_config", Context.MODE_PRIVATE)
@@ -62,7 +88,7 @@ fun MapScreen(
     }
 
     var selectedPoint by remember { mutableStateOf<GeoPoint?>(null) }
-    var address by remember { mutableStateOf<String>("") }
+    var address by remember { mutableStateOf("") }
     var showSheet by remember { mutableStateOf(false) }
     var currentStep by remember { mutableStateOf(1) }
 
@@ -74,7 +100,6 @@ fun MapScreen(
     var nameError by remember { mutableStateOf<String?>(null) }
     var phoneError by remember { mutableStateOf<String?>(null) }
     var addressError by remember { mutableStateOf<String?>(null) }
-
 
     LaunchedEffect(selectedPoint) {
         selectedPoint?.let {
@@ -110,15 +135,11 @@ fun MapScreen(
             }
         }
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .padding(padding)
-        ) {
+        Box(modifier = Modifier.padding(padding)) {
             OsmMapView(
                 modifier = Modifier.fillMaxSize(),
-                onLocationSelected = { point ->
-                    selectedPoint = point
-                }
+                onLocationSelected = { point -> selectedPoint = point } ,
+                locationEnabled = hasLocationPermission.value
             )
         }
 
@@ -135,7 +156,6 @@ fun MapScreen(
                     ) {
                         Text("Confirm your order delivery location", style = MaterialTheme.typography.titleLarge)
                         Spacer(modifier = Modifier.height(12.dp))
-
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
@@ -146,12 +166,9 @@ fun MapScreen(
                         ) {
                             Icon(Icons.Default.LocationOn, contentDescription = null, tint = MainColor)
                             Spacer(modifier = Modifier.width(12.dp))
-                            Column {
-                                Text(address, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
-                            }
+                            Text(address, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         }
                         Spacer(modifier = Modifier.height(24.dp))
-
                         Button(
                             onClick = { currentStep = 2 },
                             modifier = Modifier
@@ -166,11 +183,7 @@ fun MapScreen(
                     }
                 }
                 if (currentStep == 2) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                    ) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -187,12 +200,7 @@ fun MapScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            listOf(
-                                ADDRESS_TYPE_HOME,
-                                ADDRESS_TYPE_OFFICE,
-                                ADDRESS_TYPE_FRIEND,
-                                ADDRESS_TYPE_OTHER
-                            ).forEach { type ->
+                            listOf(ADDRESS_TYPE_HOME, ADDRESS_TYPE_OFFICE, ADDRESS_TYPE_FRIEND, ADDRESS_TYPE_OTHER).forEach { type ->
                                 FilterChip(
                                     selected = addressType == type,
                                     onClick = { addressType = type },
@@ -214,6 +222,7 @@ fun MapScreen(
                                 name = it
                                 nameError = null
                             },
+                            singleLine = true,
                             label = { Text("Receiver's name") },
                             modifier = Modifier.fillMaxWidth(),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -222,8 +231,8 @@ fun MapScreen(
                                 focusedLabelColor = MainColor
                             )
                         )
-                        if (nameError != null) {
-                            Text(nameError!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+                        nameError?.let {
+                            Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -233,6 +242,7 @@ fun MapScreen(
                                 phone = it
                                 phoneError = null
                             },
+                            singleLine = true,
                             label = { Text("Receiver's phone") },
                             modifier = Modifier.fillMaxWidth(),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -241,8 +251,8 @@ fun MapScreen(
                                 focusedLabelColor = MainColor
                             )
                         )
-                        if (phoneError != null) {
-                            Text(phoneError!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+                        phoneError?.let {
+                            Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -250,6 +260,7 @@ fun MapScreen(
                             value = landmark,
                             onValueChange = { landmark = it },
                             label = { Text("Nearby Landmark (optional)") },
+                            singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 focusedBorderColor = MainColor,
@@ -276,7 +287,6 @@ fun MapScreen(
                                 } else {
                                     addressError = null
                                 }
-
                                 if (!valid) return@Button
 
                                 val formattedPhone = phone.text.takeIf { it.isNotBlank() }?.let {
@@ -286,15 +296,13 @@ fun MapScreen(
                                 val city = addressViewModel.extractFromAddress(address) { parts ->
                                     parts.getOrNull(parts.size - 2) ?: "Unknown City"
                                 }
-
                                 val country = addressViewModel.extractFromAddress(address) { parts ->
                                     parts.lastOrNull() ?: "Unknown Country"
                                 }
 
-                                val address2Combined = when {
-                                    landmark.text.isNotBlank() -> "$addressType - ${landmark.text}"
-                                    else -> addressType
-                                }
+                                val address2Combined = if (landmark.text.isNotBlank()) {
+                                    "$addressType - ${landmark.text}"
+                                } else addressType
 
                                 val mailingAddressInput = MailingAddressInput(
                                     address1 = Optional.Present(address),
@@ -316,9 +324,7 @@ fun MapScreen(
                                 phone = TextFieldValue("")
                                 landmark = TextFieldValue("")
                             },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp),
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = MainColor),
                             shape = RoundedCornerShape(12.dp)
                         ) {
@@ -335,60 +341,82 @@ fun MapScreen(
 @Composable
 fun OsmMapView(
     modifier: Modifier = Modifier,
-    onLocationSelected: (GeoPoint) -> Unit = {}
+    onLocationSelected: (GeoPoint) -> Unit = {},
+    locationEnabled: Boolean = false
 ) {
     val context = LocalContext.current
     var marker by remember { mutableStateOf<Marker?>(null) }
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    val defaultLocation = GeoPoint(31.2001, 29.9187)
+    var mapView: MapView? by remember { mutableStateOf(null) }
+
+    LaunchedEffect(locationEnabled) {
+        if (locationEnabled) {
+            try {
+                val location = fusedLocationClient.lastLocation.await()
+                location?.let {
+                    val userPoint = GeoPoint(it.latitude, it.longitude)
+                    mapView?.apply {
+                        controller.setCenter(userPoint)
+                        marker?.let { overlays.remove(it) }
+
+                        val newMarker = Marker(this).apply {
+                            position = userPoint
+                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            icon = ContextCompat.getDrawable(context, R.drawable.placeholder)
+                        }
+
+                        overlays.add(newMarker)
+                        marker = newMarker
+                        invalidate()
+                        onLocationSelected(userPoint)
+                    }
+                }
+            } catch (e: SecurityException) {
+                Log.e("OsmMapView", "Location permission not granted: ${e.message}")
+            }
+        }
+    }
 
     AndroidView(
         factory = {
             MapView(context).apply {
+                mapView = this // Save reference
                 setTileSource(TileSourceFactory.MAPNIK)
                 setMultiTouchControls(true)
-                controller.setZoom(12.0)
-                controller.setCenter(GeoPoint(31.2001, 29.9187))
-                val customIcon = ContextCompat.getDrawable(context, R.drawable.placeholder)
+                controller.setZoom(14.0)
 
-
-                // initial marker
-                val initialPoint = GeoPoint(31.2001, 29.9187)
-                val initialMarker = Marker(this).apply {
-                    position = initialPoint
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    icon = customIcon
-                }
-                overlays.add(initialMarker)
-                marker = initialMarker
-
+                // Add tap listener
                 val receiver = object : org.osmdroid.events.MapEventsReceiver {
                     override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
                         p?.let {
-                            overlays.remove(marker)
-
+                            marker?.let { overlays.remove(it) }
                             val newMarker = Marker(this@apply).apply {
-                                position = p
+                                position = it
                                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                                icon = customIcon
+                                icon = ContextCompat.getDrawable(context, R.drawable.placeholder)
                             }
                             overlays.add(newMarker)
-                            controller.setCenter(p)
                             marker = newMarker
+                            controller.setCenter(it)
                             invalidate()
-                            onLocationSelected(p)
+                            onLocationSelected(it)
                         }
                         return true
                     }
 
-                    override fun longPressHelper(p: GeoPoint?): Boolean {
-                        return false
-                    }
+                    override fun longPressHelper(p: GeoPoint?): Boolean = false
                 }
 
-                val eventsOverlay = org.osmdroid.views.overlay.MapEventsOverlay(receiver)
-                overlays.add(eventsOverlay)
+                overlays.add(org.osmdroid.views.overlay.MapEventsOverlay(receiver))
             }
         },
         modifier = modifier
     )
 }
 
+
+suspend fun <T> Task<T>.await(): T = suspendCancellableCoroutine { cont ->
+    addOnSuccessListener { cont.resume(it) }
+    addOnFailureListener { cont.resumeWithException(it) }
+}

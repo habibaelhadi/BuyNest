@@ -97,6 +97,7 @@ fun SearchScreen(
     val selectedPrice = remember { mutableFloatStateOf(1000f) }
     val context = LocalContext.current
     val isConnected by NetworkHelper.isConnected.collectAsStateWithLifecycle()
+    var selectedItem by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit,isConnected) {
         homeViewModel.getBrands(context = context)
@@ -196,17 +197,20 @@ fun SearchScreen(
                 FilterExpansionSection(
                     filterType = selectedFilter,
                     query = searchQuery,
-                    onItemClick = { type,value ->
+                    selectedItem = selectedItem,
+                    onItemClick = { type, value ->
+                        selectedItem = value // update selected item for UI feedback
                         if (type == FilterType.All.name) {
                             isCategorySelected = false
-                        }else{
+                        } else {
                             isCategorySelected = true
                             categoryViewModel.getCategoryProducts(value)
                         }
                     },
-                    categoryList,
-                    brandsList
+                    categoryList = categoryList,
+                    brandsList = brandsList
                 )
+
 
                 Spacer(modifier = Modifier.height(12.dp))
             }
@@ -335,15 +339,16 @@ fun ProductCard(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FilterExpansionSection(
     filterType: FilterType,
     query: String,
-    onItemClick: (String,String) -> Unit,
+    selectedItem: String?,
+    onItemClick: (String, String) -> Unit,
     categoryList: List<BrandsAndProductsQuery.Node3>,
     brandsList: List<BrandsAndProductsQuery.Node3>
-) {
+)
+ {
     val categories = categoryList.map { it.title }
     val brands = brandsList.map { it.title }
 
@@ -364,9 +369,10 @@ fun FilterExpansionSection(
                     text = item,
                     modifier = Modifier
                         .clip(RoundedCornerShape(16.dp))
-                        .background(LightGray2)
+                        .background(if (item == selectedItem) MainColor else LightGray2)
                         .clickable { onItemClick(filterType.name, item) }
                         .padding(horizontal = 8.dp, vertical = 4.dp),
+                    color = if (item == selectedItem) white else Color.Black,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

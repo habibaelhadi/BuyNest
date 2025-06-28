@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.ApolloResponse
 import com.example.buynest.CreateCartMutation
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.productDetails.ProductDetailsRepository
+import com.example.buynest.model.repository.productDetails.ProductDetailsRepository
 import com.example.buynest.utils.AppConstants.KEY_CART_ID
 import com.example.buynest.utils.SecureSharedPrefHelper
 import com.example.buynest.viewmodel.cart.CartUseCase
@@ -42,10 +42,10 @@ class ProductDetailsViewModel(
     suspend fun addToCart(variantId: String, quantity: Int) {
         var cartId = SecureSharedPrefHelper.getString(KEY_CART_ID)
 
-        Log.i("CartInfo from pd_viewmodel", "Cart ID: $cartId")
+//        Log.i("CartInfo from pd_viewmodel", "Cart ID: $cartId")
 
         if (cartId == null) {
-            Log.i("CartInfo", "No cart ID found. Creating new cart.")
+//            Log.i("CartInfo", "No cart ID found. Creating new cart.")
             val createResponse: ApolloResponse<CreateCartMutation.Data> = cartUseCase.createCart()
             cartId = createResponse.data?.cartCreate?.cart?.id
 
@@ -60,7 +60,7 @@ class ProductDetailsViewModel(
         if (response.hasErrors()) {
             Log.e("CartError", "Failed to add item: ${response.errors}")
         } else {
-            Log.i("CartSuccess", "Item added to cart: $variantId in cart $cartId")
+//            Log.i("CartSuccess", "Item added to cart: $variantId in cart $cartId")
         }
     }
 }

@@ -4,7 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.buynest.model.entity.AddressModel
-import com.example.buynest.repository.address.AddressRepository
+import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.model.repository.address.AddressRepository
 import com.example.buynest.type.MailingAddressInput
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +17,9 @@ class AddressViewModel(
 
     private val _addresses = MutableStateFlow<List<AddressModel>>(emptyList())
     val addresses: StateFlow<List<AddressModel>> = _addresses
+
+    private val _addressUiState = MutableStateFlow<UiResponseState>(UiResponseState.Loading)
+    val addressUiState: StateFlow<UiResponseState> = _addressUiState
 
     private val _defaultAddress = MutableStateFlow<AddressModel?>(null)
     val defaultAddress: StateFlow<AddressModel?> = _defaultAddress
@@ -29,16 +33,18 @@ class AddressViewModel(
     fun loadAddresses(token: String) {
         Log.d("AddressViewModel", "Loading addresses with token: $token")
         viewModelScope.launch {
+            _addressUiState.value = UiResponseState.Loading
             repository.getAllAddresses(token).fold(
                 onSuccess = { list ->
                     Log.d("AddressViewModel", "Loaded ${list.size} addresses")
                     _addresses.value = list
-                    _error.value = null
+                    _addressUiState.value = UiResponseState.Success(list)
                 },
                 onFailure = { ex ->
                     val errorMsg = ex.message ?: "Unknown error loading addresses"
                     Log.e("AddressViewModel", "Error loading addresses: $errorMsg")
-                    _error.value = errorMsg
+                    _addressUiState.value = UiResponseState.Error(errorMsg)
+                    _addresses.value = emptyList()
                 }
             )
         }
@@ -49,9 +55,8 @@ class AddressViewModel(
         viewModelScope.launch {
             repository.addAddress(token, addressInput).fold(
                 onSuccess = {
-                    Log.d("AddressViewModel", "Address added successfully, reloading addresses")
+                    Log.d("AddressViewModel", "Address added successfully")
                     loadAddresses(token)
-                    _error.value = null
                 },
                 onFailure = { ex ->
                     val errorMsg = ex.message ?: "Failed to add address"
@@ -63,13 +68,12 @@ class AddressViewModel(
     }
 
     fun deleteAddress(token: String, addressId: String) {
-        Log.d("AddressViewModel", "Deleting address with ID: $addressId")
+        Log.d("AddressViewModel", "Deleting address ID: $addressId")
         viewModelScope.launch {
             repository.deleteAddress(token, addressId).fold(
                 onSuccess = {
-                    Log.d("AddressViewModel", "Address deleted successfully, reloading addresses")
+                    Log.d("AddressViewModel", "Address deleted successfully")
                     loadAddresses(token)
-                    _error.value = null
                 },
                 onFailure = { ex ->
                     val errorMsg = ex.message ?: "Failed to delete address"
@@ -81,13 +85,12 @@ class AddressViewModel(
     }
 
     fun updateAddress(token: String, addressId: String, addressInput: MailingAddressInput) {
-        Log.d("AddressViewModel", "Updating address ID: $addressId with $addressInput")
+        Log.d("AddressViewModel", "Updating address ID: $addressId")
         viewModelScope.launch {
             repository.updateAddress(token, addressId, addressInput).fold(
-                onSuccess = { updatedAddr ->
-                    Log.d("AddressViewModel", "Address updated successfully, reloading addresses")
+                onSuccess = {
+                    Log.d("AddressViewModel", "Address updated successfully")
                     loadAddresses(token)
-                    _error.value = null
                     stopEditingAddress()
                 },
                 onFailure = { ex ->
@@ -105,11 +108,8 @@ class AddressViewModel(
             repository.setDefaultAddress(token, addressId).fold(
                 onSuccess = { defaultAddr ->
                     Log.d("AddressViewModel", "Default address set: $defaultAddr")
-                    if (_defaultAddress.value?.id != defaultAddr?.id) {
-                        _defaultAddress.value = defaultAddr
-                    }
+                    _defaultAddress.value = defaultAddr
                     loadAddresses(token)
-                    _error.value = null
                 },
                 onFailure = { ex ->
                     val errorMsg = ex.message ?: "Failed to set default address"
@@ -125,9 +125,8 @@ class AddressViewModel(
         viewModelScope.launch {
             repository.getDefaultAddress(token).fold(
                 onSuccess = { defAddr ->
-                    Log.d("AddressViewModel", "Default address loaded: $defAddr")
+                    Log.d("AddressViewModel", "Default address loaded")
                     _defaultAddress.value = defAddr
-                    _error.value = null
                 },
                 onFailure = { ex ->
                     val errorMsg = ex.message ?: "Failed to load default address"
@@ -153,6 +152,4 @@ class AddressViewModel(
         val parts = address.split(",").map { it.trim() }
         return extractor(parts)
     }
-
-
 }

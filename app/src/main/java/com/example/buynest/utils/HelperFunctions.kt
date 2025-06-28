@@ -25,12 +25,4 @@ fun mapFromCategoryProduct(node: ProductsByHandleQuery.Node): UiProduct {
     )
 }
 
-fun getCurrencySymbol(code: String): String {
-    return currencySymbolMap[code] ?: code
-}
-
-fun getCurrencyName(code: String): String {
-    return countryToCurrencyCodeMap[code] ?: code
-}
-
 

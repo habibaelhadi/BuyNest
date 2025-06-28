@@ -28,7 +28,6 @@ import com.example.buynest.R
 import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.utils.NetworkHelper
 import com.example.buynest.utils.SharedPrefHelper
-import com.example.buynest.utils.getCurrencyName
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.discount.DiscountViewModel
 import com.example.buynest.viewmodel.home.HomeViewModel

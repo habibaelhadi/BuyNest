@@ -3,7 +3,7 @@ package com.example.buynest.viewmodel.payment
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.buynest.repository.payment.IPaymentRepository
+import com.example.buynest.model.repository.payment.IPaymentRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

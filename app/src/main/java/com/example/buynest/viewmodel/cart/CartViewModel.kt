@@ -13,8 +13,9 @@ import com.example.buynest.admin.CreateDraftOrderMutation
 import com.example.buynest.model.entity.AddressModel
 import com.example.buynest.model.entity.CartItem
 import com.example.buynest.model.entity.OrderModel
-import com.example.buynest.repository.cart.CartRepository
-import com.example.buynest.repository.order.IOrderRepo
+import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.model.repository.cart.CartRepository
+import com.example.buynest.model.repository.order.IOrderRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -23,6 +24,9 @@ class CartViewModel(
     private val repository: CartRepository,
     private val orderRepository: IOrderRepo
 ) : ViewModel() {
+
+    private val _cartUiState = MutableStateFlow<UiResponseState>(UiResponseState.Loading)
+    val cartUiState: StateFlow<UiResponseState> = _cartUiState
 
     private val _cartResponse = MutableStateFlow<ApolloResponse<GetCartQuery.Data>?>(null)
     val cartResponse: StateFlow<ApolloResponse<GetCartQuery.Data>?> = _cartResponse
@@ -49,29 +53,28 @@ class CartViewModel(
     private val _orderResponse = MutableStateFlow<ApolloResponse<CreateDraftOrderMutation.Data>?>(null)
     val orderResponse: StateFlow<ApolloResponse<CreateDraftOrderMutation.Data>?> = _orderResponse
 
-//    fun createCart() {
-//        viewModelScope.launch {
-//            _createCartResponse.value = repository.createCart()
-//        }
-//    }
-
-//    fun linkCartToCustomer(cartId: String, token: String) {
-//        viewModelScope.launch {
-//            _linkCartResponse.value = repository.linkCart(cartId, token)
-//        }
-//    }
 
     fun getCart(cartId: String) {
         viewModelScope.launch {
-            _cartResponse.value = repository.getCart(cartId)
+            _cartUiState.value = UiResponseState.Loading
+            try {
+                val response = repository.getCart(cartId)
+
+                val userErrors = response.data?.cart?.lines?.edges?.any { it.node == null } ?: false
+                if (response.hasErrors() || userErrors) {
+                    val errorMessage = response.errors?.firstOrNull()?.message ?: "Unknown GraphQL error"
+                    _cartUiState.value = UiResponseState.Error(errorMessage)
+                    return@launch
+                }
+
+                _cartUiState.value = UiResponseState.Success(response)
+            } catch (e: Exception) {
+                Log.e("CartViewModel", "Error loading cart: ${e.message}", e)
+                _cartUiState.value = UiResponseState.Error(e.message ?: "Unexpected error occurred")
+            }
         }
     }
 
-//    fun addItemToCart(cartId: String, variantId: String, quantity: Int) {
-//        viewModelScope.launch {
-//            _addItemResponse.value = repository.addItem(cartId, variantId, quantity)
-//        }
-//    }
 
     fun removeItemFromCart(cartId: String, lineId: String) {
         viewModelScope.launch {

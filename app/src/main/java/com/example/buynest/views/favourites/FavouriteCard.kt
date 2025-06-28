@@ -43,7 +43,7 @@ import androidx.lifecycle.viewModelScope
 import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductsDetailsByIDsQuery
 import com.example.buynest.model.mapper.mapColorNameToColor
-import com.example.buynest.repository.FirebaseAuthObject
+import com.example.buynest.model.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
@@ -58,7 +58,8 @@ fun FavouriteCard(
     viewModel: FavouritesViewModel,
     navigateToProductInfo: (String) -> Unit,
     rate: Double,
-    currencySymbol: String
+    currencySymbol: String,
+    showSnackbar: (String) -> Unit
 ) {
     val imageUrl = item.onProduct?.featuredImage?.url.toString()
     val cleanedTitle = item?.onProduct?.title?.replace(Regex("\\(.*?\\)"), "")?.trim()
@@ -182,6 +183,7 @@ fun FavouriteCard(
                         item.onProduct?.variants?.edges?.firstOrNull()?.node?.id?.let { variantId ->
                             viewModel.viewModelScope.launch {
                                 viewModel.addToCart(variantId, 1)
+                                showSnackbar("Great! Item added to your cart 🎉")
                             }
                         }
                     },
@@ -199,7 +201,6 @@ fun FavouriteCard(
             }
         }
     }
-
     GuestAlertDialog(
         showDialog = showGuestDialog.value,
         onDismiss = { showGuestDialog.value = false },

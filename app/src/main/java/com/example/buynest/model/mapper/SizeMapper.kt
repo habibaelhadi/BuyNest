@@ -2,13 +2,14 @@ package com.example.buynest.model.mapper
 
 fun mapSizeFromTextToInteger(size: String): Int{
     return when(size.uppercase()){
+        "OS" -> 0
         "XS"  -> 0
         "S" -> 1
         "M" -> 2
         "L" -> 3
         "XL" -> 4
         "XXL" -> 5
-        else -> 1
+        else -> size.toIntOrNull() ?: -1
     }
 }
 

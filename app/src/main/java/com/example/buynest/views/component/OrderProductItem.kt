@@ -3,6 +3,7 @@ package com.example.buynest.views.component
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,7 +29,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.model.entity.CartItem
+import com.example.buynest.model.mapper.mapColorNameToColor
 import com.example.buynest.ui.theme.Gray
+import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 
@@ -36,6 +39,8 @@ import com.example.buynest.ui.theme.white
 fun OrderProductItem(
     item: CartItem,
 ) {
+    val color = item.color
+    val colorDot = mapColorNameToColor(color)
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(white),
@@ -71,7 +76,8 @@ fun OrderProductItem(
                     Box(
                         modifier = Modifier
                             .size(10.dp)
-                            .background(Color.Red, shape = CircleShape)
+                            .background(colorDot, shape = CircleShape)
+                            .border(1.dp, LightGray2, shape = CircleShape)
                     )
                     Text(
                         text = "  ${item.color} | Size: ${item.size}",

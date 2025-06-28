@@ -26,13 +26,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.apollographql.apollo3.api.ApolloResponse
 import com.example.buynest.BuildConfig
-import com.example.buynest.repository.payment.datasource.PaymentDataSourceImpl
+import com.example.buynest.GetCartQuery
+import com.example.buynest.model.repository.payment.datasource.PaymentDataSourceImpl
 import com.example.buynest.model.data.remote.rest.StripeClient
 import com.example.buynest.model.entity.CartItem
+import com.example.buynest.model.mapper.mapSizeFromTextToInteger
 import com.example.buynest.model.state.SheetType
-import com.example.buynest.repository.FirebaseAuthObject
-import com.example.buynest.repository.payment.PaymentRepositoryImpl
+import com.example.buynest.model.state.UiResponseState
+import com.example.buynest.model.repository.FirebaseAuthObject
+import com.example.buynest.model.repository.payment.PaymentRepositoryImpl
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.utils.AppConstants
 import com.example.buynest.utils.SecureSharedPrefHelper
@@ -52,6 +56,9 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.rememberPaymentSheet
 import kotlinx.coroutines.launch
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
+import com.example.buynest.views.component.Indicator
+import com.example.buynest.views.component.snackbar.CustomSnackbar
+import com.example.buynest.views.favourites.NoDataLottie
 
 
 @SuppressLint("ViewModelConstructorInComposable")
@@ -68,7 +75,7 @@ fun CartScreen(
     val context = LocalContext.current
     val cartId = SecureSharedPrefHelper.getString(AppConstants.KEY_CART_ID)
     var cartItems by remember { mutableStateOf(emptyList<CartItem>()) }
-    val cartState by cartViewModel.cartResponse.collectAsState()
+    val cartState by cartViewModel.cartUiState.collectAsState()
     var itemToDelete by remember { mutableStateOf<CartItem?>(null) }
     var showConfirmDialog by remember { mutableStateOf(false) }
 
@@ -82,6 +89,7 @@ fun CartScreen(
 
     val rate by currencyViewModel.rate
     val currencySymbol by currencyViewModel.currencySymbol
+    var snackbarMessage by remember { mutableStateOf<String?>(null) }
 
     val paymentViewModel = PaymentViewModel(
         repository = PaymentRepositoryImpl(PaymentDataSourceImpl(StripeClient.api))
@@ -121,35 +129,35 @@ fun CartScreen(
         addressViewModel.loadDefaultAddress(token)
         currencyViewModel.loadCurrency()
     }
-
     LaunchedEffect(cartState) {
-        cartItems = cartState?.data?.cart?.lines?.edges?.mapNotNull { edge ->
-            val node = edge.node
-            val variant = node.merchandise.onProductVariant ?: return@mapNotNull null
-            val product = variant.product
-            val price =
-                variant.priceV2.amount?.toString()?.toDoubleOrNull()?.times(rate)?.toInt() ?: 0
-            val color =
-                variant.selectedOptions.firstOrNull { it.name == "Color" }?.value ?: "Default"
-            val size =
-                variant.selectedOptions.firstOrNull { it.name == "Size" }?.value?.toIntOrNull() ?: 0
-            val imageUrl = variant.image?.url?.toString() ?: ""
-            val maxQuantity = variant.quantityAvailable?.toInt() ?:0
-            CartItem(
-                id = "${node.id}-$size-$color".hashCode(),
-                lineId = node.id,
-                name = product.title,
-                price = price,
-                currencySymbol = currencySymbol.toString(),
-                color = color,
-                size = size,
-                imageUrl = imageUrl,
-                quantity = node.quantity,
-                variantId = variant.id,
-                maxQuantity = maxQuantity
-            )
-        } ?: emptyList()
-
+        if (cartState is UiResponseState.Success<*>) {
+            val response = (cartState as UiResponseState.Success<*>).data
+            val data = (response as? ApolloResponse<GetCartQuery.Data>)?.data
+            cartItems = data?.cart?.lines?.edges?.mapNotNull { edge ->
+                val node = edge.node
+                val variant = node.merchandise.onProductVariant ?: return@mapNotNull null
+                val product = variant.product
+                val price = variant.priceV2.amount?.toString()?.toDoubleOrNull()?.times(rate)?.toInt() ?: 0
+                val color = variant.selectedOptions.firstOrNull { it.name == "Color" }?.value ?: "Default"
+                val sizeText = variant.selectedOptions.firstOrNull { it.name.equals("Size", ignoreCase = true) }?.value.orEmpty()
+                val size = mapSizeFromTextToInteger(sizeText) ?: 0
+                val imageUrl = variant.image?.url?.toString() ?: ""
+                val maxQuantity = variant.quantityAvailable?.toInt() ?: 0
+                CartItem(
+                    id = "${node.id}-$size-$color".hashCode(),
+                    lineId = node.id,
+                    name = product.title,
+                    price = price,
+                    currencySymbol = currencySymbol.toString(),
+                    color = color,
+                    size = size,
+                    imageUrl = imageUrl,
+                    quantity = node.quantity,
+                    variantId = variant.id,
+                    maxQuantity = maxQuantity
+                )
+            } ?: emptyList()
+        }
     }
 
     fun launchCheckoutFlow() {
@@ -212,6 +220,7 @@ fun CartScreen(
                                 activeSheet = SheetType.None
                             }
                             draftOrderId?.data?.draftOrderCreate?.draftOrder?.id?.let { orderId ->
+                                Log.i("TAG", "CartScreen: $orderId ")
                                 cartViewModel.completeOrder(orderId)
                                 cartItems.forEach {
                                     cartViewModel.removeItemFromCart(
@@ -231,6 +240,7 @@ fun CartScreen(
                                     )
                                 }
                             )
+                            activeSheet = SheetType.None
                         }
                     }
                 )
@@ -238,6 +248,23 @@ fun CartScreen(
                 else -> Spacer(modifier = Modifier.height(1.dp))
             }
         }
+    }
+
+    when (cartState) {
+        is UiResponseState.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Indicator()
+            }
+            return
+        }
+        is UiResponseState.Error -> {
+            val errorMsg = (cartState as UiResponseState.Error).message
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "Failed to load cart: $errorMsg", color = MaterialTheme.colors.error)
+            }
+            return
+        }
+        else -> {}
     }
 
     Scaffold(
@@ -249,73 +276,89 @@ fun CartScreen(
             }
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .padding(paddingValues)
-        ) {
-            items(cartItems, key = { it.id }) { item ->
-                val dismissState = rememberDismissState(
-                    confirmStateChange = {
-                        if (it == DismissValue.DismissedToEnd || it == DismissValue.DismissedToStart) {
-                            itemToDelete = item
-                            showConfirmDialog = true
-                            false
-                        } else true
-                    }
-                )
-                SwipeToDismiss(
-                    state = dismissState,
-                    directions = setOf(DismissDirection.StartToEnd, DismissDirection.EndToStart),
-                    background = {
-                        val alignment = when (dismissState.dismissDirection) {
-                            DismissDirection.StartToEnd -> Alignment.CenterStart
-                            DismissDirection.EndToStart -> Alignment.CenterEnd
-                            null -> Alignment.Center
-                        }
+        if (cartItems.isEmpty()){
+            NoDataLottie(false)
+        }else {
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Transparent)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = alignment
-                        ) {
-                            Card(
-                                modifier = Modifier.fillMaxSize(),
-                                shape = RoundedCornerShape(16.dp),
-                                border = BorderStroke(1.dp, LightGray2),
-                                backgroundColor = if (dismissState.dismissDirection != null) Color.Red else Color.LightGray
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(paddingValues)
+            ) {
+                items(cartItems, key = { it.id }) { item ->
+                    val dismissState = rememberDismissState(
+                        confirmStateChange = {
+                            if (it == DismissValue.DismissedToEnd || it == DismissValue.DismissedToStart) {
+                                itemToDelete = item
+                                showConfirmDialog = true
+                                false
+                            } else true
+                        }
+                    )
+                    SwipeToDismiss(
+                        state = dismissState,
+                        directions = setOf(
+                            DismissDirection.StartToEnd,
+                            DismissDirection.EndToStart
+                        ),
+                        background = {
+                            val alignment = when (dismissState.dismissDirection) {
+                                DismissDirection.StartToEnd -> Alignment.CenterStart
+                                DismissDirection.EndToStart -> Alignment.CenterEnd
+                                null -> Alignment.Center
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Transparent)
+                                    .padding(horizontal = 20.dp),
+                                contentAlignment = alignment
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(20.dp),
-                                    contentAlignment = alignment
+                                Card(
+                                    modifier = Modifier.fillMaxSize(),
+                                    shape = RoundedCornerShape(16.dp),
+                                    border = BorderStroke(1.dp, LightGray2),
+                                    backgroundColor = if (dismissState.dismissDirection != null) Color.Red else Color.LightGray
                                 ) {
-                                    Text("Delete", color = Color.White, fontSize = 20.sp)
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(20.dp),
+                                        contentAlignment = alignment
+                                    ) {
+                                        Text("Delete", color = Color.White, fontSize = 20.sp)
+                                    }
                                 }
                             }
-                        }
-                    },
-                    dismissContent = {
-                        CartItemRow(
-                            item = item,
-                            onQuantityChange = { id, qty ->
-                                cartItems = cartItems.map {
-                                    if (it.id == id) it.copy(quantity = qty) else it
+                        },
+                        dismissContent = {
+                            CartItemRow(
+                                item = item,
+                                onQuantityChange = { id, qty ->
+                                    cartItems = cartItems.map {
+                                        if (it.id == id) it.copy(quantity = qty) else it
+                                    }
+                                },
+                                onDelete = { id ->
+                                    itemToDelete = cartItems.find { it.id == id }
+                                    showConfirmDialog = true
+                                },
+                                onItemClick = {},
+                                onLimitReached = {
+                                    snackbarMessage = "Oops! That’s the maximum quantity available"
                                 }
-                            },
-                            onDelete = { id ->
-                                itemToDelete = cartItems.find { it.id == id }
-                                showConfirmDialog = true
-                            },
-                            onItemClick = {}
-                        )
-                    }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+                            )
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+        }
+        snackbarMessage?.let { message ->
+            CustomSnackbar (message = message) {
+                snackbarMessage = null
             }
         }
     }

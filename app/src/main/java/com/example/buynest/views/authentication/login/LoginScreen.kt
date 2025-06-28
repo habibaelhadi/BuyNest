@@ -46,22 +46,15 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.R
-import com.example.buynest.repository.authentication.AuthenticationRepoImpl
-import com.example.buynest.repository.authentication.firebase.FirebaseRepositoryImpl
-import com.example.buynest.repository.authentication.firebase.datasource.FirebaseDataSourceImpl
-import com.example.buynest.repository.authentication.shopify.ShopifyAuthRepositoryImpl
-import com.example.buynest.repository.authentication.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.utils.NetworkHelper
 import com.example.buynest.utils.SharedPrefHelper
-import com.example.buynest.utils.strategies.GoogleAuthenticationStrategy
 import com.example.buynest.utils.strategies.LoginAuthenticationStrategy
 import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
 import com.example.buynest.views.authentication.CustomTextField
-import com.example.buynest.views.customsnackbar.CustomSnackbar
+import com.example.buynest.views.component.snackbar.CustomSnackbar
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -272,33 +265,33 @@ fun LoginScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Row {
-                    IconButton(
-                        onClick = {
-                            val strategy = GoogleAuthenticationStrategy(context = context, launcher = googleSignInLauncher)
-                            val validation = viewModel.setGoogleStrategy(strategy)
-
-                            if (validation == null) {
-                                SharedPrefHelper.setAuthenticationMode(context, "google")
-                                viewModel.getGoogleSignInIntent(context)?.let { intent ->
-                                    googleSignInLauncher.launch(intent)
-                                }
-                            } else {
-                                snackbarMessage.value = validation
-                            }
-                        },
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(white)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.google),
-                            contentDescription = "Sign in with Google",
-                            tint = Color.Unspecified
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(16.dp))
+//                    IconButton(
+//                        onClick = {
+//                            val strategy = GoogleAuthenticationStrategy(context = context, launcher = googleSignInLauncher)
+//                            val validation = viewModel.setGoogleStrategy(strategy)
+//
+//                            if (validation == null) {
+//                                SharedPrefHelper.setAuthenticationMode(context, "google")
+//                                viewModel.getGoogleSignInIntent(context)?.let { intent ->
+//                                    googleSignInLauncher.launch(intent)
+//                                }
+//                            } else {
+//                                snackbarMessage.value = validation
+//                            }
+//                        },
+//                        modifier = Modifier
+//                            .size(48.dp)
+//                            .clip(CircleShape)
+//                            .background(white)
+//                    ) {
+//                        Icon(
+//                            painter = painterResource(id = R.drawable.google),
+//                            contentDescription = "Sign in with Google",
+//                            tint = Color.Unspecified
+//                        )
+//                    }
+//
+//                    Spacer(modifier = Modifier.width(16.dp))
 
                     IconButton(
                         onClick = {

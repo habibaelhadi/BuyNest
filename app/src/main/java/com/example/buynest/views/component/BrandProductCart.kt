@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductsByCollectionIDQuery
 import com.example.buynest.ProductsDetailsByIDsQuery
-import com.example.buynest.repository.FirebaseAuthObject
+import com.example.buynest.model.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
