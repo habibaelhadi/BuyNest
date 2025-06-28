@@ -272,33 +272,33 @@ fun LoginScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Row {
-                    IconButton(
-                        onClick = {
-                            val strategy = GoogleAuthenticationStrategy(context = context, launcher = googleSignInLauncher)
-                            val validation = viewModel.setGoogleStrategy(strategy)
-
-                            if (validation == null) {
-                                SharedPrefHelper.setAuthenticationMode(context, "google")
-                                viewModel.getGoogleSignInIntent(context)?.let { intent ->
-                                    googleSignInLauncher.launch(intent)
-                                }
-                            } else {
-                                snackbarMessage.value = validation
-                            }
-                        },
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(white)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.google),
-                            contentDescription = "Sign in with Google",
-                            tint = Color.Unspecified
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(16.dp))
+//                    IconButton(
+//                        onClick = {
+//                            val strategy = GoogleAuthenticationStrategy(context = context, launcher = googleSignInLauncher)
+//                            val validation = viewModel.setGoogleStrategy(strategy)
+//
+//                            if (validation == null) {
+//                                SharedPrefHelper.setAuthenticationMode(context, "google")
+//                                viewModel.getGoogleSignInIntent(context)?.let { intent ->
+//                                    googleSignInLauncher.launch(intent)
+//                                }
+//                            } else {
+//                                snackbarMessage.value = validation
+//                            }
+//                        },
+//                        modifier = Modifier
+//                            .size(48.dp)
+//                            .clip(CircleShape)
+//                            .background(white)
+//                    ) {
+//                        Icon(
+//                            painter = painterResource(id = R.drawable.google),
+//                            contentDescription = "Sign in with Google",
+//                            tint = Color.Unspecified
+//                        )
+//                    }
+//
+//                    Spacer(modifier = Modifier.width(16.dp))
 
                     IconButton(
                         onClick = {

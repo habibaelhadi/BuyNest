@@ -110,7 +110,7 @@ fun SettingsScreen(
             if (user == null) {
                 showGuestDialog.value = true
             } else {
-                gotoProfileScreen()
+               // gotoProfileScreen()
             }
         })
         Spacer(modifier = Modifier.height(12.dp))
