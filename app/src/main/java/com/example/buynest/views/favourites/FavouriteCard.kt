@@ -31,6 +31,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +50,7 @@ import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.views.component.GuestAlertDialog
+import com.example.buynest.views.customsnackbar.CustomSnackbar
 import kotlinx.coroutines.launch
 
 @Composable
@@ -58,7 +60,8 @@ fun FavouriteCard(
     viewModel: FavouritesViewModel,
     navigateToProductInfo: (String) -> Unit,
     rate: Double,
-    currencySymbol: String
+    currencySymbol: String,
+    showSnackbar: (String) -> Unit
 ) {
     val imageUrl = item.onProduct?.featuredImage?.url.toString()
     val cleanedTitle = item?.onProduct?.title?.replace(Regex("\\(.*?\\)"), "")?.trim()
@@ -182,6 +185,7 @@ fun FavouriteCard(
                         item.onProduct?.variants?.edges?.firstOrNull()?.node?.id?.let { variantId ->
                             viewModel.viewModelScope.launch {
                                 viewModel.addToCart(variantId, 1)
+                                showSnackbar("Great! Item added to your cart 🎉")
                             }
                         }
                     },
@@ -199,7 +203,6 @@ fun FavouriteCard(
             }
         }
     }
-
     GuestAlertDialog(
         showDialog = showGuestDialog.value,
         onDismiss = { showGuestDialog.value = false },
