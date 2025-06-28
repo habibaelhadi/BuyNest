@@ -348,14 +348,29 @@ fun OsmMapView(
     var marker by remember { mutableStateOf<Marker?>(null) }
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val defaultLocation = GeoPoint(31.2001, 29.9187)
-    var userLocation by remember { mutableStateOf<GeoPoint?>(null) }
+    var mapView: MapView? by remember { mutableStateOf(null) }
 
     LaunchedEffect(locationEnabled) {
         if (locationEnabled) {
             try {
                 val location = fusedLocationClient.lastLocation.await()
                 location?.let {
-                    userLocation = GeoPoint(it.latitude, it.longitude)
+                    val userPoint = GeoPoint(it.latitude, it.longitude)
+                    mapView?.apply {
+                        controller.setCenter(userPoint)
+                        marker?.let { overlays.remove(it) }
+
+                        val newMarker = Marker(this).apply {
+                            position = userPoint
+                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            icon = ContextCompat.getDrawable(context, R.drawable.placeholder)
+                        }
+
+                        overlays.add(newMarker)
+                        marker = newMarker
+                        invalidate()
+                        onLocationSelected(userPoint)
+                    }
                 }
             } catch (e: SecurityException) {
                 Log.e("OsmMapView", "Location permission not granted: ${e.message}")
@@ -366,35 +381,24 @@ fun OsmMapView(
     AndroidView(
         factory = {
             MapView(context).apply {
+                mapView = this // Save reference
                 setTileSource(TileSourceFactory.MAPNIK)
                 setMultiTouchControls(true)
-
-                val centerPoint = userLocation ?: defaultLocation
                 controller.setZoom(14.0)
-                controller.setCenter(centerPoint)
 
-                val customIcon = ContextCompat.getDrawable(context, R.drawable.placeholder)
-                val initialMarker = Marker(this).apply {
-                    position = centerPoint
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    icon = customIcon
-                }
-
-                overlays.add(initialMarker)
-                marker = initialMarker
-
+                // Add tap listener
                 val receiver = object : org.osmdroid.events.MapEventsReceiver {
                     override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
                         p?.let {
-                            overlays.remove(marker)
+                            marker?.let { overlays.remove(it) }
                             val newMarker = Marker(this@apply).apply {
                                 position = it
                                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                                icon = customIcon
+                                icon = ContextCompat.getDrawable(context, R.drawable.placeholder)
                             }
                             overlays.add(newMarker)
-                            controller.setCenter(it)
                             marker = newMarker
+                            controller.setCenter(it)
                             invalidate()
                             onLocationSelected(it)
                         }
@@ -410,6 +414,7 @@ fun OsmMapView(
         modifier = modifier
     )
 }
+
 
 suspend fun <T> Task<T>.await(): T = suspendCancellableCoroutine { cont ->
     addOnSuccessListener { cont.resume(it) }
