@@ -1,7 +1,8 @@
 package com.example.buynest.repository.favorite
 
+import com.example.buynest.model.repository.favorite.FavoriteRepoImpl
 import com.example.buynest.model.state.FirebaseResponse
-import com.example.buynest.repository.favorite.favFirebase.FavFirebase
+import com.example.buynest.model.repository.favorite.favFirebase.FavFirebase
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just

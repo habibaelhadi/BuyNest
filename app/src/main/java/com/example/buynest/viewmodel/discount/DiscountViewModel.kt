@@ -3,7 +3,7 @@ package com.example.buynest.viewmodel.discount
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.buynest.model.entity.OfferModel
-import com.example.buynest.repository.discount.DiscountRepository
+import com.example.buynest.model.repository.discount.DiscountRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

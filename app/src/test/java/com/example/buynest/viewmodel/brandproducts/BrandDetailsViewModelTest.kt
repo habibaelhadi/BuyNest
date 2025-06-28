@@ -2,18 +2,15 @@ package com.example.buynest.viewmodel.brandproducts
 
 import com.example.buynest.ProductsByCollectionIDQuery
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.home.IHomeRepository
+import com.example.buynest.model.repository.home.IHomeRepository
 import io.mockk.coEvery
 import io.mockk.mockk
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain

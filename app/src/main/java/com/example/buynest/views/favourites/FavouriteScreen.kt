@@ -40,7 +40,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.buynest.ProductsDetailsByIDsQuery
 import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.R
-import com.example.buynest.repository.FirebaseAuthObject
+import com.example.buynest.model.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
@@ -50,7 +50,7 @@ import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.NoInternetLottie
 import com.example.buynest.views.component.SearchBar
-import com.example.buynest.views.customsnackbar.CustomSnackbar
+import com.example.buynest.views.component.snackbar.CustomSnackbar
 import com.example.buynest.views.orders.phenomenaFontFamily
 import org.koin.androidx.compose.koinViewModel
 

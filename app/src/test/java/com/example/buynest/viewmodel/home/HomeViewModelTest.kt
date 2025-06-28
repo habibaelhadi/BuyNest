@@ -3,7 +3,7 @@ package com.example.buynest.viewmodel.home
 import android.content.Context
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.home.IHomeRepository
+import com.example.buynest.model.repository.home.IHomeRepository
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk

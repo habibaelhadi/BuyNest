@@ -1,7 +1,7 @@
 package com.example.buynest.repository.payment
 
-import org.junit.Assert.*
-import com.example.buynest.repository.payment.datasource.IPaymentDataSource
+import com.example.buynest.model.repository.payment.PaymentRepositoryImpl
+import com.example.buynest.model.repository.payment.datasource.IPaymentDataSource
 import com.google.gson.JsonObject
 import io.mockk.coEvery
 import io.mockk.coVerify

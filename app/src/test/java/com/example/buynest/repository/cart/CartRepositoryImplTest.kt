@@ -1,12 +1,13 @@
 package com.example.buynest.repository.cart
 
-import org.junit.Assert.*
 import com.apollographql.apollo3.api.ApolloResponse
 import com.example.buynest.CreateCartMutation
 import com.example.buynest.GetCartQuery
 import com.example.buynest.LinkCartToCustomerMutation
 import com.example.buynest.RemoveItemFromCartMutation
-import com.example.buynest.repository.cart.datasource.CartDataSource
+import com.example.buynest.model.repository.cart.CartRepository
+import com.example.buynest.model.repository.cart.CartRepositoryImpl
+import com.example.buynest.model.repository.cart.datasource.CartDataSource
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

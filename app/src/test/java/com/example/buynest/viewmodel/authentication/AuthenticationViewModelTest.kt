@@ -1,9 +1,8 @@
 package com.example.buynest.viewmodel.authentication
 
 import android.util.Log
-import com.example.buynest.repository.authentication.AuthenticationRepo
+import com.example.buynest.model.repository.authentication.AuthenticationRepo
 import com.example.buynest.utils.strategies.AuthenticationStrategy
-import com.example.buynest.utils.validators.ValidationHandler
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every

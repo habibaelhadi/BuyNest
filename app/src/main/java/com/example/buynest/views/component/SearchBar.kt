@@ -3,7 +3,6 @@ package com.example.buynest.views.component
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,11 +28,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.buynest.repository.FirebaseAuthObject
+import com.example.buynest.model.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.Gray
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.utils.NetworkHelper
-import com.example.buynest.views.customsnackbar.CustomSnackbar
+import com.example.buynest.views.component.snackbar.CustomSnackbar
 import com.example.buynest.views.home.phenomenaBold
 
 @Composable

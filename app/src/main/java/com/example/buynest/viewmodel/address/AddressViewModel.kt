@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.buynest.model.entity.AddressModel
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.address.AddressRepository
+import com.example.buynest.model.repository.address.AddressRepository
 import com.example.buynest.type.MailingAddressInput
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

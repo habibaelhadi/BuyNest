@@ -1,10 +1,11 @@
 package com.example.buynest.repository.authentication.shopify
 
-import com.example.buynest.repository.authentication.shopify.datasource.ShopifyAuthRemoteDataSource
+import com.example.buynest.model.repository.authentication.shopify.ShopifyAuthRepository
+import com.example.buynest.model.repository.authentication.shopify.ShopifyAuthRepositoryImpl
+import com.example.buynest.model.repository.authentication.shopify.datasource.ShopifyAuthRemoteDataSource
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.unmockkAll
-import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before

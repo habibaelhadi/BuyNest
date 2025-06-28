@@ -14,8 +14,8 @@ import com.example.buynest.model.entity.AddressModel
 import com.example.buynest.model.entity.CartItem
 import com.example.buynest.model.entity.OrderModel
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.cart.CartRepository
-import com.example.buynest.repository.order.IOrderRepo
+import com.example.buynest.model.repository.cart.CartRepository
+import com.example.buynest.model.repository.order.IOrderRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

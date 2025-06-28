@@ -1,24 +1,19 @@
 package com.example.buynest.repository.home
 
-import com.apollographql.apollo3.ApolloCall
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.exception.ApolloException
-import kotlinx.coroutines.flow.flowOf
 import com.example.buynest.BrandsAndProductsQuery
 import com.example.buynest.ProductsByCollectionIDQuery
+import com.example.buynest.model.repository.home.HomeRepository
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import java.util.UUID
 import kotlin.test.assertNotNull
 
 class HomeRepositoryTest {

@@ -5,6 +5,7 @@ import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.exception.ApolloException
 import com.example.buynest.ProductDetailsByIDQuery
+import com.example.buynest.model.repository.productDetails.ProductDetailsRepositoryImpl
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk

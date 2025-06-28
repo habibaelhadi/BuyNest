@@ -47,15 +47,9 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.example.buynest.model.data.remote.graphql.ApolloClient
 import com.example.buynest.navigation.RoutesScreens
 import com.example.buynest.navigation.ScreenMenuItem
-import com.example.buynest.repository.cart.CartRepositoryImpl
-import com.example.buynest.repository.cart.datasource.CartDataSourceImpl
 import com.example.buynest.ui.theme.white
-import com.example.buynest.utils.SecureSharedPrefHelper
-import com.example.buynest.utils.SharedPrefHelper
-import com.example.buynest.utils.constant.*
 import kotlinx.coroutines.delay
 
 val routIndex = MutableLiveData<Int>(0)

@@ -3,7 +3,7 @@ package com.example.buynest.viewmodel.address
 import android.util.Log
 import com.apollographql.apollo3.api.Optional
 import com.example.buynest.model.entity.AddressModel
-import com.example.buynest.repository.address.AddressRepository
+import com.example.buynest.model.repository.address.AddressRepository
 import com.example.buynest.type.MailingAddressInput
 import io.mockk.coEvery
 import io.mockk.mockk

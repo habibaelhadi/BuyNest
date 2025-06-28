@@ -1,6 +1,8 @@
 package com.example.buynest.repository.authentication.firebase
 
-import com.example.buynest.repository.authentication.firebase.datasource.IFirebaseDataSource
+import com.example.buynest.model.repository.authentication.firebase.FirebaseRepository
+import com.example.buynest.model.repository.authentication.firebase.FirebaseRepositoryImpl
+import com.example.buynest.model.repository.authentication.firebase.datasource.IFirebaseDataSource
 import io.mockk.mockk
 import io.mockk.unmockkAll
 import io.mockk.verify

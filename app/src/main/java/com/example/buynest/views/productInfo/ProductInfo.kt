@@ -62,7 +62,7 @@ import com.example.buynest.ProductsDetailsByIDsQuery
 import com.example.buynest.model.mapper.mapSizeFromTextToInteger
 import com.example.buynest.model.mapper.toColorList
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.FirebaseAuthObject
+import com.example.buynest.model.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.LightGray
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
@@ -73,11 +73,10 @@ import com.example.buynest.views.component.ExpandableText
 import com.example.buynest.views.component.GuestAlertDialog
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.QuantitySelector
-import com.example.buynest.views.customsnackbar.CustomSnackbar
+import com.example.buynest.views.component.snackbar.CustomSnackbar
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.calculateCurrentOffsetForPage
 import com.google.accompanist.pager.rememberPagerState
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import org.koin.androidx.compose.koinViewModel

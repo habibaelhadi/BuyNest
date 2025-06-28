@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.favorite.FavoriteRepo
+import com.example.buynest.model.repository.favorite.FavoriteRepo
 import com.example.buynest.utils.AppConstants.KEY_CART_ID
 import com.example.buynest.utils.SecureSharedPrefHelper
 import com.example.buynest.viewmodel.cart.CartUseCase

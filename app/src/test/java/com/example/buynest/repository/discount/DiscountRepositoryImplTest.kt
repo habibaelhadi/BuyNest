@@ -1,8 +1,8 @@
 package com.example.buynest.repository.discount
 
-import org.junit.Assert.*
 import com.example.buynest.model.entity.OfferModel
-import com.example.buynest.repository.discount.datasource.ShopifyDiscountDataSource
+import com.example.buynest.model.repository.discount.DiscountRepositoryImpl
+import com.example.buynest.model.repository.discount.datasource.ShopifyDiscountDataSource
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

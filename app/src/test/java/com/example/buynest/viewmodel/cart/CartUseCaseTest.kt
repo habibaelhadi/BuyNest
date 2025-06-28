@@ -3,7 +3,7 @@ package com.example.buynest.viewmodel.cart
 import com.apollographql.apollo3.api.ApolloResponse
 import com.example.buynest.CreateCartMutation
 import com.example.buynest.LinkCartToCustomerMutation
-import com.example.buynest.repository.cart.CartRepository
+import com.example.buynest.model.repository.cart.CartRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

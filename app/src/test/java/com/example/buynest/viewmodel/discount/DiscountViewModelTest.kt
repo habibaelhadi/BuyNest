@@ -1,8 +1,7 @@
 package com.example.buynest.viewmodel.discount
 
-import org.junit.Assert.*
 import com.example.buynest.model.entity.OfferModel
-import com.example.buynest.repository.discount.DiscountRepository
+import com.example.buynest.model.repository.discount.DiscountRepository
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers

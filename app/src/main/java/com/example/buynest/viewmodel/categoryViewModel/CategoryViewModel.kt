@@ -3,7 +3,7 @@ package com.example.buynest.viewmodel.categoryViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.category.ICategoryRepo
+import com.example.buynest.model.repository.category.ICategoryRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 

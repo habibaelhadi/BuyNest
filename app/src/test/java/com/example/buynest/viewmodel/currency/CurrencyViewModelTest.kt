@@ -2,7 +2,7 @@ package com.example.buynest.viewmodel.currency
 
 import android.content.Context
 import com.example.buynest.model.data.local.CurrencyEntity
-import com.example.buynest.repository.currency.ICurrencyRepository
+import com.example.buynest.model.repository.currency.ICurrencyRepository
 import com.example.buynest.utils.CurrencyHelper
 import com.example.buynest.utils.CurrencyHelper.getCurrencyName
 import com.example.buynest.utils.CurrencyHelper.getCurrencySymbol

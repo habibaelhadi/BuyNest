@@ -2,7 +2,7 @@ package com.example.buynest.viewmodel.categoryViewModel
 
 import com.example.buynest.ProductsByHandleQuery
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.category.ICategoryRepo
+import com.example.buynest.model.repository.category.ICategoryRepo
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers

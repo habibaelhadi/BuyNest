@@ -2,7 +2,7 @@ package com.example.buynest.viewmodel.orders
 
 import com.example.buynest.admin.GetOrdersByEmailQuery
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.order.IOrderRepo
+import com.example.buynest.model.repository.order.IOrderRepo
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk

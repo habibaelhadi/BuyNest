@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -38,18 +37,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.buynest.R
-import com.example.buynest.repository.FirebaseAuthObject
+import com.example.buynest.model.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.utils.NetworkHelper
 import com.example.buynest.utils.SharedPrefHelper
 import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
-import com.example.buynest.views.component.CountryOptionBottomSheet
 import com.example.buynest.views.component.CurrencyOptionBottomSheet
 import com.example.buynest.views.component.GuestAlertDialog
 import com.example.buynest.views.component.PaymentOptionBottomSheet
 import com.example.buynest.views.component.SettingsCard
-import com.example.buynest.views.customsnackbar.CustomSnackbar
+import com.example.buynest.views.component.snackbar.CustomSnackbar
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

@@ -1,9 +1,10 @@
 package com.example.buynest.repository.address
 
-import org.junit.Assert.*
 import com.apollographql.apollo3.api.Optional
 import com.example.buynest.model.entity.AddressModel
-import com.example.buynest.repository.address.datasource.ShopifyAddressDataSource
+import com.example.buynest.model.repository.address.AddressRepository
+import com.example.buynest.model.repository.address.AddressRepositoryImpl
+import com.example.buynest.model.repository.address.datasource.ShopifyAddressDataSource
 import com.example.buynest.type.MailingAddressInput
 import io.mockk.coEvery
 import io.mockk.coVerify

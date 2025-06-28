@@ -7,8 +7,8 @@ import com.example.buynest.RemoveItemFromCartMutation
 import com.example.buynest.admin.CreateDraftOrderMutation
 import com.example.buynest.model.entity.AddressModel
 import com.example.buynest.model.entity.CartItem
-import com.example.buynest.repository.cart.CartRepository
-import com.example.buynest.repository.order.IOrderRepo
+import com.example.buynest.model.repository.cart.CartRepository
+import com.example.buynest.model.repository.order.IOrderRepo
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

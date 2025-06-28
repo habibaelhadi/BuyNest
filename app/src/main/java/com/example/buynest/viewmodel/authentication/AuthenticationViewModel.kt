@@ -4,10 +4,9 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.buynest.repository.FirebaseAuthObject
-import com.example.buynest.repository.authentication.AuthenticationRepo
+import com.example.buynest.model.repository.FirebaseAuthObject
+import com.example.buynest.model.repository.authentication.AuthenticationRepo
 import com.example.buynest.utils.strategies.AuthenticationStrategy
 import com.example.buynest.utils.strategies.GoogleAuthenticationStrategy
 import com.example.buynest.utils.validators.GoogleValidator

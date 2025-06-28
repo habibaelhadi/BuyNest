@@ -1,6 +1,5 @@
 package com.example.buynest.views.authentication.forgotpassword
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,19 +32,13 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.buynest.R
-import com.example.buynest.repository.authentication.AuthenticationRepoImpl
-import com.example.buynest.repository.authentication.firebase.FirebaseRepositoryImpl
-import com.example.buynest.repository.authentication.firebase.datasource.FirebaseDataSourceImpl
-import com.example.buynest.repository.authentication.shopify.ShopifyAuthRepositoryImpl
-import com.example.buynest.repository.authentication.shopify.datasource.ShopifyAuthRemoteDataSourceImpl
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.utils.NetworkHelper
 import com.example.buynest.viewmodel.authentication.AuthenticationViewModel
 import com.example.buynest.views.authentication.CustomTextField
-import com.example.buynest.views.customsnackbar.CustomSnackbar
+import com.example.buynest.views.component.snackbar.CustomSnackbar
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

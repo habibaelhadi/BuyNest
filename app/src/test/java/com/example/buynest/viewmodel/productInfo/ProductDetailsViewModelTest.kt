@@ -5,7 +5,7 @@ import com.apollographql.apollo3.api.ApolloResponse
 import com.example.buynest.CreateCartMutation
 import com.example.buynest.ProductDetailsByIDQuery
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.productDetails.ProductDetailsRepository
+import com.example.buynest.model.repository.productDetails.ProductDetailsRepository
 import com.example.buynest.utils.AppConstants.KEY_CART_ID
 import com.example.buynest.utils.SecureSharedPrefHelper
 import com.example.buynest.viewmodel.cart.CartUseCase
@@ -14,7 +14,6 @@ import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before

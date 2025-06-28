@@ -29,14 +29,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.apollographql.apollo3.api.ApolloResponse
 import com.example.buynest.BuildConfig
 import com.example.buynest.GetCartQuery
-import com.example.buynest.repository.payment.datasource.PaymentDataSourceImpl
+import com.example.buynest.model.repository.payment.datasource.PaymentDataSourceImpl
 import com.example.buynest.model.data.remote.rest.StripeClient
 import com.example.buynest.model.entity.CartItem
 import com.example.buynest.model.mapper.mapSizeFromTextToInteger
 import com.example.buynest.model.state.SheetType
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.FirebaseAuthObject
-import com.example.buynest.repository.payment.PaymentRepositoryImpl
+import com.example.buynest.model.repository.FirebaseAuthObject
+import com.example.buynest.model.repository.payment.PaymentRepositoryImpl
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.utils.AppConstants
 import com.example.buynest.utils.SecureSharedPrefHelper
@@ -57,8 +57,7 @@ import com.stripe.android.paymentsheet.rememberPaymentSheet
 import kotlinx.coroutines.launch
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.views.component.Indicator
-import com.example.buynest.views.component.NoInternetLottie
-import com.example.buynest.views.customsnackbar.CustomSnackbar
+import com.example.buynest.views.component.snackbar.CustomSnackbar
 import com.example.buynest.views.favourites.NoDataLottie
 
 

@@ -31,7 +31,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,13 +43,12 @@ import androidx.lifecycle.viewModelScope
 import coil.compose.rememberAsyncImagePainter
 import com.example.buynest.ProductsDetailsByIDsQuery
 import com.example.buynest.model.mapper.mapColorNameToColor
-import com.example.buynest.repository.FirebaseAuthObject
+import com.example.buynest.model.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.LightGray2
 import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.ui.theme.white
 import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.views.component.GuestAlertDialog
-import com.example.buynest.views.customsnackbar.CustomSnackbar
 import kotlinx.coroutines.launch
 
 @Composable

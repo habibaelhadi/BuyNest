@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.compose.runtime.*
-import com.example.buynest.repository.currency.ICurrencyRepository
+import com.example.buynest.model.repository.currency.ICurrencyRepository
 import com.example.buynest.utils.CurrencyHelper.getCurrencyName
 import com.example.buynest.utils.CurrencyHelper.getCurrencySymbol
 import com.example.buynest.utils.SharedPrefHelper

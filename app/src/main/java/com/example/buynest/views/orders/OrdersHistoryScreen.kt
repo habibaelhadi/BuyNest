@@ -29,7 +29,7 @@ import com.example.buynest.R
 import androidx.compose.runtime.getValue
 import com.example.buynest.admin.GetOrdersByEmailQuery
 import com.example.buynest.model.state.UiResponseState
-import com.example.buynest.repository.FirebaseAuthObject
+import com.example.buynest.model.repository.FirebaseAuthObject
 import com.example.buynest.ui.theme.*
 import com.example.buynest.viewmodel.orders.OrdersViewModel
 import com.example.buynest.views.component.Indicator

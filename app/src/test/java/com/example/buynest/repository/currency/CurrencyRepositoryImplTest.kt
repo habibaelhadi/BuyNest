@@ -2,7 +2,8 @@ package com.example.buynest.repository.currency
 
 import android.content.Context
 import com.example.buynest.model.data.local.CurrencyEntity
-import com.example.buynest.repository.currency.datasource.ICurrencyDataSource
+import com.example.buynest.model.repository.currency.CurrencyRepositoryImpl
+import com.example.buynest.model.repository.currency.datasource.ICurrencyDataSource
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

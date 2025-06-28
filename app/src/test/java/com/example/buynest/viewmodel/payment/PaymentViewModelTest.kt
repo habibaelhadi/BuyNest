@@ -1,7 +1,6 @@
 package com.example.buynest.viewmodel.payment
 
-import org.junit.Assert.*
-import com.example.buynest.repository.payment.IPaymentRepository
+import com.example.buynest.model.repository.payment.IPaymentRepository
 import com.google.gson.JsonObject
 import io.mockk.coEvery
 import io.mockk.every
