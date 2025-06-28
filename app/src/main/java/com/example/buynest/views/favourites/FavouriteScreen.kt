@@ -50,6 +50,7 @@ import com.example.buynest.viewmodel.favorites.FavouritesViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.NoInternetLottie
 import com.example.buynest.views.component.SearchBar
+import com.example.buynest.views.customsnackbar.CustomSnackbar
 import com.example.buynest.views.orders.phenomenaFontFamily
 import org.koin.androidx.compose.koinViewModel
 
@@ -61,6 +62,7 @@ fun FavouriteScreen(
     viewModel: FavouritesViewModel = koinViewModel(),
     currencyViewModel: CurrencyViewModel
 ) {
+    var snackbarMessage by remember { mutableStateOf<String?>(null) }
     val product by viewModel.productDetails.collectAsStateWithLifecycle()
     val user = FirebaseAuthObject.getAuth().currentUser
     val rate by currencyViewModel.rate
@@ -76,7 +78,6 @@ fun FavouriteScreen(
             viewModel.getAllFavorites()
         }
     }
-
 
     Column(
         modifier = Modifier
@@ -110,7 +111,10 @@ fun FavouriteScreen(
                             if (productList.isEmpty())
                                 NoDataLottie(false)
                             else {
-                                Favourites(productList, viewModel, navigateToProductInfo,rate,currencySymbol.toString())
+                                Favourites(productList, viewModel,
+                                    navigateToProductInfo,rate,
+                                    currencySymbol.toString(),
+                                    showSnackbar = { snackbarMessage = it })
                             }
                         }
                     }
@@ -119,6 +123,20 @@ fun FavouriteScreen(
         }
 
     }
+    snackbarMessage?.let { message ->
+        CustomSnackbar(
+            message = message,
+        ) {
+            snackbarMessage = null
+        }
+    }
+
+LaunchedEffect(snackbarMessage) {
+    if (snackbarMessage != null) {
+        kotlinx.coroutines.delay(2000)
+        snackbarMessage = null
+    }
+}
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -128,7 +146,8 @@ fun Favourites(
     viewModel: FavouritesViewModel,
     navigateToProductInfo: (String) -> Unit,
     rate: Double,
-    currencySymbol: String
+    currencySymbol: String,
+    showSnackbar: (String) -> Unit
 ) {
     var itemToDelete by remember { mutableStateOf<ProductsDetailsByIDsQuery.Node?>(null) }
     var showConfirmDialog by remember { mutableStateOf(false) }
@@ -200,7 +219,8 @@ fun Favourites(
                         viewModel,
                         navigateToProductInfo,
                         rate,
-                        currencySymbol
+                        currencySymbol,
+                        showSnackbar = showSnackbar
                     )
                 },
                 modifier = Modifier.padding(horizontal = 8.dp)
@@ -209,6 +229,7 @@ fun Favourites(
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
+
 
     if (showConfirmDialog && itemToDelete != null) {
         AlertDialog(

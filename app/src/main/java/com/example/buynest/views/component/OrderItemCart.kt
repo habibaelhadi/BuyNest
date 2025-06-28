@@ -49,10 +49,10 @@ fun OrderItem(order: GetOrdersByEmailQuery.Node, gotoOrderDetails: () -> Unit) {
                 painter = painterResource(R.drawable.orders),
                 contentDescription = "Order Image",
                 modifier = Modifier
-                    .padding(start = 24.dp, top = 12.dp, bottom = 12.dp)
-                    .size(50.dp)
+                    .padding(start = 18.dp, top = 12.dp, bottom = 12.dp)
+                    .size(60.dp)
                     .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.FillBounds
             )
         }
 
