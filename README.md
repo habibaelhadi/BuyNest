@@ -1,76 +1,91 @@
 # 🛒 BuyNest
 
-**BuyNest** is a mobile shopping application designed to offer users a smooth and intuitive online shopping experience. Built with modern Android development practices, the app allows users to browse products, filter by category and price, search by keyword, manage their cart, and authenticate using Firebase.
+**BuyNest** is a modern Android shopping app that offers users a seamless e-commerce experience—from browsing and filtering products to secure checkout and order history tracking. The app includes multi-currency support, address management, and coupon-based discounts through ads.
 
 ---
 
 ## 📱 Features
 
-- 🔐 Firebase Authentication (Email/Password)
-- 🔎 Real-time product search with filter & price range
-- 🛍 Browse products by category
-- 🛒 Add to cart and manage cart items
-- ❤️ Add/remove items to/from favorites
-- 📄 Product details screen
-- 🧭 Bottom navigation for easy navigation
+- 🔐 **Firebase Authentication** (Email/Password)
+- 🔎 **Search** with keyword + category + price range filter
+- 🛍 **Browse Products** by category
+- ❤️ **Favorites**: Add/remove items
+- 🛒 **Cart Management**
+- 📄 **Product Details** view
+- 🧭 **Bottom Navigation** for smooth app flow
+- 🎁 **Ad-based Coupons**: Watch ads to unlock discount codes
 
+---
+
+## ⚙️ Settings & Advanced Features
+
+- 🌍 **Currency Switcher**: Choose between different currencies
+- 📦 **Order History**: View previous orders
+- 💳 **Stripe Payment Integration**
+- 📮 **Multiple Addresses**: Add, edit, or remove delivery addresses
+  
 ---
 
 ## 🧠 Architecture & Tech Stack
 
 - **Architecture:** MVVM + Repository pattern
 - **Language:** Kotlin
-- **UI Toolkit:** Jetpack Compose
+- **UI:** Jetpack Compose
 - **Navigation:** Jetpack Navigation Component
 - **State Management:** ViewModel + StateFlow
 - **Authentication:** Firebase Auth
-- **Database & Backend:** Firebase Firestore
-- **Dependency Injection:** Hilt
-- **Network:** Apollo GraphQL (for Shopify integration)
+- **Backend Database:** Firebase Firestore
+- **Payments:** Stripe API
+- **Dependency Injection:** Koin
+- **Network:** Apollo GraphQL (for Shopify)
 - **Image Loading:** Coil
-- **Testing:** Unit testing with JUnit and Mockito
-
----
-
-## 📸 Screenshots
-
-| Home | Search + Filter | Product Details | Cart |
-|------|------------------|------------------|------|
-| ![Home](screenshots/home.png) | ![Search](screenshots/search.png) | ![Details](screenshots/details.png) | ![Cart](screenshots/cart.png) |
-
-*Add your actual screenshots in the `screenshots/` folder for proper display.*
+- **Ads & Coupons:** Custom Coupon Logic
+- **Testing:** JUnit, Coroutine testing
 
 ---
 
 ## 🧪 Testing
 
-- Unit tests for ViewModels and repositories
-- Tested Firebase Auth logic using mocked callbacks
-- Coroutine test support with `runTest`
+- ✅ Unit tests for ViewModels & Repositories
+- ✅ Firebase auth mock testing
+
+---
+## 🛠️ Admin Panel
+
+BuyNest also includes a separate **Admin Android App** that allows the store owner to:
+
+- 📦 Add, edit, or remove products
+- 📊 View sales and order data
+- 🏷️ Manage categories and discounts
+
+🔗 **Admin App GitHub Repository**: [BuyNest Admin App](https://github.com/AAtia10/BuyNest-Admin.git)
 
 ---
 
-## 🚧 Future Enhancements
+## 🚀 Future Enhancements
 
-- Order tracking system
-- Payment integration (Stripe/PayPal)
-- User profile screen
-- Product reviews and ratings
-- Admin dashboard for managing products
+- Push notifications for orders
+- Admin panel for inventory control
+- Product ratings & reviews
+- Dark mode support
 
 ---
 
-## 🧑‍💻 Developer
+## 👩‍💻 Developers
 
 **Habiba Mohamed Elhadi**  
 Android Developer | ITI Graduate  
 - 🔗 [GitHub](https://github.com/habibaelhadi)
 - 🔗 [LinkedIn](https://www.linkedin.com/in/habiba-elhadi-228774336)
 
+**Nourhan Essam**
+Android Developer | ITI Graduate
+- 🔗 [GitHub](https://github.com/Nour230)
+- 🔗 [LinkedIn](https://www.linkedin.com/in/nouressam)
+
+**Youssef Fayad**
+Android Developer | ITI Graduate
+- 🔗 [GitHub](https://github.com/yousseffayyad)
+- 🔗 [LinkedIn](https://www.linkedin.com/in/yousseffayad/)
+  
 ---
-
-## 📂 How to Run
-
-1. Clone the repo:
-   ```bash
-   git clone https://github.com/habibaelhadi/BuyNest.git
