@@ -95,29 +95,12 @@ fun ForYouSection(
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    ) {
                         Text(
                             text = "%.2f $currencySymbol".format(convertedPrice),
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp,
-                            color = Color.Black
+                            color = MainColor
                         )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        if (priceDouble > 0.0) {
-                            Text(
-                                text = "%.2f $currencySymbol".format(convertedOriginalPrice),
-                                style = TextStyle(
-                                    textDecoration = TextDecoration.LineThrough,
-                                    fontSize = 12.sp
-                                ),
-                                color = Color.Gray
-                            )
-                        }
-                    }
                 }
             }
         }
