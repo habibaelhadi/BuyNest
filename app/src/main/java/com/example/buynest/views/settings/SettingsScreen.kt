@@ -104,13 +104,17 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
 
-        SettingsCard(user?.displayName.toString() ?: "Guest", icon = Icons.Default.Person, bold = true, onClick = {
-            if (user == null) {
-                showGuestDialog.value = true
-            } else {
-               // gotoProfileScreen()
+        SettingsCard(
+            user?.displayName?.takeIf { it.isNotBlank() } ?: "Guest",
+            icon = Icons.Default.Person,
+            bold = true, onClick = {
+                if (user == null) {
+                    showGuestDialog.value = true
+                } else {
+                   // gotoProfileScreen()
+                }
             }
-        })
+        )
         Spacer(modifier = Modifier.height(12.dp))
 
         SettingsCard("Address Book", Icons.Default.Home, onClick = {
