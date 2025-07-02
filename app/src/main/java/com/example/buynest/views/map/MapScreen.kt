@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -238,13 +240,18 @@ fun MapScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
                             value = phone,
-                            onValueChange = {
-                                phone = it
-                                phoneError = null
+                            onValueChange = { input ->
+                                if (input.text.all { it.isDigit() }) {
+                                    phone = input
+                                    phoneError = null
+                                }
                             },
                             singleLine = true,
                             label = { Text("Receiver's phone") },
                             modifier = Modifier.fillMaxWidth(),
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                keyboardType = KeyboardType.Number
+                            ),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 focusedBorderColor = MainColor,
                                 cursorColor = MainColor,

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -15,6 +16,7 @@ import com.example.buynest.model.entity.AddressModel
 import com.example.buynest.type.MailingAddressInput
 import com.example.buynest.ui.theme.MainColor
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_FRIEND
 import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_HOME
 import com.example.buynest.utils.AppConstants.ADDRESS_TYPE_OFFICE
@@ -76,12 +78,17 @@ fun EditAddressSheet(
         OutlinedTextField(
             value = phone,
             onValueChange = {
-                phone = it
-                phoneError = null
+                if (it.isEmpty() || it.all { char -> char.isDigit() }) {
+                    phone = it
+                    phoneError = null
+                }
             },
             label = { Text("Phone") },
             isError = phoneError != null,
             modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number
+            ),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MainColor,
                 cursorColor = MainColor,
@@ -89,6 +96,8 @@ fun EditAddressSheet(
             ),
             singleLine = true
         )
+
+
         if (phoneError != null) {
             Text(phoneError!!, color = MaterialTheme.colors.error, style = MaterialTheme.typography.caption)
         }
