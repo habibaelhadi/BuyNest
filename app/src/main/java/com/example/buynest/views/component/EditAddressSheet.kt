@@ -78,7 +78,7 @@ fun EditAddressSheet(
         OutlinedTextField(
             value = phone,
             onValueChange = {
-                if (it.all { char -> char.isDigit() }) {
+                if (it.isEmpty() || it.all { char -> char.isDigit() }) {
                     phone = it
                     phoneError = null
                 }
@@ -96,6 +96,7 @@ fun EditAddressSheet(
             ),
             singleLine = true
         )
+
 
         if (phoneError != null) {
             Text(phoneError!!, color = MaterialTheme.colors.error, style = MaterialTheme.typography.caption)
