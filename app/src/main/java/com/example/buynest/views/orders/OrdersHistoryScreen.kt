@@ -61,6 +61,11 @@ fun OrdersHistoryScreen(
             .background(white)
             .padding(start = 24.dp)
     ){
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            "BuyNest", fontSize = 20.sp,
+            fontFamily = phenomenaFontFamily, color = MainColor
+        )
         Spacer(modifier = Modifier.height(8.dp))
         CenterAlignedTopAppBar(
             title = {

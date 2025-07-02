@@ -183,7 +183,7 @@ fun FavouriteCard(
                         item.onProduct?.variants?.edges?.firstOrNull()?.node?.id?.let { variantId ->
                             viewModel.viewModelScope.launch {
                                 viewModel.addToCart(variantId, 1)
-                                showSnackbar("Great! Item added to your cart 🎉")
+                               // showSnackbar("Great! Item added to your cart 🎉")
                             }
                         }
                     },

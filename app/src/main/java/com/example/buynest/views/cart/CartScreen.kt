@@ -38,6 +38,7 @@ import com.example.buynest.model.state.UiResponseState
 import com.example.buynest.model.repository.FirebaseAuthObject
 import com.example.buynest.model.repository.payment.PaymentRepositoryImpl
 import com.example.buynest.ui.theme.LightGray2
+import com.example.buynest.ui.theme.MainColor
 import com.example.buynest.utils.AppConstants
 import com.example.buynest.utils.SecureSharedPrefHelper
 import com.example.buynest.utils.SharedPrefHelper
@@ -59,6 +60,7 @@ import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.snackbar.CustomSnackbar
 import com.example.buynest.views.favourites.NoDataLottie
+import com.example.buynest.views.home.phenomenaBold
 
 
 @SuppressLint("ViewModelConstructorInComposable")
@@ -269,7 +271,13 @@ fun CartScreen(
 
     Scaffold(
         modifier = Modifier.padding(top = 8.dp),
-        topBar = { CartTopBar(backClicked = onBackClicked) },
+        topBar = { Column {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                "BuyNest", fontSize = 20.sp,
+                fontFamily = phenomenaBold, color = MainColor
+            )
+            CartTopBar(backClicked = onBackClicked) } },
         bottomBar = {
             BottomSection(totalPrice, Icons.Default.ArrowRightAlt, "Check Out", currencySymbol) {
                 launchCheckoutFlow()

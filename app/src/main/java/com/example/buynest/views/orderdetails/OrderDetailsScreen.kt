@@ -27,6 +27,7 @@ import com.example.buynest.views.orders.phenomenaFontFamily
 import com.example.buynest.model.entity.CartItem
 import com.example.buynest.viewmodel.currency.CurrencyViewModel
 import com.example.buynest.viewmodel.orders.OrdersViewModel
+import com.example.buynest.views.home.phenomenaBold
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -89,6 +90,11 @@ fun OrderDetailsScreen(
                 .padding(start = 24.dp, end = 18.dp)
         ) {
             item {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    "BuyNest", fontSize = 20.sp,
+                    fontFamily = phenomenaBold, color = MainColor
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 CenterAlignedTopAppBar(
                     title = {

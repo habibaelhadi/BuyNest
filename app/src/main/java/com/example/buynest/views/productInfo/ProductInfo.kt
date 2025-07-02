@@ -74,6 +74,7 @@ import com.example.buynest.views.component.GuestAlertDialog
 import com.example.buynest.views.component.Indicator
 import com.example.buynest.views.component.QuantitySelector
 import com.example.buynest.views.component.snackbar.CustomSnackbar
+import com.example.buynest.views.home.phenomenaBold
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.calculateCurrentOffsetForPage
 import com.google.accompanist.pager.rememberPagerState
@@ -118,7 +119,15 @@ fun ProductInfoScreen(
 
 
     Scaffold (
-        topBar = { ProductInfoTopBar(backClicked, navigateToCart) },
+        topBar = {
+            Column {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    "BuyNest", fontSize = 20.sp,
+                    fontFamily = phenomenaBold, color = MainColor
+                )
+            ProductInfoTopBar(backClicked, navigateToCart)}
+                 },
         bottomBar = {
             if (response is UiResponseState.Success<*>) {
                 val product = (response as UiResponseState.Success<ProductDetailsByIDQuery.Data>).data.product
@@ -161,7 +170,7 @@ fun ProductInfoScreen(
                     selectedVariantId?.let {
                         viewModel.viewModelScope.launch {
                             viewModel.addToCart(it, currentQuantity)
-                            snackbarMessage = "Great! Item added to your cart \uD83C\uDF89"
+                           // snackbarMessage = "Great! Item added to your cart \uD83C\uDF89"
                         }
                     } ?: run {
                         snackbarMessage = "Sorry, This color isn’t available in the selected size"
