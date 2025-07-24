@@ -25,14 +25,14 @@ class FirebaseDataSourceImpl : IFirebaseDataSource {
         this.firebaseResponse = firebaseResponse
     }
 
-    private fun connectToGoogle(context: Context) {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.default_web_client_id))
-            .requestEmail()
-            .requestProfile()
-            .build()
-        googleSignInClient = GoogleSignIn.getClient(context, gso)
-    }
+//    private fun connectToGoogle(context: Context) {
+//        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//            .requestIdToken(context.getString(R.string.default_web_client_id))
+//            .requestEmail()
+//            .requestProfile()
+//            .build()
+//        googleSignInClient = GoogleSignIn.getClient(context, gso)
+//    }
 
     override fun signup(name: String, phone: String, email: String, password: String) {
         auth.createUserWithEmailAndPassword(email, password)
@@ -50,8 +50,11 @@ class FirebaseDataSourceImpl : IFirebaseDataSource {
                                     val userMap = hashMapOf(
                                         "name" to name,
                                         "email" to email,
-                                        "phone" to phone
+                                        "phone" to phone,
+                                        "cartId" to "",
+                                        "createdAt" to System.currentTimeMillis()
                                     )
+
                                     FirebaseFirestore.getInstance()
                                         .collection("users")
                                         .document(user.uid)
@@ -106,7 +109,7 @@ class FirebaseDataSourceImpl : IFirebaseDataSource {
     }
 
     override fun getGoogleSignInIntent(context: Context): Intent? {
-        connectToGoogle(context)
+        //connectToGoogle(context)
         return googleSignInClient?.signInIntent
     }
 
@@ -190,15 +193,21 @@ class FirebaseDataSourceImpl : IFirebaseDataSource {
                 .document(user.uid)
                 .get()
                 .addOnSuccessListener { document ->
-                    val cartId = document.getString("cartId") ?: ""
-                    Log.i("TAG", "Firestore CartId: $cartId")
-                    continuation.resume(cartId)
+                    if (document.exists()) {
+                        val cartId = document.getString("cartId") ?: ""
+                        Log.i("TAG", "Firestore CartId: $cartId")
+                        continuation.resume(cartId)
+                    } else {
+                        Log.w("TAG", "Document for user ${user.uid} does not exist.")
+                        continuation.resume("")
+                    }
                 }
                 .addOnFailureListener { e ->
-                    Log.e("TAG", "Failed to fetch CartId: ${e.message}")
+                    Log.e("TAG", "Failed to fetch CartId: ${e.message}", e)
                     continuation.resume("")
                 }
         } else {
+            Log.e("TAG", "No authenticated user found for fetching cartId.")
             continuation.resume("")
         }
     }
