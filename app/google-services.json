@@ -1,44 +1,26 @@
 {
   "project_info": {
-    "project_number": "201825572703",
-    "project_id": "buynest-b7bbc",
-    "storage_bucket": "buynest-b7bbc.firebasestorage.app"
+    "project_number": "908092450415",
+    "project_id": "buynest-f22e9",
+    "storage_bucket": "buynest-f22e9.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:201825572703:android:e2659c97634dd7d7cc08ea",
+        "mobilesdk_app_id": "1:908092450415:android:89e0a9b2cbb9aed85acf9a",
         "android_client_info": {
           "package_name": "com.example.buynest"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "201825572703-9qdj4sjrviaas7qd6jra52pjlm33g502.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.buynest",
-            "certificate_hash": "cfd91b79d3fddf6c00eafcbaf0ad85e7f5f6972a"
-          }
-        },
-        {
-          "client_id": "201825572703-pjf2lneprfbu2sqkncdsa535a954li88.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBa9jN9DGj-YyLOWNbZaTtz_LOX4GumZvo"
+          "current_key": "AIzaSyBh6k5RjarmQG_Rvq7Tl3VcixtPkPWMC5Y"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "201825572703-pjf2lneprfbu2sqkncdsa535a954li88.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
